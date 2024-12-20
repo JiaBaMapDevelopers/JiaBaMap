@@ -182,6 +182,7 @@ export default {
 
 <template>
   <div>
+    <Login :visible="showLoginModal" @close="closeLoginModal" />
     <header>
       <!-- 頁頭（導航欄） -->
       <div class="flex flex-wrap items-center justify-between p-2 space-y-2 bg-transparent md:space-y-0">
@@ -190,9 +191,12 @@ export default {
         <!-- 主選單 -->
           <div class="items-center md:flex main-menu">
             <button  class="p-2 mr-4 rounded-md text-amber-500 hover:bg-amber-100 min-w-20" @click="openLoginModal">點擊登入</button>
-            <Login :visible="showLoginModal" @close="closeLoginModal" />
-            <a href="#" class="p-2 mr-4 rounded-md text-amber-500 hover:bg-amber-100 min-w-20">發表食記</a>
-            <a href="#" class="p-2 mr-4 rounded-md text-amber-500 hover:bg-amber-100 min-w-20">專欄文章</a>
+            <router-link to="/MyArticle" class="p-2 rounded-md text-amber-500 hover:bg-amber-100 min-w-20">
+                    發表食記
+            </router-link> 
+              <router-link to="/ArticleList" class="p-2 rounded-md text-amber-500 hover:bg-amber-100 min-w-20">
+                專欄文章
+              </router-link>
             <!-- 店家專區的下拉選單 -->
             <div class="relative inline-block text-left group">
                 <button class="p-2 mr-4 rounded-md text-amber-500 hover:bg-amber-100 focus:outline-none min-w-20">
@@ -278,10 +282,11 @@ export default {
               <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">店家加入</a></li>
               <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">聯絡我們</a></li>
               <hr class="border-amber-200">
-              <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100 rounded-bl-md rounded-br-md">登出</a></li>
+              <li><button  class="block p-2 text-amber-500 hover:bg-amber-100 rounded-bl-md rounded-br-md" @click="openLoginModal">登出</button></li>
             </ul>
           </div>
         </div>
+        <!-- <Login :visible="showLoginModal" @close="closeLoginModal" /> -->
         <!-- 下拉end -->
       </div>
     </header>
