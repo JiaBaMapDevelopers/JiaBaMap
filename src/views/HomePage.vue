@@ -286,13 +286,13 @@ export default {
       </div>
     </header>
       <!-- 搜尋區塊 -->
-      <div class="relative flex flex-col items-center justify-center w-screen m-auto text-center bg-top bg-no-repeat bg-cover h-96 bg-index_searchBG"
+      <div class="relative flex flex-col items-center justify-center m-auto text-center bg-top bg-no-repeat bg-cover h-96 bg-index_searchBG"
       aria-label="Photo by Ivan Torres on Unsplash">
         <div class="absolute inset-0 bg-gray-800 opacity-40"></div>
           <h1 class="z-10 px-3 mt-8 text-3xl text-white md:text-5xl text-bold">想知道哪裡有美食？</h1>
           <h2 class="z-10 px-3 mt-5 text-lg text-white md:text-xl text-bold">從超過 50,000 家精選餐廳中，探索您不知道的熱門美食。</h2>
           <!-- 搜尋欄容器 -->
-          <div class="z-10 hidden md:flex items-center mt-10 bg-white rounded-full h-11 ">
+          <div class="z-10 items-center hidden mt-10 bg-white rounded-full md:flex h-11 ">
              <SearchInput />
           </div>
       </div>

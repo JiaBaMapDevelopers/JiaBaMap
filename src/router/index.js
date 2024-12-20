@@ -4,6 +4,10 @@ import UserProfile from '../views/UserProfile.vue'
 import StorePage from '../views/StorePage.vue'
 import SearchPage from '../views/SearchPage.vue'
 import Login from '../components/Login.vue'
+import MyArticle from '../views/MyArticle.vue'
+import ArticleList from '../views/ArticleList.vue'
+import AboutTeam from '../views/Footer/AboutTeam.vue'
+
 const routes = [
   {
     path: '/',
@@ -31,7 +35,21 @@ const routes = [
     name: 'login',
     component: Login,
   },
-
+  {
+    path: '/myarticle',
+    name: 'myArticle',
+    component: MyArticle,
+  },
+  {
+    path: '/articlelist',
+    name: 'articlelist',
+    component: ArticleList,
+  },
+  {
+    path: '/about',
+    name: 'about',
+    component: AboutTeam
+  }
 ]
 
 const router = createRouter({
