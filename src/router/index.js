@@ -6,6 +6,7 @@ import SearchPage from '../views/SearchPage.vue'
 import Login from '../components/Login.vue'
 import MyArticle from '../views/MyArticle.vue'
 import ArticleList from '../views/ArticleList.vue'
+import AboutTeam from '../views/Footer/AboutTeam.vue'
 import {useAuth} from '@/stores/authStore'
 
 const routes = [
