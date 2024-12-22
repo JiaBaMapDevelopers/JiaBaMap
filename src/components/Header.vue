@@ -15,10 +15,15 @@ const menuContainer = ref(null);
 const isSearchOpen = ref(false);
 const showLoginModal = ref(false);
 
-// 計算屬性
+const toggleSearch = () => {
+  isSearchOpen.value = !isSearchOpen.value;
+  emit('search-toggle', isSearchOpen.value);
+};
+
+// 計算是不是在首頁，如果是首頁，則不顯示搜尋欄
 const showSearch = computed(() => route.path !== '/');
 
-// 事件處理函數
+// 事件處理函數，控制下拉選單的開關，如果開啟下拉選單，則註冊事件處理函數
 const toggleMenu = () => {
   isMenuOpen.value = !isMenuOpen.value;
   if (isMenuOpen.value) {
@@ -28,39 +33,37 @@ const toggleMenu = () => {
   }
 };
 
+// 事件處理函數，控制下拉選單的開關，如果點擊的目標不在下拉選單內，則關閉下拉選單
 const handleClickOutside = (event) => {
   if (menuContainer.value && !menuContainer.value.contains(event.target)) {
     isMenuOpen.value = false;
   }
 };
 
-const toggleSearch = () => {
-  isSearchOpen.value = !isSearchOpen.value;
-  emit('search-toggle', isSearchOpen.value);
-};
-
+// 事件處理函數，控制登入模態的開關
 const openLoginModal = () => showLoginModal.value = true;
 const closeLoginModal = () => showLoginModal.value = false;
 
-// 螢幕寬度檢查
+// 螢幕寬度檢查，如果寬度大於768px，則關閉下拉選單  
 const checkScreenWidth = () => {
   if (window.innerWidth > 768) {
     isMenuOpen.value = false;
   }
 };
 
-// 生命週期鉤子
+// 生命週期鉤子，監聽螢幕寬度，並註冊事件處理函數
 onMounted(() => {
   window.addEventListener("resize", checkScreenWidth);
 });
 
+// 生命週期鉤子，卸載事件處理函數
 onUnmounted(() => {
   window.removeEventListener("resize", checkScreenWidth);
   document.removeEventListener('click', handleClickOutside);
   isSearchOpen.value = false;
 });
 
-// 路由監聽
+// 路由監聽，如果路由改變，則關閉搜尋欄
 watch(route, () => {
   isSearchOpen.value = false;
 });
@@ -111,7 +114,7 @@ watch(route, () => {
             <span class="whitespace-nowrap">店家專區</span>
             <span class="ml-1 inline-flex items-center">&#x25BC;</span>
           </button>
-          <div class="absolute z-50 hidden w-32 mt-0 bg-white rounded-md shadow-lg group-hover:block right-0">
+          <div class="hidden absolute top-full right-0 z-50 w-32 mt-0 bg-white rounded-md shadow-lg group-hover:block">
             <ul class="py-1">
               <li><a href="#" class="block px-4 py-2 text-amber-500 hover:bg-amber-100">店家加入</a></li>
               <li><a href="#" class="block px-4 py-2 text-amber-500 hover:bg-amber-100">行銷方案</a></li>

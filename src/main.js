@@ -15,17 +15,13 @@ import 'sweetalert2/dist/sweetalert2.min.css';
 
 library.add(faEllipsis ,fasThumbsUp ,farThumbsUp, faGoogle, faUtensils, faSearch, faMapMarkerAlt, faCalendarWeek, faArrowUpFromBracket, faBars, faMagnifyingGlass, faStar, faDollarSign, faCircle, faChevronRight, faChevronDown, faWandMagicSparkles, faBowlFood, faInstagram, faStarHalfStroke, faBookmark, faUser, faCamera);
 
-// 配置 SweetAlert2 的默認選項
-const options = {
-  confirmButtonColor: '#10B981',
-  cancelButtonColor: '#EF4444',
-};
+
 
 const app = createApp(App);
 
 app.use(router)
     .use(createPinia())
-    .use(VueSweetalert2, options)
+    .use(VueSweetalert2)
     .component('font-awesome-icon', FontAwesomeIcon);
 
 app.mount('#app');

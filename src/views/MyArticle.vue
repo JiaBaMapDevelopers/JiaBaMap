@@ -2,7 +2,7 @@
 import { useRouter, useRoute } from 'vue-router';
 import Header from '../components/Header.vue';
 import Footer from '../components/Footer.vue';
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 
 const router = useRouter();
 const route = useRoute();
@@ -85,6 +85,17 @@ const editArticle = (id) => {
     path: `/myarticle/edit/${id}`
   });
 };
+
+// 在 onMounted 中初始化狀態和加載資料
+onMounted(() => {
+  // 如果 URL 中沒有 status 參數，設置默認值為 'draft' 並加載資料
+  if (!route.query.status) {
+    router.replace({
+      path: '/myarticle',
+      query: { status: 'draft' }
+    });
+  }
+});
 
 </script>
 

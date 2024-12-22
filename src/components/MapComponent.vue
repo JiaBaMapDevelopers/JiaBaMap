@@ -119,7 +119,7 @@ import loader from "./googleMapsLoader";
       store.setHoveredPlace(place.id);
       google.maps.event.trigger(marker, 'click');
       
-      // 新增這段：滾動到對應的餐廳卡片
+      // 滾動到對應的餐廳卡片
       const element = document.querySelector(`[data-place-id="${place.id}"]`);
       if (element) {
         element.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
