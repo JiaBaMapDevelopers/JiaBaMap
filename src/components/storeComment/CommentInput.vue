@@ -1,4 +1,5 @@
 <template>
+    <Login :visible="showLoginModal" @close="closeLoginModal" />
     <div class="flex gap-5 mb-4">
         <div class="flex-shrink-0 w-16 h-16 rounded-full bg-slate-300">
             <img src="../../assets/default_user.png" alt="avatar" class="w-full h-auto overflow-hidden ">
@@ -29,7 +30,7 @@
                     <button @click="submitComment" class="w-full p-2 my-2 font-bold rounded-lg shadow md:flex-1 text-amber-500">送出評論</button>
                     </div>
                     <div v-else class="flex justify-center items-center bg-gray-400 h-[100px] w-[250px]">
-                        <p class="font-black">請先<a href="#" class="m-2 text-orange-200">登入</a>以使用更多功能!</p>
+                        <p class="font-black">請先<button class="m-2 text-orange-200" @click="openLoginModal">登入</button>以留下您的評論!</p>
                     </div>
                 </div>
             </div>
@@ -45,6 +46,7 @@ import { useStarsStore } from '../../stores/starStore';
 import { useCommentStore } from '../../stores/commentStore';
 import { usePicStore } from '../../stores/picStore';
 import { useAuth } from '@/stores/authStore'
+import Login from '@/components/Login.vue';
 
 const user = useAuth()
 
@@ -89,6 +91,18 @@ const submitComment = () => {
 const openComment = () => {
     isExpanded.value = !isExpanded.value
 }
+
+const showLoginModal = ref(false); // 是否顯示登錄小畫面
+
+    // 開啟登錄小畫面
+    const openLoginModal = () => {
+      showLoginModal.value = true;
+    };
+
+    // 關閉登錄小畫面
+    const closeLoginModal = () => {
+      showLoginModal.value = false;
+    };
 </script>
 
 <style scoped>

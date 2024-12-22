@@ -177,8 +177,17 @@ export const useKeywordStore = defineStore('keyword', {
         alert("請輸入有效關鍵字!!!")
         return
       }
-      const response = await axios.get(`http://localhost:3000/restaurants/search?keyword=${this.keyword}&lat=${this.coordinate.lat}&lng=${this.coordinate.lng}`)
-      this.result = response.data
+      try{
+        const response = await axios.get(`http://localhost:3000/restaurants/search?keyword=${this.keyword}&lat=${this.coordinate.lat}&lng=${this.coordinate.lng}`)
+        if(response.status === 200){
+          this.result = response.data
+        }
+      } 
+      catch (error){
+        if(error.response){
+          this.result = []
+        }
+      }
     },
 
     // 取得座標
