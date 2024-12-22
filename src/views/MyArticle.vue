@@ -61,7 +61,7 @@ const articles = ref([
   }
 ]);
 
-// 根據狀態過濾文章
+// 根據狀態過濾食記
 const filteredArticles = computed(() => {
   return articles.value.filter(article => article.status === route.query.status);
 });
@@ -92,7 +92,7 @@ const editArticle = (id) => {
   <div class="pt-16">
     <div class="min-h-screen bg-white">
       <div class="max-w-4xl mx-auto mt-8 px-4">
-        <h2 class="text-5xl font-extrabold mb-6">您的文章</h2>
+        <h2 class="text-5xl font-extrabold mb-6">您的食記</h2>
         
         <div class="flex flex-row-reverse space-x-4 mb-4 text-xl">
           <button class="px-4 py-1 bg-orange-500 text-white rounded hover:bg-orange-600 transition-colors">
@@ -123,7 +123,7 @@ const editArticle = (id) => {
           </div>
         </div>
 
-        <!-- 文章列表 -->
+        <!-- 食記列表 -->
         <div class="mt-6 space-y-4">
           <article 
             v-for="article in filteredArticles" 
@@ -169,12 +169,12 @@ const editArticle = (id) => {
             </div>
           </article>
 
-          <!-- 無文章提示 -->
+          <!-- 無食記提示 -->
           <div 
             v-if="filteredArticles.length === 0" 
             class="text-center text-gray-500 py-8 bg-white rounded-lg shadow"
           >
-            目前沒有{{ route.query.status === 'draft' ? '草稿' : '已發佈' }}的文章
+            目前沒有{{ route.query.status === 'draft' ? '草稿' : '已發佈' }}的食記
           </div>
         </div>
       </div>
