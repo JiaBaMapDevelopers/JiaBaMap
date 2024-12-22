@@ -76,7 +76,7 @@ watch(route, () => {
 
     <!-- 中間區域：搜尋欄 -->
     <div class="hidden md:flex flex-1 justify-center mx-4">
-      <div v-if="showSearch" class="w-[400px]">
+      <div v-if="showSearch" class="w-[500px]">
         <SearchInput />
       </div>
     </div>
