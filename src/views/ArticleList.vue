@@ -179,7 +179,7 @@ const deleteComment = async (articleId, commentId) => {
     const result = await swalWithBootstrapButtons.fire({
       title: '確定要刪除評論？',
       text: '刪除後將無法恢復！',
-      icon: 'warning',
+      icon: 'danger',
       showCancelButton: true,
       confirmButtonText: '刪除！',
       cancelButtonText: '取消',
@@ -364,8 +364,8 @@ onUnmounted(() => {
 // 配置 SweetAlert 樣式
 const swalWithBootstrapButtons = $swal.mixin({
   customClass: {
-    confirmButton: 'bg-green-500 text-white px-6 py-2 rounded mx-2 hover:bg-green-600',
-    cancelButton: 'bg-red-500 text-white px-6 py-2 rounded mx-2 hover:bg-red-600',
+    confirmButton: 'bg-red-500 text-white px-6 py-2 rounded mx-2 hover:bg-red-600',
+    cancelButton: 'bg-gray-500 text-white px-6 py-2 rounded mx-2 hover:bg-gray-600',
     actions: 'flex justify-center gap-4'
   },
   buttonsStyling: false
@@ -509,7 +509,7 @@ const swalWithBootstrapButtons = $swal.mixin({
                       >
                         <button 
                           @click="deleteComment(article.id, comment.id); activeMenuId = null"
-                          class="w-full text-center px-4 py-2 text-sm font-bold text-red-500 hover:bg-gray-50"
+                          class="w-full text-center px-4 py-2 text-sm font-bold text-red-500 hover:bg-gray-300"
                         >
                           刪除
                         </button>
@@ -592,7 +592,7 @@ const swalWithBootstrapButtons = $swal.mixin({
                       >
                         <button 
                           @click="deleteReply(article.id, comment.id, reply.id); activeMenuId = null"
-                          class="w-full text-center px-4 py-2 text-sm font-bold text-red-500 hover:bg-gray-50"
+                          class="w-full text-center px-4 py-2 text-sm font-bold text-red-500 hover:bg-gray-300"
                         >
                           刪除
                         </button>

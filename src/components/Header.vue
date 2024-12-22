@@ -173,12 +173,18 @@ watch(route, () => {
       </div>
 
       <!-- 手機版搜尋欄 -->
-      <div v-if="isSearchOpen" 
-           class="absolute left-0 right-0 p-4 bg-white shadow-md top-full w-full">
-        <div class="max-w-[600px] mx-auto">
-          <SearchInput />
+      <Transition
+        enter-active-class="transition-all duration-300 ease-out"
+        enter-from-class="opacity-0 transform -translate-y-4"
+        enter-to-class="opacity-100 transform translate-y-0"
+      >
+        <div v-if="isSearchOpen" 
+             class="absolute left-0 right-0 p-4 bg-white shadow-md top-full w-full">
+          <div class="max-w-[600px] mx-auto">
+            <SearchInput />
+          </div>
         </div>
-      </div>
+      </Transition>
 
       <!-- 手機版下拉選單 -->
       <div v-if="isMenuOpen" class="absolute z-50 w-48 bg-white rounded-lg shadow-md top-16 right-4">
