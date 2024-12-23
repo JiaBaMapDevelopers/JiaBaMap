@@ -111,7 +111,7 @@ export const useStore = defineStore("store", () => {
 
       // 先獲取當前餐廳的詳細資訊
       const detailRes = await fetch(
-        `http://localhost:3000/restaurants/details?id=${placesId}`
+        `http://localhost:3000/restaurants/details?id=${placesId.value}`
       );
 
       if (!detailRes.ok) {
