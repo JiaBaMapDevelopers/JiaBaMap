@@ -1,10 +1,11 @@
 import { defineStore } from 'pinia'
-import { ref } from "vue"
+import { inject, ref } from "vue"
 import { useRouter } from 'vue-router';
  
 export const useAuth = defineStore('auth', () => {
     const userData = ref("")
     const router = useRouter()
+    const Swal = inject("$swal")
 
 
     const initializeGoogleButton = () => {
@@ -36,7 +37,13 @@ export const useAuth = defineStore('auth', () => {
  
    const userObject = decodeJwt(response.credential);
    userData.value = userObject;
-    router.push({ name: 'user' }); 
+   Swal.fire({
+    title: "登入成功",
+    icon: "success",
+    timer: 2000,
+    timerProgressBar: true,
+      })
+    // router.push({ name: 'user' }); 
    
  }
  

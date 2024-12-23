@@ -40,7 +40,7 @@ const routes = [
     path: '/myarticle',
     name: 'myArticle',
     component: MyArticle,
-    meta: { requiresAuth: false },
+    meta: { requiresAuth: true },
   },
   {
     path: '/articlelist',
@@ -58,22 +58,18 @@ const router = createRouter({
     const user = useAuth()
     const Swal = inject('$swal');
   
-    // 檢查是否需要驗證（這裡檢查 meta.requiresData）
+    
     if (to.matched.some(record => record.meta.requiresAuth)) {
-      // 假設你想檢查 store 中的某個物件是否為空
       if (!user.userData || Object.keys(user.userData).length === 0) {
-        // 如果物件為空，跳轉到 Login 頁面
         Swal.fire({
           title: "請先登入！" ,
-          icon: "warning",
+          icon: "error",
         });
         next({ name: 'home' })
       } else {
-        // 通過檢查，繼續訪問目標頁面
         next()
       }
     } else {
-      // 不需要檢查的頁面直接放行
       next()
     }
   })

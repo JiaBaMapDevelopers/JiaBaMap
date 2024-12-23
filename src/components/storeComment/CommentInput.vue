@@ -29,8 +29,8 @@
                     <UploadPic />
                     <button @click="submitComment" class="w-full p-2 my-2 font-bold rounded-lg shadow md:flex-1 text-amber-500">送出評論</button>
                     </div>
-                    <div v-else class="flex justify-center items-center bg-gray-400 h-[100px] w-[250px]">
-                        <p class="font-black">請先<button class="m-2 text-orange-200" @click="openLoginModal">登入</button>以留下您的評論!</p>
+                    <div v-else class="flex justify-center items-center bg-white h-[100px] w-[250px] border-gray-400 border-2 rounded-xl">
+                        <p class="font-black">請先<button class="m-2 text-orange-400" @click="openLoginModal">登入</button>以留下您的評論!</p>
                     </div>
                 </div>
             </div>

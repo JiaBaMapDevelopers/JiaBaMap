@@ -5,8 +5,8 @@ import { reactive, ref, computed, inject } from 'vue';
 export const useKeywordStore = defineStore('keyword', () => {
   const keyword = ref('');
   const sortOrder = ref('default');
-  const selectedDistrict = ref('中正區');
-  const coordinate = reactive({ lat: 25.032404, lng: 121.519033 });
+  let selectedDistrict = ref('中正區');
+  let coordinate = ref({ lat: 25.032404, lng: 121.519033 });
   const isOpen = ref(false);
   const result = ref([]);
   const selectedCost = ref('default');
@@ -133,8 +133,8 @@ export const useKeywordStore = defineStore('keyword', () => {
     filtered = filtered.map((place) => ({
       ...place,
       distance: calculateDistance(
-        coordinate.lat,
-        coordinate.lng,
+        coordinate.value.lat,
+        coordinate.value.lng,
         place.lat,
         place.lng
       ),
@@ -174,7 +174,7 @@ export const useKeywordStore = defineStore('keyword', () => {
     }
     try {
       const response = await axios.get(
-        `http://localhost:3000/restaurants/search?keyword=${keyword.value}&lat=${coordinate.lat}&lng=${coordinate.lng}`
+        `http://localhost:3000/restaurants/search?keyword=${keyword.value}&lat=${coordinate.value.lat}&lng=${coordinate.value.lng}`
       );
       if (response.status === 200) {
         result.value = response.data;
@@ -197,8 +197,14 @@ export const useKeywordStore = defineStore('keyword', () => {
     }
 
     if (districts[districtName]) {
-      selectedDistrict.value = districtName;
-      Object.assign(coordinate, districts[districtName]);
+      selectedDistrict.value = districtName
+      coordinate.value = districts[districtName]
+    }else if(districts["台北市"][districtName]){
+      selectedDistrict.value = districtName
+      coordinate.value = districts["台北市"][districtName]
+    }else if(districts["新北市"][districtName]){
+      selectedDistrict.value = districtName
+      coordinate.value = districts["新北市"][districtName]
     } else {
       Swal.fire({
         text: "尚未取得您的位置，請允許定位後再試！" ,
@@ -224,8 +230,11 @@ export const useKeywordStore = defineStore('keyword', () => {
   };
 
   const nearSearch = (router, lat, lng) => {
-    Object.assign(coordinate, { lat, lng });
-    navigateToSearch(router, '餐廳');
+    coordinate = {
+      lat:lat,
+      lng:lng
+    }
+    this.navigateToSearch(router, "餐廳")
   };
 
   // 返回所有狀態和方法

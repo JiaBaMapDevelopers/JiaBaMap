@@ -1,4 +1,4 @@
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
 import { defineStore } from "pinia";
 
 export const useStore = defineStore("store", () => {
@@ -19,10 +19,10 @@ export const useStore = defineStore("store", () => {
   const lat = ref("");
   const lng = ref("");
 
-  let placesId = ""
+  let placesId = ref("");
 
   const StoreId = (router, placeId) => {
-    placesId = placeId
+    placesId.value = placeId
     router.push({
       path: "/store",
     })
@@ -34,11 +34,11 @@ export const useStore = defineStore("store", () => {
   // 推薦餐廳相關狀態
   const recommendedRestaurants = ref([]);
 
-  const photoIds = [];
+  const photoIds = ref([]);
   const fetchPlaceDetail = async () => {
     try {
       const res = await fetch(
-        `http://localhost:3000/restaurants/details?id=${placesId}`
+        `http://localhost:3000/restaurants/details?id=${placesId.value}`
       );
       const resJson = await res.json();
 
@@ -55,9 +55,9 @@ export const useStore = defineStore("store", () => {
       openNow.value = resJson.openNow;
       lat.value = resJson.lat;
       lng.value = resJson.lng;
-      resJson.photoIds.forEach((id) => {
-        photoIds.push(id);
-      }); //一個array含兩組id
+      
+        photoIds.value = resJson.photoIds;
+       //一個array含兩組id
       console.log(photoIds);
     } catch (err) {
       console.log("Failed to fetch place detail from Google API.");
@@ -68,7 +68,7 @@ export const useStore = defineStore("store", () => {
   const fetchStorePhoto = async () => {
     try {
       const res = await fetch(
-        `http://localhost:3000/restaurants/photo?id=${photoIds[0]}`
+        `http://localhost:3000/restaurants/photo?id=${photoIds.value[0]}`
       );
       console.log(res);
       storePhoto.value = URL.createObjectURL(await res.blob());
@@ -81,7 +81,7 @@ export const useStore = defineStore("store", () => {
   const fetchBannerPhoto = async () => {
     try {
       const res = await fetch(
-        `http://localhost:3000/restaurants/photo?id=${photoIds[1]}`
+        `http://localhost:3000/restaurants/photo?id=${photoIds.value[1]}`
       );
       console.log(res);
       bannerPhoto.value = URL.createObjectURL(await res.blob());
