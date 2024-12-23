@@ -1,4 +1,4 @@
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
 import { defineStore } from "pinia";
 
 export const useStore = defineStore("store", () => {
@@ -25,6 +25,7 @@ export const useStore = defineStore("store", () => {
     placesId = placeId
     router.push({
       path: "/store",
+      query: { id: placeId },
     })
   }
 
@@ -216,6 +217,73 @@ export const useStore = defineStore("store", () => {
       recommendedRestaurants.value = [];
     }
   };
+
+  // 儲存餐廳資料到本地
+  const saveToLocalStorage = () => {
+    const data ={
+      storeName:storeName.value,
+      rating: rating.value,
+      userRatingCount: userRatingCount.value,
+      startPrice: startPrice.value,
+      endPrice: endPrice.value,
+      weekDayDescriptions: weekDayDescriptions.value,
+      formattedAddress: formattedAddress.value,
+      websiteUri: websiteUri.value,
+      nationalPhoneNumber: nationalPhoneNumber.value,
+      googleMapsUri: googleMapsUri.value,
+      openNow: openNow.value,
+      lat: lat.value,
+      lng: lng.value,
+      placesId
+    };
+    localStorage.setItem('storeData', JSON.stringify(data));
+  }
+
+  const loadFromLocalStorage = () => {
+    const data = JSON.parse(localStorage.getItem("storeData"));
+    if (data) {
+      storeName.value = data.storeName || "";
+      rating.value = data.rating || "";
+      userRatingCount.value = data.userRatingCount || "";
+      startPrice.value = data.startPrice || "";
+      endPrice.value = data.endPrice || "";
+      weekDayDescriptions.value = data.weekDayDescriptions || "";
+      formattedAddress.value = data.formattedAddress || "";
+      websiteUri.value = data.websiteUri || "";
+      nationalPhoneNumber.value = data.nationalPhoneNumber || "";
+      openNow.value = data.openNow || "";
+      googleMapsUri.value = data.googleMapsUri || "";
+      lat.value = data.lat || "";
+      lng.value = data.lng || "";
+      placesId = data.placesId || "";
+    }
+  };
+
+   // 在資料變化時自動保存
+   watch(
+    [
+      storeName,
+      rating,
+      userRatingCount,
+      startPrice,
+      endPrice,
+      weekDayDescriptions,
+      formattedAddress,
+      websiteUri,
+      nationalPhoneNumber,
+      openNow,
+      googleMapsUri,
+      lat,
+      lng,
+      placesId
+    ],
+    saveToLocalStorage,
+    { deep: true }
+  );
+
+  // 頁面加載時還原資料
+  loadFromLocalStorage();
+
 
   return {
     // 基本資料
