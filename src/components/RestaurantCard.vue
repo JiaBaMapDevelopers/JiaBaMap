@@ -98,7 +98,8 @@
     :class="{ 'bg-amber-100': restaurantStore.hoveredPlaceId === place.id }"
     @mouseenter="handleMouseEnter(place.id)"
     @mouseleave="handleMouseLeave">
-      <div class="w-40 h-32 ml-3">
+      <div class="w-40 h-32 ml-3 relative">
+        <Loader v-if="loading[place.id]" class="absolute inset-0 w-full h-full object-cover z-50 bg-white/50 flex items-center justify-center"/>
         <img v-if="place.photoId" :src="photoGet(place.photoId)" alt="Place image" class="object-cover w-full h-full" />
       </div>
       <div class="flex flex-col justify-between ml-3 sm:text-xl w-4/5">
@@ -150,15 +151,15 @@
 <script setup>
 import { useRestaurantStore } from '@/stores/searchPage';
 import { useKeywordStore } from '../stores/keywordStore.js'
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useStore } from '../stores/storePage'
 import { useRouter } from "vue-router";
+import Loader from '../components/Loader.vue'
 
 const router = useRouter();
 const restaurantStore = useRestaurantStore()
 const Search = useKeywordStore()
 const Store = useStore()
-
 
 
 const handleMouseEnter = (placeId) => {
@@ -203,4 +204,23 @@ const setCostRange = (value) => {
 const photoGet = (photoId) =>{
   return `http://localhost:3000/restaurants/photo?id=${photoId}`
 } 
+
+const loading = ref({})
+
+watch(
+  () => Search.filteredResult,
+  (newResults) => {
+    newResults.forEach((place) => {
+      if (!loading.value[place.id]) {
+        loading.value[place.id] = true;
+        setTimeout(() => {
+          loading.value[place.id] = false;
+        }, 1000); 
+      }
+    });
+  },
+  { immediate: true }
+);
+
+
 </script>
