@@ -27,10 +27,10 @@ const toggleSearch = () => {
   emit('search-toggle', isSearchOpen.value);
 };
 
-// 計算是不是在首頁，不是首頁就顯示搜尋欄
+// 計算是不是在首頁，如果是首頁，則不顯示搜尋欄
 const showSearch = computed(() => route.path !== '/');
 
-// 切換選單，打開選單時監聽點擊事件, 關閉選單時移除監聽
+// 事件處理函數，控制下拉選單的開關，如果開啟下拉選單，則註冊事件處理函數
 const toggleMenu = () => {
   isMenuOpen.value = !isMenuOpen.value;
   if (isMenuOpen.value) {
@@ -40,18 +40,18 @@ const toggleMenu = () => {
   }
 };
 
-// 點擊外部關閉選單
+// 事件處理函數，控制下拉選單的開關，如果點擊的目標不在下拉選單內，則關閉下拉選單
 const handleClickOutside = (event) => {
   if (menuContainer.value && !menuContainer.value.contains(event.target)) {
     isMenuOpen.value = false;
   }
 };
 
-// 登入模態控制
+// 事件處理函數，控制登入模態的開關
 const openLoginModal = () => showLoginModal.value = true;
 const closeLoginModal = () => showLoginModal.value = false;
 
-// 螢幕寬度檢查
+// 螢幕寬度檢查，如果寬度大於768px，則關閉下拉選單  
 const checkScreenWidth = () => {
   windowWidth.value = window.innerWidth;
   if (windowWidth.value > 768) {
@@ -65,18 +65,20 @@ const currentProfilePicture = computed(() => {
 });
 
 // 生命週期鉤子
+// 生命週期鉤子，監聽螢幕寬度，並註冊事件處理函數
 onMounted(() => {
   window.addEventListener("resize", checkScreenWidth);
   document.addEventListener('click', handleClickOutside);
 });
 
+// 生命週期鉤子，卸載事件處理函數
 onUnmounted(() => {
   window.removeEventListener("resize", checkScreenWidth);
   document.removeEventListener('click', handleClickOutside);
   isSearchOpen.value = false;
 });
 
-// 路由監聽
+// 路由監聽，如果路由改變，則關閉搜尋欄
 watch(route, () => {
   isSearchOpen.value = false;
 });
