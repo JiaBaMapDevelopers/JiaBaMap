@@ -122,7 +122,7 @@
           <span>
             <font-awesome-icon 
               :icon="['fas' ,'circle']" 
-              :style="{color:place?.openNow ? 'green' : 'gray', fontSize:'8px', margin:'2px'}" />
+              :style="{color:place?.openNow ? 'green' : 'red', fontSize:'8px', margin:'2px'}" />
           </span>
           <p class="font-bold ml-1"> {{ place?.openNow ? '營業中' : '已打烊' }}</p>
         </div>

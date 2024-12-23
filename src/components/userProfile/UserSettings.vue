@@ -120,7 +120,7 @@
             <div class="mt-6 flex justify-center space-x-4">
                 <button
                 @click="saveProfile"
-                class="px-4 py-2 bg-amber-500 text-white rounded-md hover:bg-amber-400 focus:outline-none focus:ring-2 focus:ring-green-500"
+                class="px-4 py-2 bg-amber-500 text-white rounded-md hover:bg-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-500"
                 >
                 儲存
                 </button>
