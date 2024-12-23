@@ -5,7 +5,7 @@
             <!-- 個人照片 -->
             <div class="flex justify-center">
                 <img
-                    :src="userData.picture"
+                    :src="profilePicture || userData.picture"
                     alt="Profile Picture"
                     class="w-24 h-24 rounded-full object-cover border border-gray-300"
                 />
@@ -159,7 +159,8 @@ const user = useAuth()
 const { userData, logout} = user
 const menuVisible = ref(false);
 const isEditing = ref(false);
-const profilePicture = ref('https://via.placeholder.com/100'); // 頭像
+const profilePicture = ref(''); // 頭像
+// https://via.placeholder.com/100
 const username = ref('編輯名稱'); // 使用者名稱
 const instagramUsername = ref(''); // IG 帳號
 // const userData = ref(null); // 用戶資料
