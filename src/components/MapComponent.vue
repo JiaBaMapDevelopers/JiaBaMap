@@ -1,9 +1,10 @@
 <template>
-  <div ref="mapContainer" class="hidden md:block md:w-1/2 h-screen"></div>
+    <div ref="mapContainer" class="hidden md:block md:w-1/2 h-[calc(100vh-72px)]"></div>
+
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, computed, onBeforeUnmount, nextTick } from "vue";
+import { ref, onMounted, computed, onBeforeUnmount, nextTick } from "vue";
 import { useRestaurantStore } from '@/stores/searchPage';
 import { watch } from 'vue'
 import loader from "./googleMapsLoader";
@@ -11,26 +12,25 @@ import loader from "./googleMapsLoader";
     const store = useRestaurantStore()
   
     const map = ref(null); // Google 地圖實例
-    let markers = []; // 使用普通數組管理標記
-    let infoWindows = []; // 管理所有 InfoWindow
+    let markers = []; 
+    let infoWindows = []; 
     const mapContainer = ref(null); // 地圖 DOM 容器
     // const places = ref([]); // 從 Local Storage 加載的地點資料
     // const districts = ref([]);
 
-
     watch(() => store.hoveredPlaceId, (newPlaceId) => {
       if (!map.value) return
       
-      markers.forEach(marker => {
+    markers.forEach(marker => {
     marker.setIcon(null); // 使用預設的紅色標記
     marker.setAnimation(null); // 停止任何動畫
     });
       // 找到對應的標記
-        const marker = markers.find(m => m.placeId === newPlaceId)
+      const marker = markers.find(m => m.placeId === newPlaceId)
     if (marker) {
       if (newPlaceId) {
-        // 放大效果可以通過縮放實現
-        marker.setAnimation(google.maps.Animation.BOUNCE); // 或使用 BOUNCE 效果
+        // 放大效果可以縮放
+        marker.setAnimation(google.maps.Animation.BOUNCE); // 使用 BOUNCE 效果
         google.maps.event.trigger(marker, 'click')
       } else {
         infoWindows.forEach(window => window.close())
@@ -94,7 +94,6 @@ import loader from "./googleMapsLoader";
 
     const updateMarkers = () => {
       if (!map.value) {
-          console.warn("地圖尚未初始化，跳過標記更新");
           return;
         }
       clearMarkers()
@@ -271,11 +270,8 @@ watch(
   () => places.value,
   (newPlaces) => {
     if (!map.value) {
-      console.warn("地圖尚未初始化，跳過更新");
       return;
     }
-
-    console.log("places 更新:", newPlaces);
     if (newPlaces && newPlaces.length > 0) {
       updateMarkers(); // 數據更新時重新繪製標記
       map.value.setCenter(districts.value)

@@ -1,13 +1,15 @@
 <template>
     <div>
-        <Header @search-toggle="handleSearchToggle" />
+        <Header class:="z-100" @search-toggle="handleSearchToggle" />
         
-        <div :class="['flex', { 
+        <div 
+        class:="relative"
+        :class="['flex', { 
         'mt-24': isSearchOpen && windowWidth < 768,
         'mt-20': !isHome && windowWidth >= 768 && windowWidth < 1167,
         'mt-8': isHome || windowWidth >= 1167
         }]">
-            <RestaurantCard />
+            <RestaurantCard class=""/>
             <MapComponent/>
         </div>
     </div>

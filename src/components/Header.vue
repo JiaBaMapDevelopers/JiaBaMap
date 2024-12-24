@@ -127,23 +127,23 @@ watch(route, () => {
 
     <!-- 手機版選單 -->
     <div v-if="isMenuOpen" 
-         class="absolute top-full left-0 right-0 bg-white shadow-lg md:hidden">
-      <div class="py-2">
+         class="absolute top-full right-0 bg-white shadow-lg md:hidden">
+      <div class="py-2 w-24">
         <ul class="space-y-2">
           <li v-if="!user.userData">
-            <button @click="openLoginModal" class="w-full text-left p-2 text-amber-500 hover:bg-amber-100">
+            <button @click="openLoginModal" class="w-full p-2 text-amber-500 hover:bg-amber-100 text-center">
               登入
             </button>
           </li>
-          <li v-else>
-            <button @click="user.logout" class="w-full text-left p-2 text-amber-500 hover:bg-amber-100">
+          <li><router-link to="/myarticle" class="block p-2 text-amber-500 hover:bg-amber-100 text-center">發表食記</router-link></li>
+          <li><router-link to="/articlelist" class="block p-2 text-amber-500 hover:bg-amber-100 text-center">專欄文章</router-link></li>
+          <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100 text-center">店家專區</a></li>
+          <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100 text-center">排行榜</a></li>
+          <li v-if="user.userData">
+            <button @click="user.logout" class="w-full p-2 text-amber-500 hover:bg-amber-100 text-center">
               登出
             </button>
           </li>
-          <li><router-link to="/myarticle" class="block p-2 text-amber-500 hover:bg-amber-100">發表食記</router-link></li>
-          <li><router-link to="/articlelist" class="block p-2 text-amber-500 hover:bg-amber-100">專欄文章</router-link></li>
-          <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">店家專區</a></li>
-          <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">排行榜</a></li>
         </ul>
       </div>
     </div>
@@ -157,11 +157,6 @@ watch(route, () => {
                 class="p-2 rounded-md text-amber-500 hover:bg-amber-100 min-w-20" 
                 @click="openLoginModal">
           登入
-        </button>
-        <button v-else 
-                class="p-2 rounded-md text-amber-500 hover:bg-amber-100 min-w-20" 
-                @click="user.logout">
-          登出
         </button>
         <router-link to="/myarticle" class="p-2 rounded-md text-amber-500 hover:bg-amber-100 min-w-20">
           發表食記
@@ -218,6 +213,12 @@ watch(route, () => {
                   <font-awesome-icon :icon="['fas', 'bookmark']" class="mr-2" />
                   珍藏餐廳
                 </router-link>
+              </li>
+              <li>
+                <button @click="user.logout" class="w-full px-4 py-2 text-amber-500 hover:bg-amber-100 text-center">
+                  <font-awesome-icon :icon="['fas', 'sign-out-alt']" class="mr-2" />
+                  登出
+                </button>
               </li>
             </ul>
           </div>
@@ -234,11 +235,7 @@ watch(route, () => {
                 @click="openLoginModal">
           登入
         </button>
-        <button v-else 
-                class="p-2 rounded-md text-amber-500 hover:bg-amber-100 min-w-20" 
-                @click="user.logout">
-          登出
-        </button>
+        
         <router-link to="/myarticle" class="p-2 rounded-md text-amber-500 hover:bg-amber-100 min-w-20">
           發表食記
         </router-link>
@@ -294,6 +291,12 @@ watch(route, () => {
                   <font-awesome-icon :icon="['fas', 'bookmark']" class="mr-2" />
                   珍藏餐廳
                 </router-link>
+              </li>
+              <li>
+                <button @click="user.logout" class="w-full px-4 py-2 text-amber-500 hover:bg-amber-100 text-center">
+                  <font-awesome-icon :icon="['fas', 'sign-out-alt']" class="mr-2" />
+                  登出
+                </button>
               </li>
             </ul>
           </div>
