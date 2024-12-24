@@ -21,6 +21,9 @@ const isHome = computed(() => route.path === '/');
 // 新增：監聽視窗寬度變化
 const windowWidth = ref(window.innerWidth);
 
+// 新增：判斷是否為 UserProfile 頁面
+const isUserProfile = computed(() => route.path === '/user');
+
 // 切換搜尋欄
 const toggleSearch = () => {
   isSearchOpen.value = !isSearchOpen.value;
@@ -28,19 +31,12 @@ const toggleSearch = () => {
 };
 
 
+// 切換選單開關
+const toggleMenu = () => isMenuOpen.value = !isMenuOpen.value;
 
 // 事件處理函數，控制下拉選單的開關
-const toggleMenu = (event) => {
-  event.stopPropagation(); // 阻止事件冒泡
-  isMenuOpen.value = !isMenuOpen.value;
-};
-
-// 事件處理函數，控制下拉選單的開關，如果點擊的目標不在下拉選單內，則關閉下拉選單
 const handleClickOutside = (event) => {
-  const menuButton = document.querySelector('.menu-button');
-  if (menuContainer.value && 
-      !menuContainer.value.contains(event.target) && 
-      !menuButton?.contains(event.target)) {
+  if (!event.target.closest('.menu-button') && !event.target.closest('.mobile-menu')) {
     isMenuOpen.value = false;
   }
 };
@@ -59,7 +55,7 @@ const checkScreenWidth = () => {
 
 // 頭像的計算屬性
 const currentProfilePicture = computed(() => {
-  return user.userData?.picture || '/src/assets/default_user.png';
+  return user.userData.picture || '/src/assets/default_user.png';
 });
 
 // 生命週期鉤子
@@ -117,7 +113,7 @@ watch(route, () => {
       enter-to-class="opacity-100 transform translate-y-0"
     >
       <div v-if="isSearchOpen" 
-           class="absolute left-0 right-0 p-4 bg-white shadow-md top-full md:hidden">
+           class="absolute left-0 right-0 p-2 bg-white shadow-md top-full md:hidden">
         <SearchInput />
       </div>
     </Transition>
@@ -125,7 +121,7 @@ watch(route, () => {
     <!-- 手機版選單 -->
     <div v-if="isMenuOpen" 
          ref="menuContainer"
-         class="absolute top-full right-0 bg-white shadow-lg md:hidden">
+         class="absolute top-full right-0 bg-white shadow-lg md:hidden mobile-menu">
       <div class="py-2 w-26 text-center">
         <ul class="space-y-2">
           <li v-if="!user.userData">
@@ -229,8 +225,8 @@ watch(route, () => {
                 </router-link>
               </li>
               <li>
-                <button @click="user.logout" class="w-full px-4 py-2 text-amber-500 hover:bg-amber-100 text-center">
-                  <font-awesome-icon :icon="['fas', 'sign-out-alt']" class="mr-2" />
+                <button @click="user.logout" class="w-full px-4 py-2 text-amber-500 hover:bg-amber-100 text-left">
+                  <font-awesome-icon :icon="['fas', 'right-from-bracket']" class="mr-2" />
                   登出
                 </button>
               </li>
@@ -308,7 +304,7 @@ watch(route, () => {
               </li>
               <li>
                 <button @click="user.logout" class="w-full px-4 py-2 text-amber-500 hover:bg-amber-100 text-center">
-                  <font-awesome-icon :icon="['fas', 'sign-out-alt']" class="mr-2" />
+                  <font-awesome-icon :icon="['fas', 'right-from-bracket']" class="mr-2" />
                   登出
                 </button>
               </li>
@@ -318,6 +314,9 @@ watch(route, () => {
       </div>
     </div>
   </header>
+
+  <!-- 添加一個佔位 div 來處理 margin -->
+  <div :class="{'mt-8' : isSearchOpen && windowWidth < 768}"></div>
 </template>
 
 <style scoped>
