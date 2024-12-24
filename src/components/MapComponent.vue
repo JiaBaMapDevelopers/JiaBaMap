@@ -262,7 +262,7 @@ const places = computed(() => Search.result);
 const districts = computed(() => Search.coordinate);
 
 const photoGet = (photoId) =>{
-  return `http://localhost:3000/restaurants/photo?id=${photoId}`
+  return `${import.meta.env.VITE_BACKEND_BASE_URL}/restaurants/photos/${photoId}`
 } 
 
 
