@@ -124,45 +124,40 @@ watch(route, () => {
 
     <!-- 手機版選單 -->
     <div v-if="isMenuOpen" 
-<<<<<<< HEAD
          ref="menuContainer"
          class="absolute top-full right-0 bg-white shadow-lg md:hidden">
       <div class="py-2 w-26 text-center">
-=======
-         class="absolute top-full right-0 bg-white shadow-lg md:hidden">
-      <div class="py-2 w-24">
->>>>>>> 55022b50d0a9c12f8ad3ce1de04823942ce427c6
         <ul class="space-y-2">
           <li v-if="!user.userData">
             <button @click="openLoginModal" class="w-full p-2 text-amber-500 hover:bg-amber-100 text-center">
               登入
             </button>
           </li>
-          <li href="#" class="flex cursor-pointer align-center">
+          <li v-if="user.userData" class="flex cursor-pointer align-center">
             <div class="w-10 h-10 ml-2 rounded-full bg-slate-400">
               <img :src="currentProfilePicture" alt="avatar" class="w-full h-full object-cover rounded-full">
             </div>
             <router-link to="/user" class="pl-4 font-bold leading-10 text-amber-500">{{ user.userData?.name || '使用者' }}</router-link>
           </li>
-          <hr class="mt-2 border-amber-200">
-            <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">月排行</a></li>
-            <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">週排行</a></li>
-            <router-link to="search" class="block p-2 text-amber-500 hover:bg-amber-100">搜尋餐廳</router-link>
+          <hr v-if="user.userData" class="mt-2 border-amber-200">
+          <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">月排行</a></li>
+          <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">週排行</a></li>
+          <router-link to="search" class="block p-2 text-amber-500 hover:bg-amber-100">搜尋餐廳</router-link>
           <hr class="border-amber-200">
-            <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">線上訂位</a></li>
-            <router-link to="/articlelist" class="block p-2 text-amber-500 hover:bg-amber-100">美食專欄</router-link>
-            <router-link to="/myarticle" class="block p-2 text-amber-500 hover:bg-amber-100">發表食記</router-link>
+          <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">線上訂位</a></li>
+          <router-link to="/articlelist" class="block p-2 text-amber-500 hover:bg-amber-100">美食專欄</router-link>
+          <router-link to="/myarticle" class="block p-2 text-amber-500 hover:bg-amber-100">發表食記</router-link>
           <hr class="border-amber-200">
-            <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">行銷方案</a></li>
-            <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">邀請部落客</a></li>
-            <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">店家加入</a></li>
-            <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">聯絡我們</a></li>
+          <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">行銷方案</a></li>
+          <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">邀請部落客</a></li>
+          <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">店家加入</a></li>
+          <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">聯絡我們</a></li>
           <hr class="border-amber-200">
-           <li v-if="user.userData">
-              <button @click="user.logout" class="w-full p-2 text-amber-500 hover:bg-amber-100 text-center">
-                登出
-              </button>
-            </li>
+          <li v-if="user.userData">
+            <button @click="user.logout" class="w-full p-2 text-amber-500 hover:bg-amber-100 text-center">
+              登出
+            </button>
+          </li>
         </ul>
       </div>
     </div>
