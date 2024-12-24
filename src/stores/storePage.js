@@ -300,6 +300,6 @@ export const useStore = defineStore("store", () => {
     recommendedRestaurants,
     fetchRecommendedRestaurants,
     lat,
-    lng,
+    lng
   };
 });
