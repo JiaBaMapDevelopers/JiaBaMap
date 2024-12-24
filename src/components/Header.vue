@@ -27,22 +27,20 @@ const toggleSearch = () => {
   emit('search-toggle', isSearchOpen.value);
 };
 
-// 計算是不是在首頁，如果是首頁，則不顯示搜尋欄
-const showSearch = computed(() => route.path !== '/');
 
-// 事件處理函數，控制下拉選單的開關，如果開啟下拉選單，則註冊事件處理函數
-const toggleMenu = () => {
+
+// 事件處理函數，控制下拉選單的開關
+const toggleMenu = (event) => {
+  event.stopPropagation(); // 阻止事件冒泡
   isMenuOpen.value = !isMenuOpen.value;
-  if (isMenuOpen.value) {
-    document.addEventListener('click', handleClickOutside);
-  } else {
-    document.removeEventListener('click', handleClickOutside);
-  }
 };
 
 // 事件處理函數，控制下拉選單的開關，如果點擊的目標不在下拉選單內，則關閉下拉選單
 const handleClickOutside = (event) => {
-  if (menuContainer.value && !menuContainer.value.contains(event.target)) {
+  const menuButton = document.querySelector('.menu-button');
+  if (menuContainer.value && 
+      !menuContainer.value.contains(event.target) && 
+      !menuButton?.contains(event.target)) {
     isMenuOpen.value = false;
   }
 };
@@ -65,22 +63,21 @@ const currentProfilePicture = computed(() => {
 });
 
 // 生命週期鉤子
-// 生命週期鉤子，監聽螢幕寬度，並註冊事件處理函數
 onMounted(() => {
   window.addEventListener("resize", checkScreenWidth);
   document.addEventListener('click', handleClickOutside);
 });
 
-// 生命週期鉤子，卸載事件處理函數
 onUnmounted(() => {
   window.removeEventListener("resize", checkScreenWidth);
   document.removeEventListener('click', handleClickOutside);
   isSearchOpen.value = false;
 });
 
-// 路由監聽，如果路由改變，則關閉搜尋欄
+// 路由監聽，如果路由改變，則關閉搜尋欄和選單
 watch(route, () => {
   isSearchOpen.value = false;
+  isMenuOpen.value = false;
 });
 </script>
 
@@ -107,7 +104,7 @@ watch(route, () => {
         <button @click="toggleSearch" class="text-amber-500">
           <font-awesome-icon :icon="['fas', 'magnifying-glass']" class="w-5 h-5" />
         </button>
-        <button @click="toggleMenu" class="text-amber-500">
+        <button @click="toggleMenu" class="text-amber-500 menu-button">
           <font-awesome-icon :icon="['fas', 'bars']" class="w-6 h-6" />
         </button>
       </div>
@@ -127,6 +124,7 @@ watch(route, () => {
 
     <!-- 手機版選單 -->
     <div v-if="isMenuOpen" 
+         ref="menuContainer"
          class="absolute top-full right-0 bg-white shadow-lg md:hidden">
       <div class="py-2 w-26 text-center">
         <ul class="space-y-2">
@@ -144,11 +142,11 @@ watch(route, () => {
           <hr class="mt-2 border-amber-200">
             <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">月排行</a></li>
             <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">週排行</a></li>
-            <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">搜尋餐廳</a></li>
+            <router-link to="search" class="block p-2 text-amber-500 hover:bg-amber-100">搜尋餐廳</router-link>
           <hr class="border-amber-200">
             <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">線上訂位</a></li>
-            <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">美食專欄</a></li>
-            <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">發表食記</a></li>
+            <router-link to="/articlelist" class="block p-2 text-amber-500 hover:bg-amber-100">美食專欄</router-link>
+            <router-link to="/myarticle" class="block p-2 text-amber-500 hover:bg-amber-100">發表食記</router-link>
           <hr class="border-amber-200">
             <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">行銷方案</a></li>
             <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">邀請部落客</a></li>
