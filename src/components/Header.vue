@@ -124,9 +124,14 @@ watch(route, () => {
 
     <!-- 手機版選單 -->
     <div v-if="isMenuOpen" 
+<<<<<<< HEAD
          ref="menuContainer"
          class="absolute top-full right-0 bg-white shadow-lg md:hidden">
       <div class="py-2 w-26 text-center">
+=======
+         class="absolute top-full right-0 bg-white shadow-lg md:hidden">
+      <div class="py-2 w-24">
+>>>>>>> 55022b50d0a9c12f8ad3ce1de04823942ce427c6
         <ul class="space-y-2">
           <li v-if="!user.userData">
             <button @click="openLoginModal" class="w-full p-2 text-amber-500 hover:bg-amber-100 text-center">
