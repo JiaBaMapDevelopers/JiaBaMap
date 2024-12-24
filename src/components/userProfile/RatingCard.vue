@@ -100,14 +100,14 @@ const getRankImage = computed(() => {
 </script>
 
 <template>
-  <div class="box-border w-full h-screen pt-2 mt-2 overflow-y-auto sm:w-72">
+  <div class="box-border w-full h-screen pt-2 mt-2 overflow-y-auto sm:w-72 scrollbar-hide">
     <h1 class="text-2xl font-bold text-amber-500">熱門餐廳排行榜</h1>
     <div v-if="restaurants && imageResponse">
       <p>目前所在地：{{ userLocation }}</p>
       <div
         v-for="(item, index) in restaurants" 
         :key="index"
-        class="relative flex items-center gap-3 pb-2 mt-10"
+        class="relative flex items-center gap-3 pb-2 mt-8"
       >
         <!-- 排名圖 -->
         <div class="absolute w-10 h-10 -top-4" v-if="index < 3">
@@ -123,45 +123,29 @@ const getRankImage = computed(() => {
           >
         </div>
         <!-- 餐廳排名、名稱 -->
-        <div class="flex flex-col justify-between sm:text-xl">
-          <div class="ml-3">
-            <h2 class="text-base font-bold text-gray-500 sm:text-xs">
+        <div class="flex flex-col justify-between w-3/5 sm:text-xl">
+          <div>
+            <h2 class="text-base font-bold text-gray-500">
               {{ index+1 }}. 
               <a href="#" class="text-amber-500 hover:text-orange-300">{{ item.name }}</a>
             </h2>
           </div>
           <!-- 餐廳內容 -->
-          <div class="flex flex-row items-center mt-3 ml-3 space-x-1 text-center">
-
-            <div class="flex items-center w-12 h-6 px-2 space-x-1 text-center text-white bg-red-600 rounded-2xl">
-              <p class="text-xs">{{ item.rating }}</p>
+          <div class="flex flex-row items-center mt-3 space-x-1 text-center">
+            <div class="flex items-center px-2 py-1 space-x-1 text-center text-white bg-orange-600 rounded-2xl">
+              <p class="text-sm">{{ item.rating }}</p>
               <font-awesome-icon :icon="['fas', 'star']" class="text-xs" />
             </div>
-
-            <p class="font-light sm:text-xs">（評論數：{{ item.userRatingCount }} 則）</p>
-            
+            <p class="text-sm font-light">評論: {{ item.userRatingCount }} 則</p>
           </div>
+          <p class="mt-2 text-sm">均消: {{ item.startPrice }} - {{ item.endPrice }}</p>
           <!-- 需判斷是否營業 -->
-          <div class="flex items-center mx-3 mt-3 text-sm">
+          <div class="flex items-center mt-2 text-sm">
             <span class="mr-2 text-center text-green-600">
               <font-awesome-icon :icon="['fas', 'circle']" style="font-size: 8px;" />
             </span>
-            <p>{{ item?.openNow ? '營業中' : '已打烊' }}</p>
-          </div>
-
-          <div class="flex items-center mt-3 ml-3">
-            <!-- <div class="px-2 mx-1 text-base bg-gray-200 rounded-full sm:text-xs ">
-              <a href="#"
-                class="text-xs"
-                @click="navigateToSearch(item.keyword)"
-              >
-              {{ item.keyword }}
-              </a>
-            </div> -->
-            <div>
-              <p class="font-bold sm:text-xs">均消: {{ item.startPrice }} - {{ item.endPrice }}</p>
-            </div>
-          </div>    
+            <p class="font-bold">{{ item?.openNow ? '營業中' : '已打烊' }}</p>
+          </div>  
         </div>
       </div>
     </div>
