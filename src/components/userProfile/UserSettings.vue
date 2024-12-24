@@ -1,33 +1,19 @@
 <template>
-    <div class="p-4 lg:p-8">
+    <div class="p-4 my-10 lg:p-8">
         <!-- 非編輯模式 -->
         <div v-if="!isEditing">
             <!-- 個人照片 -->
             <div class="flex justify-center">
                 <img
-                    :src="userData.picture"
+                    :src="currentProfilePicture"
                     alt="Profile Picture"
                     class="object-cover w-24 h-24 border border-gray-300 rounded-full"
                 />
             </div>
 
             <!-- 名稱和數據 -->
-             <!-- 若無法順利回傳加入v-if="userData" -->
             <div class="mt-4 text-center" >
-                <h2 class="text-2xl font-bold text-gray-700">{{ userData?.name || username }}</h2>  
-                <div class="flex justify-center mt-2 space-x-4 text-sm text-gray-500">
-                    <div>
-                        <span class="font-bold text-gray-700">0</span> 餐廳評論
-                    </div>
-                    <div>
-                        <span class="font-bold text-gray-700">0</span> 位粉絲
-                    </div>
-                </div>
-            </div>
-
-            <!-- 個人簡介 -->
-            <div class="mt-4 text-center">
-                <p class="text-gray-600">愛食記新手</p>
+                <h2 class="text-2xl font-bold text-gray-700">{{ userData.name || "使用者" }}</h2>  
             </div>
 
             <!-- 社群連結 -->
@@ -41,25 +27,23 @@
                 >
                     Instagram: {{ instagramUsername }}
                 </a>
-                <p v-else class="text-gray-500"><font-awesome-icon :icon="['fab', 'instagram']" class="w-5 h-5 mr-1 text-amber-500"/>Instagram 未連結</p>
+                <p v-else class="flex items-center justify-center text-gray-500"><font-awesome-icon :icon="['fab', 'instagram']" class="w-5 h-5 mr-1 text-amber-500"/>Instagram 未連結</p>
             </div>
 
             <!-- 編輯個人檔案按鈕 -->
-            <div class="relative flex items-center justify-center mt-6">
+            <div class="relative flex items-center justify-center mt-6 ">
                 <div class="w-full"></div>
-                <!-- 編輯個人檔案按鈕 (保持居中) -->
                 <button
                     @click="toggleEditMode"
                     class="w-full py-2 mx-2 text-white rounded-md min-w-36 bg-amber-500 hover:bg-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-500"
                 >
                     編輯個人檔案
                 </button>
-
-                <!-- ⋯按鈕 (距離編輯個人檔案按鈕右側4px) -->
                 <div class="relative w-full ">
                     <button
+                        id="dropdownButton"
                         @click="toggleMenu"
-                        class="p-1 text-2xl text-gray-500 rounded-md  hover:bg-amber-100 focus:outline-none"
+                        class="p-1 text-2xl text-gray-500 rounded-md hover:bg-amber-100 focus:outline-none"
                         >
                         ⋯
                     </button>
@@ -88,10 +72,11 @@
             <!-- 更換照片 -->
             <div class="relative flex justify-center">
                 <img
-                    :src="profilePicture"
+                    :src="currentProfilePicture"
                     alt="Profile Picture"
                     class="object-cover w-24 h-24 border border-gray-300 rounded-full"
                 />
+
                 <label
                     for="photo-upload"
                     class="absolute inset-0 flex items-center justify-center bg-black rounded-full cursor-pointer bg-opacity-20"
@@ -120,13 +105,13 @@
             <!-- 編輯 IG 帳號 -->
             <div class="mt-4 text-center">
                 <p class="mb-2 text-sm text-gray-500">您的社群連結：</p>
-                <span class="mr-2 text-2xl text-amber-500"><font-awesome-icon :icon="['fab', 'instagram']" class="w-5 h-5 mr-1 text-amber-500"/></span>
+                <span class="text-2xl text-amber-500"><font-awesome-icon :icon="['fab', 'instagram']" class="w-5 h-5 mr-1 text-amber-500"/></span>
                 <div class="flex items-center justify-center">
                     <input
                         v-model="instagramUsername"
                         type="text"
                         placeholder="輸入 IG 帳號"
-                        class="w-1/2 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
+                        class="w-1/2 p-2 text-center border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
                     />
                 </div>
             </div>
@@ -135,7 +120,7 @@
             <div class="flex justify-center mt-6 space-x-4">
                 <button
                 @click="saveProfile"
-                class="px-4 py-2 text-white rounded-md bg-amber-500 hover:bg-amber-400 focus:outline-none focus:ring-2 focus:ring-green-500"
+                class="px-4 py-2 text-white rounded-md bg-amber-500 hover:bg-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-500"
                 >
                 儲存
                 </button>
@@ -151,60 +136,111 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import { useAuth } from '@/stores/authStore'
+// import { useRouter } from 'vue-router';
 
 const user = useAuth()
-const { userData, logout} = user
+const { userData, logout } = user
 const menuVisible = ref(false);
 const isEditing = ref(false);
 const profilePicture = ref('https://via.placeholder.com/100'); // 頭像
 const username = ref('編輯名稱'); // 使用者名稱
 const instagramUsername = ref(''); // IG 帳號
-// const userData = ref(null); // 用戶資料
-
-const router = useRouter();
+const defaultPicture=ref('https://via.placeholder.com/100')
+// const router = useRouter();
 
 // 計算屬性 - 生成 IG 連結
 const instagramLink = computed(() => {
-  return `https://instagram.com/${instagramUsername.value}`;
+    return `https://instagram.com/${instagramUsername.value}`;
 });
+
+// 計算屬性 - 確定目前顯示的圖片
+const currentProfilePicture = computed(() => {
+    return profilePicture.value || userData.picture || defaultPicture.value;
+});
+
+// 監聽 userData.picture 的更新
+watch(
+    () => userData.picture,
+    (newValue) => {
+        if (newValue) {
+            profilePicture.value = newValue; // 使用 Google 圖片作為初始值
+        }
+    },
+    { immediate: true } // 登入後立即執行
+);
 
 // 切換編輯模式
 const toggleEditMode = () => {
-  isEditing.value = true;
+    isEditing.value = true;
+    username.value = userData.name || "使用者"; // 初始化為 Google 名稱
+    instagramUsername.value = userData.instagram || ''; // 保留現有 Instagram 資料
 };
 
 // 保存使用者資料並退出編輯模式
 const saveProfile = () => {
-  isEditing.value = false;
+    isEditing.value = false;
+    userData.name = username.value;
+    // 如果有新圖片，更新到 `userData`
+    if (profilePicture.value) {
+        userData.picture = profilePicture.value;
+    }    
+    userData.instagram = instagramUsername.value; // 更新 userData 的 IG 資料
 };
+
 
 // 取消編輯，恢復原始值（可擴展為重置到用戶原始數據）
 const cancelEdit = () => {
-  isEditing.value = false;
-  instagramUsername.value = '';
+    isEditing.value = false;
+    username.value = userData.name; // 恢復 Google 名稱
+    profilePicture.value = userData.picture || defaultPicture.value;
+    instagramUsername.value = userData.instagram
 };
+
 
 // 切換選單顯示/隱藏
 const toggleMenu = () => {
-  menuVisible.value = !menuVisible.value;
+    menuVisible.value = !menuVisible.value;
 };
 
-// 撰寫食記的功能（僅示範）
+// 撰寫食記的功能
 const writeReview = () => {
-  alert('撰寫食評功能即將啟用！');
+    alert('撰寫食評功能即將啟用！');
 };
 
 // 更新頭像
 const onPhotoChange = (event) => {
-  const file = event.target.files[0];
-  if (file) {
-    profilePicture.value = URL.createObjectURL(file);
-  }
+    const file = event.target.files[0];
+    if (file) {
+        const newImage = URL.createObjectURL(file);
+        user.setPicture(newImage); // 更新 Pinia 資料
+    }
 };
+
+// 點擊其他地方時關閉下拉選單
+const handleClickOutside = (event) => {
+    if (
+        menuVisible.value &&
+        !event.target.closest('#dropdownMenu') && // 點擊的元素不在選單內
+        !event.target.closest('#dropdownButton') // 點擊的元素不在按鈕內
+    ) {
+        menuVisible.value = false; // 關閉選單
+    }
+};
+
+
+// 添加全域事件監聽器
+onMounted(() => {
+    document.addEventListener('click', handleClickOutside);
+});
+
+// 移除全域事件監聽器
+onUnmounted(() => {
+    document.removeEventListener('click', handleClickOutside);
+});
 </script>
+
 
 <style scoped>
     /* 標籤覆蓋樣式 */

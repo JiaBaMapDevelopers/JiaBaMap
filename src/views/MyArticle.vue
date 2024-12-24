@@ -106,9 +106,12 @@ onMounted(() => {
         <h2 class="text-5xl font-extrabold mb-6">您的食記</h2>
         
         <div class="flex flex-row-reverse space-x-4 mb-4 text-xl">
-          <button class="px-4 py-1 bg-orange-500 text-white rounded hover:bg-orange-600 transition-colors">
+          <router-link 
+            to="/createnote" 
+            class="px-4 py-1 bg-orange-500 text-white rounded hover:bg-orange-600 transition-colors">
             撰寫食記
-          </button>
+          </router-link>
+
         </div>
 
         <div class="border-b">

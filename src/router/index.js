@@ -8,6 +8,8 @@ import MyArticle from '../views/MyArticle.vue'
 import ArticleList from '../views/ArticleList.vue'
 import AboutTeam from '../views/Footer/AboutTeam.vue'
 import {useAuth} from '@/stores/authStore'
+import CreateNoteView from '@/views/CreateNoteView.vue';
+import PreviewNoteView from '@/views/PreviewNoteView.vue';
 
 const routes = [
   {
@@ -51,7 +53,17 @@ const routes = [
     path: '/about',
     name: 'about',
     component: AboutTeam
-  }
+  },
+  {
+    path: '/createnote',
+    name: 'CreateNote',
+    component: CreateNoteView
+  },
+  {
+    path: "/previewnote",
+    name: "PreviewNote",
+    component: PreviewNoteView,
+  },
 ]
 
 const router = createRouter({
