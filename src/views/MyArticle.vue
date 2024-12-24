@@ -1,11 +1,29 @@
 <script setup>
 import { useRouter, useRoute } from 'vue-router';
-import Header from '../components/Header.vue';
 import Footer from '../components/Footer.vue';
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 
 const router = useRouter();
 const route = useRoute();
+
+// 控制手機版搜尋欄的狀態
+const isSearchOpen = ref(false);
+
+// 處理搜尋欄開關事件
+const handleSearchToggle = (isOpen) => {
+  isSearchOpen.value = isOpen;
+};
+
+// 新增：判斷是否為首頁
+const isHome = computed(() => route.path === '/');
+
+// 新增：視窗寬度狀態
+const windowWidth = ref(window.innerWidth);
+
+// 修改：監聽視窗大小變化
+const handleResize = () => {
+  windowWidth.value = window.innerWidth;
+};
 
 // 假資料
 const articles = ref([
@@ -95,23 +113,32 @@ onMounted(() => {
       query: { status: 'draft' }
     });
   }
+  // 添加視窗大小監聽
+  window.addEventListener('resize', handleResize);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('resize', handleResize);
 });
 
 </script>
 
 <template>
-  <div class="pt-16">
-    <div class="min-h-screen bg-white">
-      <div class="max-w-4xl mx-auto mt-8 px-4">
+  <div>
+    <div 
+      :class="['min-h-screen bg-white', { 
+        'mt-24': windowWidth < 768,
+        'mt-20': !isHome && windowWidth >= 768 && windowWidth < 1167,
+        'mt-8': isHome || windowWidth >= 1167
+      }]">
+      <div class="max-w-4xl mx-auto px-4">
         <h2 class="text-5xl font-extrabold mb-6">您的食記</h2>
-        
         <div class="flex flex-row-reverse space-x-4 mb-4 text-xl">
           <router-link 
             to="/createnote" 
             class="px-4 py-1 bg-orange-500 text-white rounded hover:bg-orange-600 transition-colors">
             撰寫食記
           </router-link>
-
         </div>
 
         <div class="border-b">
