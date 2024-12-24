@@ -1,12 +1,12 @@
 <template>
   <div class="box-border w-full h-screen overflow-y-auto md:w-1/2">
-    <div class="box-border sticky top-0 z-50 flex flex-col w-full pb-3 space-x-0 bg-white">
-      <div class="flex flex-col">
-        <div class="p-3 font-bold text-gray-500">
+    <div class="box-border sticky top-0 z-40 flex flex-col w-full pb-3 space-x-0 bg-white">
+      <div class="flex flex-col bg-white">
+        <div class="p-3 font-bold text-gray-500 bg-white">
           <h3>台灣『美食餐廳』 | 精選TOP 15間熱門店家</h3>
         </div>
 
-        <div class="hidden text-sm text-gray-600 md:flex">
+        <div class="hidden text-sm text-gray-600 bg-white md:flex">
           <div class="px-3">
             <a href="#">台灣</a>
           </div>
@@ -19,7 +19,7 @@
         </div>
       </div>
 
-      <div class="relative flex flex-row items-start w-full px-2 mx-3">
+      <div class="relative flex flex-row items-start w-full px-2 mx-3 bg-white">
         <!-- 餐廳排序 -->
         <div class="relative inline-block w-1/4 mx-1 md:w-1/6">
           <button
@@ -99,7 +99,7 @@
     @mouseenter="handleMouseEnter(place.id)"
     @mouseleave="handleMouseLeave">
       <div class="relative w-40 h-32 ml-3">
-        <Loader v-if="loading[place.id]" class="absolute inset-0 z-50 flex items-center justify-center object-cover w-full h-full bg-white/50"/>
+        <Loader v-if="loading[place.id]" class="absolute inset-0 z-20 flex items-center justify-center object-cover w-full h-full bg-white/50"/>
         <img v-if="place.photoId" :src="photoGet(place.photoId)" alt="Place image" class="object-cover w-full h-full" />
       </div>
       <div class="flex flex-col justify-between w-3/5 ml-3 sm:text-xl">
