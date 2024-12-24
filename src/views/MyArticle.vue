@@ -6,13 +6,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue';
 const router = useRouter();
 const route = useRoute();
 
-// 控制手機版搜尋欄的狀態
-const isSearchOpen = ref(false);
 
-// 處理搜尋欄開關事件
-const handleSearchToggle = (isOpen) => {
-  isSearchOpen.value = isOpen;
-};
 
 // 新增：判斷是否為首頁
 const isHome = computed(() => route.path === '/');
