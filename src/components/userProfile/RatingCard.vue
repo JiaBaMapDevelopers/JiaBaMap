@@ -1,69 +1,85 @@
 <script setup>
-import { computed, ref } from "vue";
+import { computed, ref, TrackOpTypes } from "vue";
 import { useRouter } from "vue-router";
 import { useKeywordStore } from "@/stores/keywordStore";
+import axios from "axios";
 
-const restaurants = ref([
-  {
-    rank: 1,
-    name: "麻的 小辛辣｜麻辣干鍋 台中美村店",
-    rating: 4.9,
-    reviews: 20,
-    cost: 600,
-    openingHours: "12:00-14:30, 16:00-22:00",
-    keyword: "晚餐",
-    imageUrl: "/image/麻的小辛辣.jpg"
-  },
-  {
-    rank: 2,
-    name: "麻的 小辛辣｜麻辣干鍋 台中美村店",
-    rating: 4.8,
-    reviews: 10,
-    cost: 500,
-    openingHours: "12:00-14:30, 16:00-22:00",
-    keyword: "咖啡",
-    imageUrl: "/image/麻的小辛辣.jpg"
-  },
-  {
-    rank: 3,
-    name: "麻的 小辛辣｜麻辣干鍋 台中美村店",
-    rating: 4.7,
-    reviews: 20,
-    cost: 400,
-    openingHours: "12:00-14:30, 16:00-22:00",
-    keyword: "燒肉",
-    imageUrl: "/image/麻的小辛辣.jpg"
-  },
-  {
-    rank: 4,
-    name: "麻的 小辛辣｜麻辣干鍋 台中美村店",
-    rating: 4.7,
-    reviews: 20,
-    cost: 600,
-    openingHours: "12:00-14:30, 16:00-22:00",
-    keyword: "pizza",
-    imageUrl: "/image/麻的小辛辣.jpg"
-  },
-  {
-    rank: 5,
-    name: "麻的 小辛辣｜麻辣干鍋 台中美村店",
-    rating: 4.7,
-    reviews: 20,
-    cost: 700,
-    openingHours: "12:00-14:30, 16:00-22:00",
-    keyword: "中餐",
-    imageUrl: "/image/麻的小辛辣.jpg"
+let restaurants = ref(null)
+let imageResponse = ref([])
+let userLocation = ref("")
+
+// 先確認使用者裝置能不能抓地點
+if(navigator.geolocation) {
+  function error() {
+    alert('無法取得你的位置');
   }
-]);
+  // 使用者允許抓目前位置，回傳經緯度
+  async function success(position) {
+    let lat = position.coords.latitude
+    let lng = position.coords.longitude
+    const keyword = "餐廳"
 
-const getRankImage = computed(() => {
-  return (rank) => {
-    if (rank <= 3) {
-      return `/image/top${rank}.png`;
-    }
-    return null;
-  };
-});
+    let storeUrl = `http://localhost:3000/restaurants/search?keyword=${keyword}&lat=${lat}&lng=${lng}`
+    await fetchRestaurants(storeUrl)
+
+    //取得目前區域
+    userLocation.value = restaurants.value[0].address.substr(5, 6)
+    // 把圖片id拿出來
+    const imageId = ref([])
+    restaurants.value.forEach(element => {
+      imageId.value.push(element.photoId)
+    })
+
+    // 抓餐廳圖片
+    imageResponse.value = await fetchImgs(imageId.value)
+  }
+  // 跟使用者拿所在位置的權限
+  navigator.geolocation.getCurrentPosition(success, error);
+} else {
+  alert('Sorry, 你的裝置不支援地理位置功能。')
+}
+
+function arrayBufferToBase64(buffer) {
+  const bytes = new Uint8Array(buffer);
+  let binary = '';
+  const chunkSize = 8192; // 每次處理的字節數，根據需要調整
+
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
+  }
+  return window.btoa(binary);
+}
+
+
+async function fetchImgs(imageId) {
+  try {
+    const promises = imageId.map(async (id) => {
+      const response = await axios.get(`http://localhost:3000/restaurants/photo?id=${id}`, {
+        responseType: 'arraybuffer' // 確保響應是二進制數據
+      })
+      if (response) {
+        const base64Image = response.data ? arrayBufferToBase64(response.data) : null;
+        return `data:image/jpeg;base64,${base64Image}`
+      } else {
+        return null
+      }
+    })
+    const imageUrls = await Promise.all(promises)
+    return imageUrls
+  } catch (err) {
+    console.error(err)
+  }
+}
+
+async function fetchRestaurants(url){
+  try{ // 抓15間餐廳
+    const response = await axios.get(url)
+    restaurants.value = response.data
+    return restaurants
+  } catch (err) {
+    console.error(err)
+  }
+}
 
 const router = useRouter()
 const keywordStore = useKeywordStore()
@@ -72,67 +88,78 @@ const navigateToSearch = (tag) => {
   keywordStore.navigateToSearch(router, tag)
 }
 
+const getRankImage = computed(() => {
+  return (rank) => {
+    if (rank <= 3) {
+      return `/image/top${rank}.png`;
+    }
+  };
+});
+
 </script>
 
 <template>
   <div class="box-border w-full h-screen pt-2 mt-2 overflow-y-auto sm:w-72">
     <div>
-      <h1 class="mx-3 text-2xl font-bold text-amber-500">熱門餐廳</h1>
+      <h1 class="text-2xl font-bold text-amber-500">熱門餐廳排行榜</h1>
+      <p>目前所在地：{{ userLocation }}</p>
     </div>
-    <div 
+    <div
       v-for="(item, index) in restaurants" 
-      :key="index" 
-      class="relative flex items-center pb-2 mt-10"
-    >    
+      :key="index"
+      class="relative flex items-center gap-3 pb-2 mt-10"
+    >
        <!-- 排名圖 -->
-       <div class="absolute w-10 h-10 -top-4 left-3" v-if="getRankImage(item.rank)">
-        <img :src="getRankImage(item.rank)" alt="店家排名">
+       <div class="absolute w-10 h-10 -top-4" v-if="index < 3">
+        <img :src="getRankImage(index+1)" alt="店家排名">
       </div>
       <!-- 餐廳圖 -->
-      <div class="w-32 h-32 sm:w-28 sm:h-24">
+      <div class="relative w-32 h-32 overflow-hidden">
         <img
-          :src="item.imageUrl" 
-          class="object-cover w-full h-full mx-3 rounded-md"
+          v-if="imageResponse[index]"
+          :src="imageResponse[index]"
+          alt="Restaurant Image"
+          class="absolute inset-0 object-cover w-full h-full rounded-md"
         >
       </div>
       <!-- 餐廳排名、名稱 -->
-      <div class="flex flex-col justify-between ml-3 sm:text-xl">
+      <div class="flex flex-col justify-between sm:text-xl">
         <div class="ml-3">
           <h2 class="text-base font-bold text-gray-500 sm:text-xs">
-            {{ item.rank }}. 
+            {{ index+1 }}. 
             <a href="#" class="text-amber-500 hover:text-orange-300">{{ item.name }}</a>
           </h2>
         </div>
         <!-- 餐廳內容 -->
         <div class="flex flex-row items-center mt-3 ml-3 space-x-1 text-center">
 
-          <div class="flex items-center w-12 h-6 px-2 space-x-1 text-center text-white bg-red-600  rounded-2xl">
+          <div class="flex items-center w-12 h-6 px-2 space-x-1 text-center text-white bg-red-600 rounded-2xl">
             <p class="text-xs">{{ item.rating }}</p>
             <font-awesome-icon :icon="['fas', 'star']" class="text-xs" />
           </div>
 
-          <p class="font-light sm:text-xs">(評論數: {{ item.reviews }})</p>
+          <p class="font-light sm:text-xs">（評論數：{{ item.userRatingCount }} 則）</p>
           
         </div>
         <!-- 需判斷是否營業 -->
-        <div class="flex items-center mx-3 mt-3 text-sm sm:hidden">
+        <div class="flex items-center mx-3 mt-3 text-sm">
           <span class="mr-2 text-center text-green-600">
             <font-awesome-icon :icon="['fas', 'circle']" style="font-size: 8px;" />
           </span>
-          <p>營業時間: {{ item.openingHours }}</p>
+          <p>{{ item?.openNow ? '營業中' : '已打烊' }}</p>
         </div>
 
         <div class="flex items-center mt-3 ml-3">
-          <div class="px-2 mx-1 text-base bg-gray-200 rounded-full sm:text-xs ">
+          <!-- <div class="px-2 mx-1 text-base bg-gray-200 rounded-full sm:text-xs ">
             <a href="#"
               class="text-xs"
               @click="navigateToSearch(item.keyword)"
             >
             {{ item.keyword }}
             </a>
-          </div>
+          </div> -->
           <div>
-            <p class="font-bold  sm:text-xs">均消: {{ item.cost }}</p>
+            <p class="font-bold sm:text-xs">均消: {{ item.startPrice }} - {{ item.endPrice }}</p>
           </div>
         </div>    
       </div>
