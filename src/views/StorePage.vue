@@ -52,8 +52,8 @@ onMounted(async () => {
         await restaurantStore.fetchRecommendedRestaurants();
         console.log('recommendedRestaurants fetched');
         
-        await restaurantStore.fetchSearchTopics();
-        console.log('Search topics fetched');
+        // await restaurantStore.fetchSearchTopics();
+        // console.log('Search topics fetched');
         
     } catch (error) {
         console.error('數據載入錯誤：', error);
@@ -80,7 +80,7 @@ document.addEventListener('click', handleDocumentClick);
 
 <template>
     <div>
-        <Header/>
+        <Header />
         <div class="fixed top-2 left-1/2 transform -translate-x-1/2 z-40 w-[600px] hidden md:block">
             <SearchInput />
         </div>
@@ -118,7 +118,7 @@ document.addEventListener('click', handleDocumentClick);
                 <div class="space-y-2 text-center md:text-left">
                      <h2 class="py-1 text-3xl font-black text-gray-700">{{ storeName }}</h2>
                     <div class="flex flex-wrap items-center justify-center gap-3 md:justify-start">
-                        <span class="px-2 py-1 rounded-2xl text-yellow-50 bg-orange-600">{{ rating }} ★</span>
+                        <span class="px-2 py-1 bg-orange-600 rounded-2xl text-yellow-50">{{ rating }} ★</span>
                         <a href="#"><span class="text-gray-400">{{ userRatingCount }}則評論</span></a>
                     </div>
                     <div class="flex flex-wrap justify-center gap-3 py-2 md:justify-start">

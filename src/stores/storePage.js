@@ -19,7 +19,7 @@ export const useStore = defineStore("store", () => {
   const lat = ref("");
   const lng = ref("");
 
-  let placesId = ""
+  let placesId = "";
 
   const StoreId = (router, placeId) => {
     placesId = placeId
@@ -56,11 +56,12 @@ export const useStore = defineStore("store", () => {
       openNow.value = resJson.openNow;
       lat.value = resJson.lat;
       lng.value = resJson.lng;
-      resJson.photoIds.forEach((id) => {
-        photoIds.push(id);
-      }); //一個array含兩組id
+      
+      photoIds.value = resJson.photoIds;
+       //一個array含兩組id
       console.log(photoIds);
     } catch (err) {
+      console.log("Failed to fetch place detail from Google API.");
       console.log(err);
     }
   };
@@ -68,7 +69,7 @@ export const useStore = defineStore("store", () => {
   const fetchStorePhoto = async () => {
     try {
       const res = await fetch(
-        `http://localhost:3000/restaurants/photo?id=${photoIds[0]}`
+        `http://localhost:3000/restaurants/photo?id=${photoIds.value[0]}`
       );
       console.log(res);
       storePhoto.value = URL.createObjectURL(await res.blob());
@@ -81,7 +82,7 @@ export const useStore = defineStore("store", () => {
   const fetchBannerPhoto = async () => {
     try {
       const res = await fetch(
-        `http://localhost:3000/restaurants/photo?id=${photoIds[1]}`
+        `http://localhost:3000/restaurants/photo?id=${photoIds.value[1]}`
       );
       console.log(res);
       bannerPhoto.value = URL.createObjectURL(await res.blob());
@@ -93,67 +94,85 @@ export const useStore = defineStore("store", () => {
 
   const staticMapUrl = computed(() => {
     // 如果沒有位置資訊，返回空
-    if (!lat.value || !lng.value) return null;
+    if (!formattedAddress.value || !lat.value || !lng.value) return null;
 
     return `http://localhost:3000/restaurants/staticmap?lat=${lat.value}&lng=${lng.value}`;
   });
 
   // 獲取類似餐廳
   const fetchSimilarRestaurants = async () => {
-    if (!placesId) {
-      similarRestaurants.value = [];
-      return;
-    }
-  
-    // 先獲取當前餐廳的詳細資訊
-    const detailRes = await fetch(
-      `http://localhost:3000/restaurants/details?id=${placesId}`
-    );
+    try {
+      if (!placesId) {
+        console.error('缺少 placesId');
+        return;
+      }
 
-    const detailData = await detailRes.json();
-  
-    // 使用當前餐廳的位置搜尋附近餐廳
-    const searchRes = await fetch(
-      `http://localhost:3000/restaurants/search?keyword=餐廳&lat=${detailData.lat}&lng=${detailData.lng}`
-    );
-  
-    const resJson = await searchRes.json();
-  
-    // 使用 Set 來儲存已經添加的餐廳 ID
-    const addedIds = new Set();
-    
-    // 過濾掉當前餐廳和重複的餐廳
-    similarRestaurants.value = resJson
-      .filter(restaurant => {
-        // 如果是當前餐廳或已經添加過，則跳過
-        if (restaurant.id === placesId || addedIds.has(restaurant.id)) {
-          return false;
-        }
-        // 將餐廳 ID 加入已添加集合
-        addedIds.add(restaurant.id);
+      // 先獲取當前餐廳的詳細資訊
+      const detailRes = await fetch(
+        `http://localhost:3000/restaurants/details?id=${placesId}`
+      );
+
+      if (!detailRes.ok) {
+        throw new Error(`HTTP Error: ${detailRes.status}`);
+      }
+
+      const detailData = await detailRes.json();
+      console.log('當前餐廳詳細資訊:', detailData);
+
+      // 使用當前餐廳的位置搜尋附近餐廳
+      const searchRes = await fetch(
+        `http://localhost:3000/restaurants/search?keyword=餐廳&lat=${detailData.lat}&lng=${detailData.lng}`
+      );
+
+      if (!searchRes.ok) {
+        throw new Error(`HTTP Error: ${searchRes.status}`);
+      }
+
+      const resJson = await searchRes.json();
+      console.log('搜尋結果:', resJson);
+
+      // 使用 Set 來儲存已經添加的餐廳 ID
+      const addedIds = new Set();
+      
+      // 過濾掉當前餐廳和重複的餐廳
+      similarRestaurants.value = resJson
+        .filter(restaurant => {
+          // 如果是當前餐廳或已經添加過，則跳過
+          if (restaurant.id === placesId || addedIds.has(restaurant.id)) {
+            return false;
+          }
+          // 將餐廳 ID 加入已添加集合
+          addedIds.add(restaurant.id);
           return true;
-      })
-      .map((restaurant) => ({
-        name: restaurant.name,
-        rating: restaurant.rating || "N/A",
-        userRatingCount: restaurant.userRatingCount || 0,
-        address: restaurant.address || "未知地址",
-        isOpen: restaurant.openNow || false,
-        photoUrl: restaurant.photoId ?
-          `http://localhost:3000/restaurants/photo?id=${restaurant.photoId}` : null,
-        place_id: restaurant.id,
-        googleMapsUri: `https://www.google.com/maps/place/?q=place_id:${restaurant.id}`
-      }));
+        })
+        .map((restaurant) => ({
+          name: restaurant.name,
+          rating: restaurant.rating || "N/A",
+          userRatingCount: restaurant.userRatingCount || 0,
+          address: restaurant.address || "未知地址",
+          isOpen: restaurant.openNow || false,
+          photoUrl: restaurant.photoId ?
+            `http://localhost:3000/restaurants/photo?id=${restaurant.photoId}` : null,
+          place_id: restaurant.id,
+          googleMapsUri: `https://www.google.com/maps/place/?q=place_id:${restaurant.id}`
+        }))
+        .slice(0, 15); // 限制顯示 15 間餐廳
+
+      console.log('處理後的相似餐廳:', similarRestaurants.value);
+    } catch (err) {
+      console.error("獲取相似餐廳失敗:", err);
+      similarRestaurants.value = [];
+    }
   };
 
   const fetchRecommendedRestaurants = async () => {
+    try {
       const res = await fetch(
         `http://localhost:3000/restaurants/search?keyword=餐廳`
       );
 
       if (!res.ok) {
-        recommendedRestaurants.value  = [];
-        return
+        throw new Error(`HTTP Error: ${res.status}`);
       }
 
       const resJson = await res.json();
@@ -188,6 +207,12 @@ export const useStore = defineStore("store", () => {
           place_id: restaurant.id,
           googleMapsUri: `https://www.google.com/maps/place/?q=place_id:${restaurant.id}`
         }))
+        .slice(0, 15);
+
+    } catch (err) {
+      console.error("獲取推薦餐廳失敗:", err);
+      recommendedRestaurants.value = [];
+    }
   };
 
   // 儲存餐廳資料到本地
@@ -231,7 +256,7 @@ export const useStore = defineStore("store", () => {
     }
   };
 
-   // 在資料變化時自動保存
+  // 在資料變化時自動保存
    watch(
     [
       storeName,
@@ -256,7 +281,6 @@ export const useStore = defineStore("store", () => {
   // 頁面加載時還原資料
   loadFromLocalStorage();
 
-
   return {
     // 基本資料
     storeName,
@@ -279,11 +303,13 @@ export const useStore = defineStore("store", () => {
     fetchStorePhoto,
     fetchBannerPhoto,
     staticMapUrl,
+    // 相似餐廳相關
     similarRestaurants,
     fetchSimilarRestaurants,
+    // 推薦餐廳相關
     recommendedRestaurants,
     fetchRecommendedRestaurants,
     lat,
-    lng
+    lng,
   };
 });
