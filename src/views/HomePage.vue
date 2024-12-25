@@ -27,7 +27,7 @@ export default {
       <h1 class="z-10 px-3 mt-8 text-3xl text-white md:text-5xl text-bold">想知道哪裡有美食？</h1>
       <h2 class="z-10 px-3 mt-5 text-lg text-white md:text-xl text-bold">從超過 50,000 家精選餐廳中，探索您不知道的熱門美食。</h2>
       <!-- 搜尋欄容器 -->
-      <div class="z-10 hidden md:flex items-center mt-10 bg-white rounded-full h-11">
+      <div class="z-10 items-center hidden mt-10 bg-white rounded-full md:flex h-11">
         <SearchInput />
       </div>
     </div>
