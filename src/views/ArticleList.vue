@@ -31,10 +31,8 @@ const api = axios.create({
 const fetchArticles = async () => {
   try {
     const { data } = await api.get('/articles');
-    console.log('從後端獲取的文章:', data);
     publishedArticles.value = data;
   } catch (error) {
-    console.error('獲取文章失敗:', error);
     // 使用假資料作為後備
     publishedArticles.value = [{
       id: "1",
@@ -131,7 +129,6 @@ const toggleLike = async (articleId, commentId, replyId) => {
 // 添加評論
 const addComment = async (articleId) => {
   if (!articleId) {
-    console.error('No article ID provided');
     return;
   }
 
@@ -141,11 +138,9 @@ const addComment = async (articleId) => {
   }
 
   try {
-    console.log('Adding comment to article:', articleId);
-    
     // 先準備新評論的資料
     const newCommentData = {
-      id: `c${Date.now()}`,  // 生成臨時 ID
+      id: crypto.randomUUID(),  // 生成 UUID
       content: newComment.value.content,
       user: '訪客',
       date: dayjs().format('YYYY-MM-DD HH:mm:ss'),
@@ -158,7 +153,6 @@ const addComment = async (articleId) => {
       await api.post(`/articles/${articleId}/comments`, newCommentData);
       await fetchArticles();
     } catch (error) {
-      console.warn('API 請求失敗，使用本地更新:', error);
       // API 失敗時，直接更新前端資料
       const article = publishedArticles.value.find(a => a.id === articleId);
       if (article) {
@@ -168,7 +162,6 @@ const addComment = async (articleId) => {
     
     newComment.value.content = '';
   } catch (error) {
-    console.error('Error adding comment:', error);
     alert('發表評論失敗，請稍後再試');
   }
 };
@@ -179,7 +172,7 @@ const deleteComment = async (articleId, commentId) => {
     const result = await swalWithBootstrapButtons.fire({
       title: '確定要刪除評論？',
       text: '刪除後將無法恢復！',
-      icon: 'danger',
+      icon: 'warning',
       showCancelButton: true,
       confirmButtonText: '刪除！',
       cancelButtonText: '取消',
@@ -196,7 +189,6 @@ const deleteComment = async (articleId, commentId) => {
           icon: 'success'
         });
       } catch (error) {
-        console.warn('API 請求失敗，使用本地更新:', error);
         const article = publishedArticles.value.find(a => a.id === articleId);
         if (article) {
           article.comments = article.comments.filter(c => c.id !== commentId);
@@ -228,7 +220,7 @@ const addReply = async (articleId, commentId) => {
   try {
     // 先準備新回覆的資料
     const newReplyData = {
-      id: `r${Date.now()}`,  // 生成臨時 ID
+      id: crypto.randomUUID(),  // 生成臨時 ID
       content: newReply.value.content,
       user: '訪客',
       date: dayjs().format('YYYY-MM-DD HH:mm:ss'),
@@ -241,7 +233,6 @@ const addReply = async (articleId, commentId) => {
       await api.post(`/articles/${articleId}/comments/${commentId}/replies`, newReplyData);
       await fetchArticles();
     } catch (error) {
-      console.warn('API 請求失敗，使用本地更新:', error);
       // API 失敗時，直接更新前端資料
       const article = publishedArticles.value.find(a => a.id === articleId);
       if (article) {
@@ -283,7 +274,6 @@ const deleteReply = async (articleId, commentId, replyId) => {
           icon: 'success'
         });
       } catch (error) {
-        console.warn('API 請求失敗，使用本地更新:', error);
         const article = publishedArticles.value.find(a => a.id === articleId);
         if (article) {
           const comment = article.comments.find(c => c.id === commentId);
@@ -335,7 +325,7 @@ const handleClickOutside = (event) => {
   }
 };
 
-// 新增的響應式狀態
+// 控制手機版搜尋欄的狀態
 const isSearchOpen = ref(false);
 const isMobile = ref(window.innerWidth < 768);
 

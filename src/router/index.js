@@ -8,6 +8,8 @@ import MyArticle from '../views/MyArticle.vue'
 import ArticleList from '../views/ArticleList.vue'
 import {useAuth} from '@/stores/authStore'
 import { inject } from 'vue'
+import CreateNoteView from '@/views/CreateNoteView.vue';
+import PreviewNoteView from '@/views/PreviewNoteView.vue';
 
 const routes = [
   {
@@ -46,6 +48,16 @@ const routes = [
     path: '/articlelist',
     name: 'articlelist',
     component: ArticleList,
+  },
+  {
+    path: '/createnote',
+    name: 'CreateNote',
+    component: CreateNoteView
+  },
+  {
+    path: "/previewnote",
+    name: "PreviewNote",
+    component: PreviewNoteView,
   },
 ]
 

@@ -4,10 +4,9 @@ import { ref } from 'vue';
 export const useRestaurantStore = defineStore('restaurant', () => {
   const hoveredPlaceId = ref(null);
 
-  function setHoveredPlace(placeId) {
-    hoveredPlaceId.value = placeId;
+  const setHoveredPlace = (placedId) => {
+    hoveredPlaceId.value = placedId;
   }
-
 
   return {
     hoveredPlaceId,

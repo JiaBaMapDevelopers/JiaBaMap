@@ -1,9 +1,10 @@
 <template>
-  <div ref="mapContainer" class="hidden md:block md:w-1/2 h-screen"></div>
+    <div ref="mapContainer" class="hidden md:block md:w-1/2 h-[calc(100vh-72px)]"></div>
+
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, computed, onBeforeUnmount, nextTick } from "vue";
+import { ref, onMounted, computed, onBeforeUnmount, nextTick } from "vue";
 import { useRestaurantStore } from '@/stores/searchPage';
 import { watch } from 'vue'
 import loader from "./googleMapsLoader";
@@ -11,26 +12,25 @@ import loader from "./googleMapsLoader";
     const store = useRestaurantStore()
   
     const map = ref(null); // Google 地圖實例
-    let markers = []; // 使用普通數組管理標記
-    let infoWindows = []; // 管理所有 InfoWindow
+    let markers = []; 
+    let infoWindows = []; 
     const mapContainer = ref(null); // 地圖 DOM 容器
     // const places = ref([]); // 從 Local Storage 加載的地點資料
     // const districts = ref([]);
 
-
     watch(() => store.hoveredPlaceId, (newPlaceId) => {
       if (!map.value) return
       
-      markers.forEach(marker => {
+    markers.forEach(marker => {
     marker.setIcon(null); // 使用預設的紅色標記
     marker.setAnimation(null); // 停止任何動畫
     });
       // 找到對應的標記
-        const marker = markers.find(m => m.placeId === newPlaceId)
+      const marker = markers.find(m => m.placeId === newPlaceId)
     if (marker) {
       if (newPlaceId) {
-        // 放大效果可以通過縮放實現
-        marker.setAnimation(google.maps.Animation.BOUNCE); // 或使用 BOUNCE 效果
+        // 放大效果可以縮放
+        marker.setAnimation(google.maps.Animation.BOUNCE); // 使用 BOUNCE 效果
         google.maps.event.trigger(marker, 'click')
       } else {
         infoWindows.forEach(window => window.close())
@@ -94,7 +94,6 @@ import loader from "./googleMapsLoader";
 
     const updateMarkers = () => {
       if (!map.value) {
-          console.warn("地圖尚未初始化，跳過標記更新");
           return;
         }
       clearMarkers()
@@ -119,7 +118,7 @@ import loader from "./googleMapsLoader";
       store.setHoveredPlace(place.id);
       google.maps.event.trigger(marker, 'click');
       
-      // 新增這段：滾動到對應的餐廳卡片
+      // 滾動到對應的餐廳卡片
       const element = document.querySelector(`[data-place-id="${place.id}"]`);
       if (element) {
         element.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -152,8 +151,8 @@ import loader from "./googleMapsLoader";
                     <h3 class="text-base font-medium leading-6 truncate text-amber-500">${place.name}</h3>
                     <div class="flex items-center text-sm text-white">
                       ${place.rating ? `
-                        <span class="bg-red-500 w-[46px] h-[18px] rounded-[9px] flex items-center justify-center">
-                          <span class=" text-xs font-bold">${place.rating.toFixed(1)}</span>
+                        <span class="bg-orange-600 w-[46px] h-[18px] rounded-[9px] flex items-center justify-center">
+                          <span class=" text-xs mr-1">${place.rating.toFixed(1)}</span>
                           <span>
                             <svg class="svg-inline--fa fa-star" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="star" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><path class="" fill="currentColor" d="M316.9 18C311.6 7 300.4 0 288.1 0s-23.4 7-28.8 18L195 150.3 51.4 171.5c-12 1.8-22 10.2-25.7 21.7s-.7 24.2 7.9 32.7L137.8 329 113.2 474.7c-2 12 3 24.2 12.9 31.3s23 8 33.8 2.3l128.3-68.5 128.3 68.5c10.8 5.7 23.9 4.9 33.8-2.3s14.9-19.3 12.9-31.3L438.5 329 542.7 225.9c8.6-8.5 11.7-21.2 7.9-32.7s-13.7-19.9-25.7-21.7L381.2 150.3 316.9 18z"></path></svg></span>
                           </span>
@@ -271,11 +270,8 @@ watch(
   () => places.value,
   (newPlaces) => {
     if (!map.value) {
-      console.warn("地圖尚未初始化，跳過更新");
       return;
     }
-
-    console.log("places 更新:", newPlaces);
     if (newPlaces && newPlaces.length > 0) {
       updateMarkers(); // 數據更新時重新繪製標記
       map.value.setCenter(districts.value)

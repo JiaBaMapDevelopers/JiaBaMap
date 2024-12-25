@@ -1,12 +1,28 @@
 import { defineStore } from 'pinia'
-import { inject, ref } from "vue"
+import { inject, ref, watch } from "vue"
 import { useRouter } from 'vue-router';
  
 export const useAuth = defineStore('auth', () => {
-    const userData = ref("")
-    const router = useRouter()
-    const Swal = inject("$swal")
+      const userData = ref(JSON.parse(localStorage.getItem('userData')) || null);
+      const router = useRouter()
+      const Swal = inject("$swal")
 
+// 監聽資料變化並更新 localStorage
+watch(userData, (newValue) => {
+  if (newValue) {
+      localStorage.setItem('userData', JSON.stringify(newValue));
+  } else {
+      localStorage.removeItem('userData'); // 清除資料
+  }
+}, { deep: true });
+
+  // 新增更新大頭貼的方法
+  const setPicture = (newPicture) => {
+    if (userData.value) {
+      userData.value.picture = newPicture; // 更新圖片資料
+      localStorage.setItem('userData', JSON.stringify(userData.value)); // 更新 localStorage
+    }
+  };
 
     const initializeGoogleButton = () => {
         const buttonContainer = document.querySelector("#googleButton");
@@ -44,6 +60,8 @@ export const useAuth = defineStore('auth', () => {
     timerProgressBar: true,
       })
     // router.push({ name: 'user' }); 
+   localStorage.setItem('userData', JSON.stringify(userObject)); // 存入 localStorage
+    router.push({ name: 'user' }); 
    
  }
  
@@ -63,6 +81,7 @@ export const useAuth = defineStore('auth', () => {
  
  const logout = () => {
    userData.value = null;
+   localStorage.removeItem('userData'); // 清除 localStorage
    router.push({ name: 'home' });
    console.log("用戶已登出");
  };
@@ -72,6 +91,7 @@ export const useAuth = defineStore('auth', () => {
         useAuth,
         initializeGoogleButton,
         userData,
+        setPicture, // 新增 setPicture 方法
         logout,
     };
 })
