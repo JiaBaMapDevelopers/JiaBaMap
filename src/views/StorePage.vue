@@ -52,8 +52,6 @@ onMounted(async () => {
         await restaurantStore.fetchRecommendedRestaurants();
         console.log('recommendedRestaurants fetched');
         
-        await restaurantStore.fetchSearchTopics();
-        console.log('Search topics fetched');
         
     } catch (error) {
         console.error('數據載入錯誤：', error);

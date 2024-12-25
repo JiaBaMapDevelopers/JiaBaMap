@@ -21,28 +21,22 @@ const isHome = computed(() => route.path === '/');
 // 新增：監聽視窗寬度變化
 const windowWidth = ref(window.innerWidth);
 
+// 新增：判斷是否為 UserProfile 頁面
+const isUserProfile = computed(() => route.path === '/user');
+
 // 切換搜尋欄
 const toggleSearch = () => {
   isSearchOpen.value = !isSearchOpen.value;
   emit('search-toggle', isSearchOpen.value);
 };
 
-// 計算是不是在首頁，如果是首頁，則不顯示搜尋欄
-const showSearch = computed(() => route.path !== '/');
 
-// 事件處理函數，控制下拉選單的開關，如果開啟下拉選單，則註冊事件處理函數
-const toggleMenu = () => {
-  isMenuOpen.value = !isMenuOpen.value;
-  if (isMenuOpen.value) {
-    document.addEventListener('click', handleClickOutside);
-  } else {
-    document.removeEventListener('click', handleClickOutside);
-  }
-};
+// 切換選單開關
+const toggleMenu = () => isMenuOpen.value = !isMenuOpen.value;
 
-// 事件處理函數，控制下拉選單的開關，如果點擊的目標不在下拉選單內，則關閉下拉選單
+// 事件處理函數，控制下拉選單的開關
 const handleClickOutside = (event) => {
-  if (menuContainer.value && !menuContainer.value.contains(event.target)) {
+  if (!event.target.closest('.menu-button') && !event.target.closest('.mobile-menu')) {
     isMenuOpen.value = false;
   }
 };
@@ -61,26 +55,25 @@ const checkScreenWidth = () => {
 
 // 頭像的計算屬性
 const currentProfilePicture = computed(() => {
-  return user.userData?.picture || '/src/assets/default_user.png';
+  return user.userData.picture || '/src/assets/default_user.png';
 });
 
 // 生命週期鉤子
-// 生命週期鉤子，監聽螢幕寬度，並註冊事件處理函數
 onMounted(() => {
   window.addEventListener("resize", checkScreenWidth);
   document.addEventListener('click', handleClickOutside);
 });
 
-// 生命週期鉤子，卸載事件處理函數
 onUnmounted(() => {
   window.removeEventListener("resize", checkScreenWidth);
   document.removeEventListener('click', handleClickOutside);
   isSearchOpen.value = false;
 });
 
-// 路由監聽，如果路由改變，則關閉搜尋欄
+// 路由監聽，如果路由改變，則關閉搜尋欄和選單
 watch(route, () => {
   isSearchOpen.value = false;
+  isMenuOpen.value = false;
 });
 </script>
 
@@ -107,7 +100,7 @@ watch(route, () => {
         <button @click="toggleSearch" class="text-amber-500">
           <font-awesome-icon :icon="['fas', 'magnifying-glass']" class="w-5 h-5" />
         </button>
-        <button @click="toggleMenu" class="text-amber-500">
+        <button @click="toggleMenu" class="text-amber-500 menu-button">
           <font-awesome-icon :icon="['fas', 'bars']" class="w-6 h-6" />
         </button>
       </div>
@@ -120,27 +113,45 @@ watch(route, () => {
       enter-to-class="opacity-100 transform translate-y-0"
     >
       <div v-if="isSearchOpen" 
-           class="absolute left-0 right-0 p-4 bg-white shadow-md top-full md:hidden">
+           class="absolute left-0 right-0 p-2 bg-white shadow-md top-full md:hidden">
         <SearchInput />
       </div>
     </Transition>
 
     <!-- 手機版選單 -->
     <div v-if="isMenuOpen" 
-         class="absolute top-full right-0 bg-white shadow-lg md:hidden">
-      <div class="py-2 w-24">
+         ref="menuContainer"
+         class="absolute top-full right-0 bg-white shadow-lg md:hidden mobile-menu">
+      <div class="py-2 w-26 text-center">
         <ul class="space-y-2">
           <li v-if="!user.userData">
             <button @click="openLoginModal" class="w-full p-2 text-amber-500 hover:bg-amber-100 text-center">
               登入
             </button>
           </li>
-          <li><router-link to="/myarticle" class="block p-2 text-amber-500 hover:bg-amber-100 text-center">發表食記</router-link></li>
-          <li><router-link to="/articlelist" class="block p-2 text-amber-500 hover:bg-amber-100 text-center">專欄文章</router-link></li>
-          <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100 text-center">店家專區</a></li>
-          <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100 text-center">排行榜</a></li>
+          <li v-if="user.userData" class="flex cursor-pointer align-center">
+            <div class="w-10 h-10 ml-2 rounded-full bg-slate-400">
+              <img :src="currentProfilePicture" alt="avatar" class="w-full h-full object-cover rounded-full">
+            </div>
+            <router-link to="/user" class="pl-4 font-bold leading-10 text-amber-500">{{ user.userData?.name || '使用者' }}</router-link>
+          </li>
+          <hr v-if="user.userData" class="mt-2 border-amber-200">
+          <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">月排行</a></li>
+          <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">週排行</a></li>
+          <router-link to="search" class="block p-2 text-amber-500 hover:bg-amber-100">搜尋餐廳</router-link>
+          <hr class="border-amber-200">
+          <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">線上訂位</a></li>
+          <router-link to="/articlelist" class="block p-2 text-amber-500 hover:bg-amber-100">美食專欄</router-link>
+          <router-link to="/myarticle" class="block p-2 text-amber-500 hover:bg-amber-100">發表食記</router-link>
+          <hr class="border-amber-200">
+          <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">行銷方案</a></li>
+          <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">邀請部落客</a></li>
+          <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">店家加入</a></li>
+          <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">聯絡我們</a></li>
+          <hr class="border-amber-200">
           <li v-if="user.userData">
             <button @click="user.logout" class="w-full p-2 text-amber-500 hover:bg-amber-100 text-center">
+              <font-awesome-icon :icon="['fas', 'right-from-bracket']" class="mr-2" />
               登出
             </button>
           </li>
@@ -215,8 +226,8 @@ watch(route, () => {
                 </router-link>
               </li>
               <li>
-                <button @click="user.logout" class="w-full px-4 py-2 text-amber-500 hover:bg-amber-100 text-center">
-                  <font-awesome-icon :icon="['fas', 'sign-out-alt']" class="mr-2" />
+                <button @click="user.logout" class="w-full px-4 py-2 text-amber-500 hover:bg-amber-100 text-left">
+                  <font-awesome-icon :icon="['fas', 'right-from-bracket']" class="mr-2" />
                   登出
                 </button>
               </li>
@@ -294,7 +305,7 @@ watch(route, () => {
               </li>
               <li>
                 <button @click="user.logout" class="w-full px-4 py-2 text-amber-500 hover:bg-amber-100 text-center">
-                  <font-awesome-icon :icon="['fas', 'sign-out-alt']" class="mr-2" />
+                  <font-awesome-icon :icon="['fas', 'right-from-bracket']" class="mr-2" />
                   登出
                 </button>
               </li>
@@ -304,6 +315,9 @@ watch(route, () => {
       </div>
     </div>
   </header>
+
+  <!-- 添加一個佔位 div 來處理 margin -->
+  <div :class="{'mt-8' : isSearchOpen && windowWidth < 768}"></div>
 </template>
 
 <style scoped>
