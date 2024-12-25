@@ -35,7 +35,7 @@ export const useStore = defineStore("store", () => {
   // 推薦餐廳相關狀態
   const recommendedRestaurants = ref([]);
 
-  const photoIds = [];
+  const photoIds = ref([]);
   const fetchPlaceDetail = async () => {
     try {
       const res = await fetch(

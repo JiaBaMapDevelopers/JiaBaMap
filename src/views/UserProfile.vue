@@ -16,6 +16,6 @@
 <script setup>
 import Header from '../components/Header.vue'
 import UserTab from '../components/userProfile/UserTab.vue'
-import RatingCard from '../components/userProfile/RatingCard.vue';
-import UserSettings from '../components/userProfile/UserSettings.vue';
+import RatingCard from '../components/userProfile/RatingCard.vue'
+import UserSettings from '../components/userProfile/UserSettings.vue'
 </script>

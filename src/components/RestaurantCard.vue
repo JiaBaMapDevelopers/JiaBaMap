@@ -1,12 +1,12 @@
 <template>
-  <div class="box-border w-full md:w-1/2 h-screen overflow-y-auto">
-    <div class="flex flex-col bg-white box-border w-full space-x-0 z-40 sticky top-0 pb-3">
+  <div class="box-border w-full h-screen overflow-y-auto md:w-1/2">
+    <div class="box-border sticky top-0 z-40 flex flex-col w-full pb-3 space-x-0 bg-white">
       <div class="flex flex-col bg-white">
         <div class="p-3 font-bold text-gray-500 bg-white">
           <h3>台灣『美食餐廳』 | 精選TOP 15間熱門店家</h3>
         </div>
 
-        <div class="hidden md:flex text-sm text-gray-600 bg-white">
+        <div class="hidden text-sm text-gray-600 bg-white md:flex">
           <div class="px-3">
             <a href="#">台灣</a>
           </div>
@@ -24,7 +24,7 @@
         <div class="relative inline-block w-1/4 mx-1 md:w-1/6">
           <button
             @click="toggleSort"
-            class="bg-amber-500 rounded-md text-white text-xs w-full mt-2 p-1 flex justify-between items-center">
+            class="flex items-center justify-between w-full p-1 mt-2 text-xs text-white rounded-md bg-amber-500">
             <div>
               <font-awesome-icon :icon="['fas', 'bars']" />
             </div>
@@ -35,13 +35,13 @@
           </button>
           <div
             v-if="sortMenu"
-            class="bg-amber-400 rounded-md text-white text-xs w-full p-1 text-center absolute top-full left-0 mt-1 shadow-md z-10">
+            class="absolute left-0 z-10 w-full p-1 mt-1 text-xs text-center text-white rounded-md shadow-md bg-amber-400 top-full">
             <ul>
               <li
                 v-for="(label, value) in sortOptions"
                 :key="value"
                 @click="setSortOrder(value)"
-                class="cursor-pointer hover:bg-amber-500 py-1 z-10">
+                class="z-10 py-1 cursor-pointer hover:bg-amber-500">
                 <span>{{ label }}</span>
               </li>
             </ul>
@@ -52,7 +52,7 @@
         <div class="relative inline-block w-1/4 mx-1 md:w-1/6">
           <button
             @click="toggleCost"
-            class="bg-amber-500 rounded-md text-white text-xs w-full mt-2 p-1 flex justify-between items-center">
+            class="flex items-center justify-between w-full p-1 mt-2 text-xs text-white rounded-md bg-amber-500">
             <div>
               <font-awesome-icon :icon="['fas', 'bars']" />
             </div>
@@ -63,13 +63,13 @@
           </button>
           <div
             v-if="costMenu"
-            class="bg-amber-400 rounded-md text-white text-xs w-full p-1 text-center absolute top-full left-0 mt-1 shadow-md z-10">
+            class="absolute left-0 z-10 w-full p-1 mt-1 text-xs text-center text-white rounded-md shadow-md bg-amber-400 top-full">
             <ul>
               <li
                 v-for="(label, value) in costOptions"
                 :key="value"
                 @click="setCostRange(value)"
-                class="cursor-pointer hover:bg-amber-500 py-1 ">
+                class="py-1 cursor-pointer hover:bg-amber-500 ">
                 <span>{{ label }}</span>
               </li>
             </ul>
@@ -94,50 +94,50 @@
     v-for="place in Search.filteredResult" 
     :key="place.id"
     :data-place-id="place.id"
-    class="flex py-1 items-center border-b transition-colors duration-200"
+    class="flex items-center py-1 transition-colors duration-200 border-b"
     :class="{ 'bg-amber-100': restaurantStore.hoveredPlaceId === place.id }"
     @mouseenter="handleMouseEnter(place.id)"
     @mouseleave="handleMouseLeave">
-      <div class="w-40 h-32 ml-3 relative">
-        <Loader v-if="loading[place.id]" class="absolute inset-0 w-full h-full object-cover z-20 bg-white/50 flex items-center justify-center"/>
+      <div class="relative w-40 h-32 ml-3">
+        <Loader v-if="loading[place.id]" class="absolute inset-0 z-20 flex items-center justify-center object-cover w-full h-full bg-white/50"/>
         <img v-if="place.photoId" :src="photoGet(place.photoId)" alt="Place image" class="object-cover w-full h-full" />
       </div>
-      <div class="flex flex-col justify-between ml-3 sm:text-xl w-4/5">
+      <div class="flex flex-col justify-between w-3/5 ml-3 sm:text-xl">
         <div class="ml-3">
           <h2 class="font-bold text-gray-500 text-base h-6 w-[350px] text-ellipsis whitespace-nowrap overflow-hidden">
             <a href="#" class="text-amber-500 hover:text-orange-500" @click="StoreId(place.id)">{{ place.name }}</a>
           </h2>
         </div>
         <div class="flex mt-3 ml-3 text-xs">
-          <div class="bg-orange-600 mr-2 rounded-2xl text-white px-2 py-1 items-center">
+          <div class="items-center px-2 py-1 mr-2 text-white bg-orange-600 rounded-2xl">
             <p>{{ place.rating }} <font-awesome-icon :icon="['fas', 'star']" /></p>
           </div>
-          <p class="mr-2 flex items-center font-light">(評論數: {{ place.userRatingCount }})</p>
+          <p class="flex items-center mr-2 font-light">(評論數: {{ place.userRatingCount }})</p>
         </div>
         <div class="flex mt-3 ml-3 text-xs">
           <p v-if="!place.startPrice || !place.endPrice" class="mr-2 font-light">平均消費：未提供</p>
           <p v-else class="mr-2 font-light">平均消費： {{ place.startPrice}} ~ {{ place.endPrice}} 元</p>
           <p class="mr-2 font-light">距離 {{ place.distance.toFixed(2) || "??" }} 公里</p>
         </div>
-        <div class="mt-3 mx-3 hidden md:flex items-center text-sm">
+        <div class="items-center hidden mx-3 mt-3 text-sm md:flex">
           <span>
             <font-awesome-icon 
               :icon="['fas' ,'circle']" 
               :style="{color:place?.openNow ? 'green' : 'red', fontSize:'8px', margin:'2px'}" />
           </span>
-          <p class="font-bold ml-1"> {{ place?.openNow ? '營業中' : '已打烊' }}</p>
+          <p class="ml-1 font-bold"> {{ place?.openNow ? '營業中' : '已打烊' }}</p>
         </div>
-        <div class="mt-3 ml-3 flex flex-wrap items-center">
+        <div class="flex flex-wrap items-center mt-3 ml-3">
         <!-- <span>
           <a href="#" 
-            class="hidden md:block bg-gray-200 rounded-full px-3 py-1 text-sm mr-2 mb-1 items-center">
+            class="items-center hidden px-3 py-1 mb-1 mr-2 text-sm bg-gray-200 rounded-full md:block">
             <font-awesome-icon :icon="['fas', 'wand-magic-sparkles']" class="text-orange-400"/>
                 相似餐廳
           </a>
         </span> -->
         <span>
           <button @click="Search.nearSearch(router, place.lat, place.lng)"
-            class="hidden md:block bg-gray-200 rounded-full px-3 py-1 text-sm mr-2 mb-1 items-center">
+            class="items-center hidden px-3 py-1 mb-1 mr-2 text-sm bg-gray-200 rounded-full md:block">
             <font-awesome-icon :icon="['fas', 'location-dot']" class="text-orange-400"/>
                 附近                 
           </button>

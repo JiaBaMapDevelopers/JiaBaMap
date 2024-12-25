@@ -6,6 +6,7 @@ import SearchPage from '../views/SearchPage.vue'
 import Login from '../components/Login.vue'
 import MyArticle from '../views/MyArticle.vue'
 import ArticleList from '../views/ArticleList.vue'
+import AboutTeam from '../views/Footer/AboutTeam.vue'
 import {useAuth} from '@/stores/authStore'
 import CreateNoteView from '@/views/CreateNoteView.vue';
 import PreviewNoteView from '@/views/PreviewNoteView.vue';
@@ -47,6 +48,11 @@ const routes = [
     path: '/articlelist',
     name: 'articlelist',
     component: ArticleList,
+  },
+  {
+    path: '/about',
+    name: 'about',
+    component: AboutTeam
   },
   {
     path: '/createnote',
