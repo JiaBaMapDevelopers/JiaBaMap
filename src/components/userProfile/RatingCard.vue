@@ -123,9 +123,9 @@ const getRankImage = computed(() => {
           >
         </div>
         <!-- 餐廳排名、名稱 -->
-        <div class="flex flex-col justify-between w-3/5 sm:text-xl">
+        <div class="flex flex-col justify-between flex-shrink-0 w-40 sm:text-xl">
           <div>
-            <h2 class="text-base font-bold text-gray-500">
+            <h2 class="text-base font-bold text-gray-500 truncate">
               {{ index+1 }}. 
               <a href="#" class="text-amber-500 hover:text-orange-300">{{ item.name }}</a>
             </h2>

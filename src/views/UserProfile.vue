@@ -2,11 +2,11 @@
     <div>
         <Header />
         <div class="justify-center w-3/4 m-auto sm:flex gap-9">
-            <div class="w-full sm:w-2/3 ">
+            <div class="w-full md:my-20 sm:w-2/3 ">
                 <UserSettings />
                 <UserTab />
             </div>
-            <div class="w-full h-screen my-10 sm:w-1/3">
+            <div class="w-full h-screen my-16 md:my-20 sm:w-1/3">
                 <RatingCard />
             </div>
         </div>
