@@ -154,7 +154,7 @@ export const useStore = defineStore("store", () => {
             }`
           : null,
         place_id: restaurant.id,
-        googleMapsUri: `https://www.google.com/maps/place/?q=place_id:${restaurant.id}`,
+        googleMapsUri: restaurant.googleMapsUri
       }));
   };
 
