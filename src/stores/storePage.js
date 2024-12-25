@@ -39,7 +39,7 @@ export const useStore = defineStore("store", () => {
   const fetchPlaceDetail = async () => {
     try {
       const res = await fetch(
-        `http://localhost:3000/restaurants/details?id=${placesId}`
+        `${import.meta.env.VITE_BACKEND_BASE_URL}/restaurants/details?id=${placesId}`
       );
       const resJson = await res.json();
 
@@ -69,7 +69,7 @@ export const useStore = defineStore("store", () => {
   const fetchStorePhoto = async () => {
     try {
       const res = await fetch(
-        `http://localhost:3000/restaurants/photo?id=${photoIds.value[0]}`
+        `${import.meta.env.VITE_BACKEND_BASE_URL}/restaurants/photo?id=${photoIds.value[0]}`
       );
       console.log(res);
       storePhoto.value = URL.createObjectURL(await res.blob());
@@ -82,7 +82,7 @@ export const useStore = defineStore("store", () => {
   const fetchBannerPhoto = async () => {
     try {
       const res = await fetch(
-        `http://localhost:3000/restaurants/photo?id=${photoIds.value[1]}`
+        `${import.meta.env.VITE_BACKEND_BASE_URL}/restaurants/photo?id=${photoIds.value[1]}`
       );
       console.log(res);
       bannerPhoto.value = URL.createObjectURL(await res.blob());
@@ -96,7 +96,7 @@ export const useStore = defineStore("store", () => {
     // 如果沒有位置資訊，返回空
     if (!formattedAddress.value || !lat.value || !lng.value) return null;
 
-    return `http://localhost:3000/restaurants/staticmap?lat=${lat.value}&lng=${lng.value}`;
+    return `${import.meta.env.VITE_BACKEND_BASE_URL}/restaurants/staticmap?lat=${lat.value}&lng=${lng.value}`;
   });
 
   // 獲取類似餐廳
@@ -109,7 +109,7 @@ export const useStore = defineStore("store", () => {
 
       // 先獲取當前餐廳的詳細資訊
       const detailRes = await fetch(
-        `http://localhost:3000/restaurants/details?id=${placesId}`
+        `${import.meta.env.VITE_BACKEND_BASE_URL}/restaurants/details?id=${placesId}`
       );
 
       if (!detailRes.ok) {
@@ -121,7 +121,7 @@ export const useStore = defineStore("store", () => {
 
       // 使用當前餐廳的位置搜尋附近餐廳
       const searchRes = await fetch(
-        `http://localhost:3000/restaurants/search?keyword=餐廳&lat=${detailData.lat}&lng=${detailData.lng}`
+        `${import.meta.env.VITE_BACKEND_BASE_URL}/restaurants/search?keyword=餐廳&lat=${detailData.lat}&lng=${detailData.lng}`
       );
 
       if (!searchRes.ok) {
@@ -152,7 +152,7 @@ export const useStore = defineStore("store", () => {
           address: restaurant.address || "未知地址",
           isOpen: restaurant.openNow || false,
           photoUrl: restaurant.photoId ?
-            `http://localhost:3000/restaurants/photo?id=${restaurant.photoId}` : null,
+            `${import.meta.env.VITE_BACKEND_BASE_URL}/restaurants/photo?id=${restaurant.photoId}` : null,
           place_id: restaurant.id,
           googleMapsUri: `https://www.google.com/maps/place/?q=place_id:${restaurant.id}`
         }))
@@ -168,7 +168,7 @@ export const useStore = defineStore("store", () => {
   const fetchRecommendedRestaurants = async () => {
     try {
       const res = await fetch(
-        `http://localhost:3000/restaurants/search?keyword=餐廳`
+        `${import.meta.env.VITE_BACKEND_BASE_URL}/restaurants/search?keyword=餐廳`
       );
 
       if (!res.ok) {
@@ -203,7 +203,7 @@ export const useStore = defineStore("store", () => {
           rating: restaurant.rating || "N/A",
           userRatingCount: restaurant.userRatingCount || 0,
           photoUrl: restaurant.photoId ?
-            `http://localhost:3000/restaurants/photo?id=${restaurant.photoId}` : null,
+            `${import.meta.env.VITE_BACKEND_BASE_URL}/restaurants/photo?id=${restaurant.photoId}` : null,
           place_id: restaurant.id,
           googleMapsUri: `https://www.google.com/maps/place/?q=place_id:${restaurant.id}`
         }))
