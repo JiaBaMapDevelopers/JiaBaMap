@@ -142,7 +142,7 @@ export const useStore = defineStore("store", () => {
         photoUrl: restaurant.photoId ?
           `http://localhost:3000/restaurants/photo?id=${restaurant.photoId}` : null,
         place_id: restaurant.id,
-        googleMapsUri: `https://www.google.com/maps/place/?q=place_id:${restaurant.id}`
+        googleMapsUri: restaurant.googleMapsUri
       }));
   };
 
@@ -186,7 +186,7 @@ export const useStore = defineStore("store", () => {
           photoUrl: restaurant.photoId ?
             `http://localhost:3000/restaurants/photo?id=${restaurant.photoId}` : null,
           place_id: restaurant.id,
-          googleMapsUri: `https://www.google.com/maps/place/?q=place_id:${restaurant.id}`
+          googleMapsUri: restaurant.googleMapsUri
         }))
   };
 
