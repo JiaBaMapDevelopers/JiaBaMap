@@ -19,12 +19,14 @@ const hideFooter = computed(() => {
 </script>
 
 <template>
-  <Login />
-  <div class="relative min-h-screen">
-    <Header />
-    <div class="overflow-x-auto hide-scrollbar">
-      <RouterView />
-      <Footer />
+  <div>
+    <Login />
+    <div class="relative min-h-screen">
+      <Header />
+      <div class="overflow-x-auto hide-scrollbar">
+        <RouterView />
+        <Footer />
+      </div>
     </div>
   </div>
 </template>

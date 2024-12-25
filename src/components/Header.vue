@@ -85,225 +85,228 @@ watch(route, () => {
 </script>
 
 <template>
-  <Login :visible="showLoginModal" @close="closeLoginModal" />
-  <header class="fixed top-0 left-0 right-0 z-50 flex items-center p-2 border-b border-orange-200 bg-white"
-         :class="{ 'flex-wrap': !isHome && windowWidth >= 768 && windowWidth < 1167 }">
-    <!-- 第一行：LOGO 和搜尋欄 -->
-    <div class="flex w-full items-center justify-between">
-      <!-- LOGO -->
-      <router-link to="/" class="w-[130px] flex-shrink-0">
-        <img src="../assets/logo.jpg" alt="Logo" class="w-full">
-      </router-link>
+  <div>
+    <Login :visible="showLoginModal" @close="closeLoginModal" />
+    <!-- header start -->
+    <header class="fixed top-0 left-0 right-0 z-50 flex items-center p-2 bg-white border-b border-orange-200"
+          :class="{ 'flex-wrap': !isHome && windowWidth >= 768 && windowWidth < 1167 }">
+      <!-- 第一行：LOGO 和搜尋欄 -->
+      <div class="flex items-center justify-between w-full">
+        <!-- LOGO -->
+        <router-link to="/" class="w-[130px] flex-shrink-0">
+          <img src="../assets/logo.jpg" alt="Logo" class="w-full">
+        </router-link>
 
-      <!-- 中間區域：搜尋欄 -->
-      <div class="hidden md:flex flex-1 justify-center mx-4">
-        <div v-if="route.path !== '/'" class="w-[500px]">
+        <!-- 中間區域：搜尋欄 -->
+        <div class="justify-center flex-1 hidden mx-4 md:flex">
+          <div v-if="route.path !== '/'" class="w-[500px]">
+            <SearchInput />
+          </div>
+        </div>
+
+        <!-- 手機版選單按鈕 -->
+        <div class="flex items-center space-x-4 md:hidden">
+          <button @click="toggleSearch" class="text-amber-500">
+            <font-awesome-icon :icon="['fas', 'magnifying-glass']" class="w-5 h-5" />
+          </button>
+          <button @click="toggleMenu" class="text-amber-500">
+            <font-awesome-icon :icon="['fas', 'bars']" class="w-6 h-6" />
+          </button>
+        </div>
+      </div>
+
+      <!-- 手機版搜尋欄 -->
+      <Transition
+        enter-active-class="transition-all duration-300 ease-out"
+        enter-from-class="transform -translate-y-4 opacity-0"
+        enter-to-class="transform translate-y-0 opacity-100"
+      >
+        <div v-if="isSearchOpen" 
+            class="absolute left-0 right-0 p-4 bg-white shadow-md top-full md:hidden">
           <SearchInput />
         </div>
+      </Transition>
+
+      <!-- 手機版選單 -->
+      <div v-if="isMenuOpen" 
+          class="absolute right-0 bg-white shadow-lg top-full md:hidden">
+        <div class="w-24 py-2">
+          <ul class="space-y-2">
+            <li v-if="!user.userData">
+              <button @click="openLoginModal" class="w-full p-2 text-center text-amber-500 hover:bg-amber-100">
+                登入
+              </button>
+            </li>
+            <li><router-link to="/myarticle" class="block p-2 text-center text-amber-500 hover:bg-amber-100">發表食記</router-link></li>
+            <li><router-link to="/articlelist" class="block p-2 text-center text-amber-500 hover:bg-amber-100">專欄文章</router-link></li>
+            <li><a href="#" class="block p-2 text-center text-amber-500 hover:bg-amber-100">店家專區</a></li>
+            <li><a href="#" class="block p-2 text-center text-amber-500 hover:bg-amber-100">排行榜</a></li>
+            <li v-if="user.userData">
+              <button @click="user.logout" class="w-full p-2 text-center text-amber-500 hover:bg-amber-100">
+                登出
+              </button>
+            </li>
+          </ul>
+        </div>
       </div>
 
-      <!-- 手機版選單按鈕 -->
-      <div class="flex md:hidden items-center space-x-4">
-        <button @click="toggleSearch" class="text-amber-500">
-          <font-awesome-icon :icon="['fas', 'magnifying-glass']" class="w-5 h-5" />
-        </button>
-        <button @click="toggleMenu" class="text-amber-500">
-          <font-awesome-icon :icon="['fas', 'bars']" class="w-6 h-6" />
-        </button>
-      </div>
-    </div>
+      <!-- 桌面版主選單 -->
+      <div v-if="!isHome" 
+          class="items-center justify-start hidden w-full pl-4 mt-2 space-x-4 md:flex xl:w-auto xl:mt-0 xl:justify-end xl:pl-0">
+        <!-- 登入/登出按鈕 -->
+        <div class="flex items-center space-x-4">
+          <button v-if="!user.userData" 
+                  class="p-2 rounded-md text-amber-500 hover:bg-amber-100 min-w-20" 
+                  @click="openLoginModal">
+            登入
+          </button>
+          <router-link to="/myarticle" class="p-2 rounded-md text-amber-500 hover:bg-amber-100 min-w-20">
+            發表食記
+          </router-link>
+          <router-link to="/articlelist" class="p-2 rounded-md text-amber-500 hover:bg-amber-100 min-w-20">
+            專欄文章
+          </router-link>
+        </div>
 
-    <!-- 手機版搜尋欄 -->
-    <Transition
-      enter-active-class="transition-all duration-300 ease-out"
-      enter-from-class="opacity-0 transform -translate-y-4"
-      enter-to-class="opacity-100 transform translate-y-0"
-    >
-      <div v-if="isSearchOpen" 
-           class="absolute left-0 right-0 p-4 bg-white shadow-md top-full md:hidden">
-        <SearchInput />
-      </div>
-    </Transition>
-
-    <!-- 手機版選單 -->
-    <div v-if="isMenuOpen" 
-         class="absolute top-full right-0 bg-white shadow-lg md:hidden">
-      <div class="py-2 w-24">
-        <ul class="space-y-2">
-          <li v-if="!user.userData">
-            <button @click="openLoginModal" class="w-full p-2 text-amber-500 hover:bg-amber-100 text-center">
-              登入
+        <!-- 下拉選單群組 -->
+        <div class="flex items-center space-x-4">
+          <!-- 店家專區的下拉選單 -->
+          <div class="relative inline-block text-left group">
+            <button class="flex items-center p-2 rounded-md text-amber-500 hover:bg-amber-100 focus:outline-none min-w-20 whitespace-nowrap">
+              店家專區<span class="ml-1">&#x25BC;</span>
             </button>
-          </li>
-          <li><router-link to="/myarticle" class="block p-2 text-amber-500 hover:bg-amber-100 text-center">發表食記</router-link></li>
-          <li><router-link to="/articlelist" class="block p-2 text-amber-500 hover:bg-amber-100 text-center">專欄文章</router-link></li>
-          <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100 text-center">店家專區</a></li>
-          <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100 text-center">排行榜</a></li>
-          <li v-if="user.userData">
-            <button @click="user.logout" class="w-full p-2 text-amber-500 hover:bg-amber-100 text-center">
-              登出
+            <div class="absolute right-0 z-50 hidden w-32 mt-0 bg-white rounded-md shadow-lg group-hover:block">
+              <ul class="py-1">
+                <li><a href="#" class="block px-4 py-2 text-amber-500 hover:bg-amber-100">店家加入</a></li>
+                <li><a href="#" class="block px-4 py-2 text-amber-500 hover:bg-amber-100">行銷方案</a></li>
+                <li><a href="#" class="block px-4 py-2 text-amber-500 hover:bg-amber-100">邀請部落客</a></li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- 排行榜的下拉選單 -->
+          <div class="relative inline-block text-left group">
+            <button class="flex items-center p-2 rounded-md text-amber-500 hover:bg-amber-100 focus:outline-none min-w-20 whitespace-nowrap">
+              排行榜<span class="ml-1">&#x25BC;</span>
             </button>
-          </li>
-        </ul>
-      </div>
-    </div>
+            <div class="absolute right-0 z-50 hidden w-32 mt-0 bg-white rounded-md shadow-lg group-hover:block">
+              <ul class="py-1">
+                <li><a href="#" class="block px-4 py-2 text-amber-500 hover:bg-amber-100">週排行</a></li>
+                <li><a href="#" class="block px-4 py-2 text-amber-500 hover:bg-amber-100">月排行</a></li>
+              </ul>
+            </div>
+          </div>
 
-    <!-- 桌面版主選單 -->
-    <div v-if="!isHome" 
-         class="hidden md:flex items-center space-x-4 w-full mt-2 justify-start pl-4 xl:w-auto xl:mt-0 xl:justify-end xl:pl-0">
-      <!-- 登入/登出按鈕 -->
-      <div class="flex items-center space-x-4">
-        <button v-if="!user.userData" 
-                class="p-2 rounded-md text-amber-500 hover:bg-amber-100 min-w-20" 
-                @click="openLoginModal">
-          登入
-        </button>
-        <router-link to="/myarticle" class="p-2 rounded-md text-amber-500 hover:bg-amber-100 min-w-20">
-          發表食記
-        </router-link>
-        <router-link to="/articlelist" class="p-2 rounded-md text-amber-500 hover:bg-amber-100 min-w-20">
-          專欄文章
-        </router-link>
+          <!-- 會員頭貼 -->
+          <div v-if="user.userData" class="relative inline-block text-left group">
+            <div class="w-10 h-10 overflow-hidden rounded-full cursor-pointer">
+              <img :src="currentProfilePicture" alt="avatar" class="object-cover w-full h-full">
+            </div>
+            <div class="absolute right-0 z-50 hidden mt-0 bg-white rounded-md shadow-lg w-36 group-hover:block">
+              <ul class="py-1">
+                <li>
+                  <router-link to="/user" class="block px-4 py-2 text-amber-500 hover:bg-amber-100">
+                    <font-awesome-icon :icon="['fas', 'user']" class="mr-2" />
+                    個人檔案
+                  </router-link>
+                </li>
+                <li>
+                  <router-link to="/user" class="block px-4 py-2 text-amber-500 hover:bg-amber-100">
+                    <font-awesome-icon :icon="['fas', 'bookmark']" class="mr-2" />
+                    珍藏餐廳
+                  </router-link>
+                </li>
+                <li>
+                  <button @click="user.logout" class="w-full px-4 py-2 text-center text-amber-500 hover:bg-amber-100">
+                    <font-awesome-icon :icon="['fas', 'sign-out-alt']" class="mr-2" />
+                    登出
+                  </button>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <!-- 下拉選單群組 -->
-      <div class="flex items-center space-x-4">
-        <!-- 店家專區的下拉選單 -->
-        <div class="relative inline-block text-left group">
-          <button class="p-2 rounded-md text-amber-500 hover:bg-amber-100 focus:outline-none min-w-20 whitespace-nowrap flex items-center">
-            店家專區<span class="ml-1">&#x25BC;</span>
+      <!-- 首頁版本的選單 -->
+      <div v-else class="items-center justify-end hidden space-x-4 md:flex">
+        <!-- 登入/登出按鈕 -->
+        <div class="flex items-center space-x-4">
+          <button v-if="!user.userData" 
+                  class="p-2 rounded-md text-amber-500 hover:bg-amber-100 min-w-20" 
+                  @click="openLoginModal">
+            登入
           </button>
-          <div class="hidden absolute right-0 z-50 w-32 mt-0 bg-white rounded-md shadow-lg group-hover:block">
-            <ul class="py-1">
-              <li><a href="#" class="block px-4 py-2 text-amber-500 hover:bg-amber-100">店家加入</a></li>
-              <li><a href="#" class="block px-4 py-2 text-amber-500 hover:bg-amber-100">行銷方案</a></li>
-              <li><a href="#" class="block px-4 py-2 text-amber-500 hover:bg-amber-100">邀請部落客</a></li>
-            </ul>
-          </div>
+          
+          <router-link to="/myarticle" class="p-2 rounded-md text-amber-500 hover:bg-amber-100 min-w-20">
+            發表食記
+          </router-link>
+          <router-link to="/articlelist" class="p-2 rounded-md text-amber-500 hover:bg-amber-100 min-w-20">
+            專欄文章
+          </router-link>
         </div>
 
-        <!-- 排行榜的下拉選單 -->
-        <div class="relative inline-block text-left group">
-          <button class="p-2 rounded-md text-amber-500 hover:bg-amber-100 focus:outline-none min-w-20 whitespace-nowrap flex items-center">
-            排行榜<span class="ml-1">&#x25BC;</span>
-          </button>
-          <div class="hidden absolute right-0 z-50 w-32 mt-0 bg-white rounded-md shadow-lg group-hover:block">
-            <ul class="py-1">
-              <li><a href="#" class="block px-4 py-2 text-amber-500 hover:bg-amber-100">週排行</a></li>
-              <li><a href="#" class="block px-4 py-2 text-amber-500 hover:bg-amber-100">月排行</a></li>
-            </ul>
+        <!-- 下拉選單群組 -->
+        <div class="flex items-center space-x-4">
+          <!-- 店家專區的下拉選單 -->
+          <div class="relative inline-block text-left group">
+            <button class="flex items-center p-2 rounded-md text-amber-500 hover:bg-amber-100 focus:outline-none min-w-20 whitespace-nowrap">
+              店家專區<span class="ml-1">&#x25BC;</span>
+            </button>
+            <div class="absolute right-0 z-50 hidden w-32 mt-0 bg-white rounded-md shadow-lg group-hover:block">
+              <ul class="py-1">
+                <li><a href="#" class="block px-4 py-2 text-amber-500 hover:bg-amber-100">店家加入</a></li>
+                <li><a href="#" class="block px-4 py-2 text-amber-500 hover:bg-amber-100">行銷方案</a></li>
+                <li><a href="#" class="block px-4 py-2 text-amber-500 hover:bg-amber-100">邀請部落客</a></li>
+              </ul>
+            </div>
           </div>
-        </div>
 
-        <!-- 會員頭貼 -->
-        <div v-if="user.userData" class="relative inline-block text-left group">
-          <div class="w-10 h-10 rounded-full cursor-pointer overflow-hidden">
-            <img :src="currentProfilePicture" alt="avatar" class="w-full h-full object-cover">
+          <!-- 排行榜的下拉選單 -->
+          <div class="relative inline-block text-left group">
+            <button class="flex items-center p-2 rounded-md text-amber-500 hover:bg-amber-100 focus:outline-none min-w-20 whitespace-nowrap">
+              排行榜<span class="ml-1">&#x25BC;</span>
+            </button>
+            <div class="absolute right-0 z-50 hidden w-32 mt-0 bg-white rounded-md shadow-lg group-hover:block">
+              <ul class="py-1">
+                <li><a href="#" class="block px-4 py-2 text-amber-500 hover:bg-amber-100">週排行</a></li>
+                <li><a href="#" class="block px-4 py-2 text-amber-500 hover:bg-amber-100">月排行</a></li>
+              </ul>
+            </div>
           </div>
-          <div class="hidden absolute right-0 z-50 w-36 mt-0 bg-white rounded-md shadow-lg group-hover:block">
-            <ul class="py-1">
-              <li>
-                <router-link to="/user" class="block px-4 py-2 text-amber-500 hover:bg-amber-100">
-                  <font-awesome-icon :icon="['fas', 'user']" class="mr-2" />
-                  個人檔案
-                </router-link>
-              </li>
-              <li>
-                <router-link to="/user" class="block px-4 py-2 text-amber-500 hover:bg-amber-100">
-                  <font-awesome-icon :icon="['fas', 'bookmark']" class="mr-2" />
-                  珍藏餐廳
-                </router-link>
-              </li>
-              <li>
-                <button @click="user.logout" class="w-full px-4 py-2 text-amber-500 hover:bg-amber-100 text-center">
-                  <font-awesome-icon :icon="['fas', 'sign-out-alt']" class="mr-2" />
-                  登出
-                </button>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </div>
 
-    <!-- 首頁版本的選單 -->
-    <div v-else class="hidden md:flex items-center space-x-4 justify-end">
-      <!-- 登入/登出按鈕 -->
-      <div class="flex items-center space-x-4">
-        <button v-if="!user.userData" 
-                class="p-2 rounded-md text-amber-500 hover:bg-amber-100 min-w-20" 
-                @click="openLoginModal">
-          登入
-        </button>
-        
-        <router-link to="/myarticle" class="p-2 rounded-md text-amber-500 hover:bg-amber-100 min-w-20">
-          發表食記
-        </router-link>
-        <router-link to="/articlelist" class="p-2 rounded-md text-amber-500 hover:bg-amber-100 min-w-20">
-          專欄文章
-        </router-link>
-      </div>
-
-      <!-- 下拉選單群組 -->
-      <div class="flex items-center space-x-4">
-        <!-- 店家專區的下拉選單 -->
-        <div class="relative inline-block text-left group">
-          <button class="p-2 rounded-md text-amber-500 hover:bg-amber-100 focus:outline-none min-w-20 whitespace-nowrap flex items-center">
-            店家專區<span class="ml-1">&#x25BC;</span>
-          </button>
-          <div class="hidden absolute right-0 z-50 w-32 mt-0 bg-white rounded-md shadow-lg group-hover:block">
-            <ul class="py-1">
-              <li><a href="#" class="block px-4 py-2 text-amber-500 hover:bg-amber-100">店家加入</a></li>
-              <li><a href="#" class="block px-4 py-2 text-amber-500 hover:bg-amber-100">行銷方案</a></li>
-              <li><a href="#" class="block px-4 py-2 text-amber-500 hover:bg-amber-100">邀請部落客</a></li>
-            </ul>
-          </div>
-        </div>
-
-        <!-- 排行榜的下拉選單 -->
-        <div class="relative inline-block text-left group">
-          <button class="p-2 rounded-md text-amber-500 hover:bg-amber-100 focus:outline-none min-w-20 whitespace-nowrap flex items-center">
-            排行榜<span class="ml-1">&#x25BC;</span>
-          </button>
-          <div class="hidden absolute right-0 z-50 w-32 mt-0 bg-white rounded-md shadow-lg group-hover:block">
-            <ul class="py-1">
-              <li><a href="#" class="block px-4 py-2 text-amber-500 hover:bg-amber-100">週排行</a></li>
-              <li><a href="#" class="block px-4 py-2 text-amber-500 hover:bg-amber-100">月排行</a></li>
-            </ul>
-          </div>
-        </div>
-
-        <!-- 會員頭貼 -->
-        <div v-if="user.userData" class="relative inline-block text-left group">
-          <div class="w-10 h-10 rounded-full cursor-pointer overflow-hidden">
-            <img :src="currentProfilePicture" alt="avatar" class="w-full h-full object-cover">
-          </div>
-          <div class="hidden absolute right-0 z-50 w-36 mt-0 bg-white rounded-md shadow-lg group-hover:block">
-            <ul class="py-1">
-              <li>
-                <router-link to="/user" class="block px-4 py-2 text-amber-500 hover:bg-amber-100">
-                  <font-awesome-icon :icon="['fas', 'user']" class="mr-2" />
-                  個人檔案
-                </router-link>
-              </li>
-              <li>
-                <router-link to="/user" class="block px-4 py-2 text-amber-500 hover:bg-amber-100">
-                  <font-awesome-icon :icon="['fas', 'bookmark']" class="mr-2" />
-                  珍藏餐廳
-                </router-link>
-              </li>
-              <li>
-                <button @click="user.logout" class="w-full px-4 py-2 text-amber-500 hover:bg-amber-100 text-center">
-                  <font-awesome-icon :icon="['fas', 'sign-out-alt']" class="mr-2" />
-                  登出
-                </button>
-              </li>
-            </ul>
+          <!-- 會員頭貼 -->
+          <div v-if="user.userData" class="relative inline-block text-left group">
+            <div class="w-10 h-10 overflow-hidden rounded-full cursor-pointer">
+              <img :src="currentProfilePicture" alt="avatar" class="object-cover w-full h-full">
+            </div>
+            <div class="absolute right-0 z-50 hidden mt-0 bg-white rounded-md shadow-lg w-36 group-hover:block">
+              <ul class="py-1">
+                <li>
+                  <router-link to="/user" class="block px-4 py-2 text-amber-500 hover:bg-amber-100">
+                    <font-awesome-icon :icon="['fas', 'user']" class="mr-2" />
+                    個人檔案
+                  </router-link>
+                </li>
+                <li>
+                  <router-link to="/user" class="block px-4 py-2 text-amber-500 hover:bg-amber-100">
+                    <font-awesome-icon :icon="['fas', 'bookmark']" class="mr-2" />
+                    珍藏餐廳
+                  </router-link>
+                </li>
+                <li>
+                  <button @click="user.logout" class="w-full px-4 py-2 text-center text-amber-500 hover:bg-amber-100">
+                    <font-awesome-icon :icon="['fas', 'sign-out-alt']" class="mr-2" />
+                    登出
+                  </button>
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  </header>
+    </header>
+  </div>
 </template>
 
 <style scoped>
