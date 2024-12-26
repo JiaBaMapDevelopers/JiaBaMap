@@ -3,6 +3,7 @@ import { ref, onMounted, onUnmounted, inject } from 'vue';
 import axios from 'axios';
 import dayjs from 'dayjs'
 import Header from "../components/Header.vue";
+import articleData from '../../data/articleList.json';
 
 const $swal = inject('$swal');  // 注入 $swal
 
@@ -24,7 +25,7 @@ const newReply = ref({
 
 // 設置 axios 基礎 URL
 const api = axios.create({
- baseURL: 'http://localhost:3000/api'
+ baseURL: import.meta.env.VITE_BACKEND_BASE_URL
 });
 
 // 獲取所有文章
@@ -33,98 +34,24 @@ const fetchArticles = async () => {
     const { data } = await api.get('/articles');
     publishedArticles.value = data;
   } catch (error) {
-    // 使用假資料作為後備
-    publishedArticles.value = [{
-      id: "1",
-      title: "山下的咖啡店",
-      photo: "https://images.unsplash.com/photo-1554118811-1e0d58224f24",
-      date: "2024-03-15 09:30:00",
-      location: "台北市松山區民生東路四段 97 巷 12 號",
-      price: "均消 $300-500",
-      openHours: "週二至週日 11:00-21:00",
-      likes: 0,
-      isLiked: false,
-      content: "隱身在巷弄裡的溫馨咖啡店，店面不大但格外溫馨。老闆是日本留學歸國的咖啡師，對咖啡有獨到的見解。店內使用的咖啡豆都是精選的單品豆，現烘現磨，香氣四溢。最推薦他們的手沖耶加雪菲，清爽的花香中帶有柑橘的香甜，讓人回味無窮。甜點也都是店內手作，特別推薦開心果千層蛋糕，口感細膩不會太甜。座位不多，建議提前預約。庭院有個小花園，天氣好的時候在那裡喝咖啡特別愜意。",
-      showFullContent: true,
-      comments: [
-        {
-          id: "c1",
-          user: "小明",
-          content: "咖啡真的很棒！老闆很用心在挑選咖啡豆，每次來都能品嚐到不同風味。甜點也很精緻，特別喜歡那個開心果千層。",
-          likes: 0,
-          isLiked: false,
-          date: "2024-03-16 14:20:00",
-          replies: [
-            {
-              id: "r1",
-              user: "店長",
-              content: "謝謝您的支持！我們會繼續努力，歡迎常來喔！",
-              date: "2024-03-16 15:30:00",
-              likes: 0,
-              isLiked: false,
-              showOptions: false
-            }
-          ]
-        },
-        {
-          id: "c2",
-          user: "咖啡控",
-          content: "耶加雪菲真的很讚，酸度適中不會太強烈，很適合下午悠閒的時光。就是價格稍微貴了點。",
-          likes: 0,
-          isLiked: false,
-          date: "2024-03-17 16:45:00",
-          replies: []
-        },
-        {
-          id: "c3",
-          user: "美食探索家",
-          content: "環境很舒適，很適合工作或是和朋友聊天。不過假日人比較多，建議先訂位。",
-          likes: 0,
-          isLiked: false,
-          date: "2024-03-18 11:15:00",
-          showOptions: false,
-          replies: []
-        }
-      ]
-    }];
+    // 如果 API 請求失敗，使用本地 JSON 資料
+    publishedArticles.value = articleData.articles;
   }
 };
 
 // 新增點讚功能
-const toggleLike = async (articleId, commentId, replyId) => {
-  try {
-    const article = publishedArticles.value.find(a => a.id === articleId);
-    if (!article) return;
+const toggleLike = async (targetId) => {
+  const target = publishedArticles.value.find(item => item.id === targetId);
+  if (!target) return;
 
-    if (replyId && commentId) {
-      // 為回覆點讚
-      const comment = article.comments.find(c => c.id === commentId);
-      if (comment) {
-        const reply = comment.replies.find(r => r.id === replyId);
-        if (reply) {
-          reply.isLiked = !reply.isLiked;
-          reply.likes += reply.isLiked ? 1 : -1;
-          await api.post(`/articles/${articleId}/comments/${commentId}/replies/${replyId}/like`);
-        }
-      }
-    } else if (commentId) {
-      // 為評論點讚
-      const comment = article.comments.find(c => c.id === commentId);
-      if (comment) {
-        comment.isLiked = !comment.isLiked;
-        comment.likes += comment.isLiked ? 1 : -1;
-        await api.post(`/articles/${articleId}/comments/${commentId}/like`);
-      }
-    } else {
-      // 為文章點讚
-      article.isLiked = !article.isLiked;
-      article.likes += article.isLiked ? 1 : -1;
-      await api.post(`/articles/${articleId}/like`);
-    }
-  } catch (error) {
-    console.error('點讚失敗:', error);
-  }
-};
+  // 更新點讚狀態
+  target.isLiked = !target.isLiked;
+  target.likes += target.isLiked ? 1 : -1;
+
+  // API 請求
+  await api.post(`/like/${targetId}`);
+}
+
 
 // 添加評論
 const addComment = async (articleId) => {
@@ -133,12 +60,16 @@ const addComment = async (articleId) => {
   }
 
   if (!newComment.value.content.trim()) {
-    alert('請輸入評論內容');
+    await swalWithBootstrapButtons.fire({
+     title: '提醒',
+     text: '請輸入回覆內容',
+     icon: 'warning',
+     confirmButtonText: '確定'
+   });
     return;
   }
 
-  try {
-    // 先準備新評論的資料
+    // 準備新評論的資料
     const newCommentData = {
       id: crypto.randomUUID(),  // 生成 UUID
       content: newComment.value.content,
@@ -149,59 +80,45 @@ const addComment = async (articleId) => {
       replies: []
     };
 
-    try {
       await api.post(`/articles/${articleId}/comments`, newCommentData);
-      await fetchArticles();
-    } catch (error) {
-      // API 失敗時，直接更新前端資料
       const article = publishedArticles.value.find(a => a.id === articleId);
       if (article) {
         article.comments.push(newCommentData);
       }
+      newComment.value.content = '';
     }
     
-    newComment.value.content = '';
-  } catch (error) {
-    alert('發表評論失敗，請稍後再試');
-  }
-};
 
-// 修改刪除評論函數
+
+// 刪除評論函數
 const deleteComment = async (articleId, commentId) => {
+  const result = await swalWithBootstrapButtons.fire({
+    title: '確定要刪除評論？',
+    text: '刪除後將無法恢復！',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: '刪除！',
+    cancelButtonText: '取消',
+    reverseButtons: true
+  });
+  
   try {
-    const result = await swalWithBootstrapButtons.fire({
-      title: '確定要刪除評論？',
-      text: '刪除後將無法恢復！',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonText: '刪除！',
-      cancelButtonText: '取消',
-      reverseButtons: true
-    });
-
     if (result.isConfirmed) {
-      try {
-        await api.delete(`/articles/${articleId}/comments/${commentId}`);
-        await fetchArticles();
-        await swalWithBootstrapButtons.fire({
-          title: '已刪除！',
-          text: '評論已成功刪除。',
-          icon: 'success'
-        });
-      } catch (error) {
-        const article = publishedArticles.value.find(a => a.id === articleId);
-        if (article) {
-          article.comments = article.comments.filter(c => c.id !== commentId);
+      await api.delete(`/articles/${articleId}/comments/${commentId}`);
+      const article = publishedArticles.value.find(a => a.id === articleId);
+      if (article) {
+        const comment = article.comments.find(c => c.id === commentId);
+        if(comment){
+          comment.remove();
         }
-        await swalWithBootstrapButtons.fire({
-          title: '已刪除！',
-          text: '評論已刪除。',
-          icon: 'success'
-        });
       }
+      await swalWithBootstrapButtons.fire({
+        title: '已刪除！',
+        text: '評論已成功刪除。',
+        icon: 'success'
+      });
     }
   } catch (error) {
-    console.error('Error deleting comment:', error);
     await swalWithBootstrapButtons.fire({
       title: '錯誤！',
       text: '刪除評論失敗，請稍後再試',
@@ -213,12 +130,15 @@ const deleteComment = async (articleId, commentId) => {
 // 添加回覆
 const addReply = async (articleId, commentId) => {
   if (!newReply.value.content.trim()) {
-    alert('請輸入回覆內容');
+    await swalWithBootstrapButtons.fire({
+     title: '提醒',
+     text: '請輸入回覆內容',
+     icon: 'warning',
+     confirmButtonText: '確定'
+   });
     return;
   }
-  
-  try {
-    // 先準備新回覆的資料
+    // 新回覆的資料
     const newReplyData = {
       id: crypto.randomUUID(),  // 生成臨時 ID
       content: newReply.value.content,
@@ -231,9 +151,6 @@ const addReply = async (articleId, commentId) => {
 
     try {
       await api.post(`/articles/${articleId}/comments/${commentId}/replies`, newReplyData);
-      await fetchArticles();
-    } catch (error) {
-      // API 失敗時，直接更新前端資料
       const article = publishedArticles.value.find(a => a.id === articleId);
       if (article) {
         const comment = article.comments.find(c => c.id === commentId);
@@ -241,62 +158,59 @@ const addReply = async (articleId, commentId) => {
           comment.replies.push(newReplyData);
         }
       }
+      newReply.value.content = '';
+      newReply.value.replyingTo = null;
+    }catch (error) {
+      await swalWithBootstrapButtons.fire({
+        title: '錯誤！',
+        text: '發表回覆失敗，請稍後再試',
+        icon: 'error'
+      });
     }
+}
 
-    newReply.value.content = '';
-    newReply.value.replyingTo = null;
-  } catch (error) {
-    console.error('Error adding reply:', error);
-    alert('發表回覆失敗，請稍後再試');
-  }
-};
 
 // 修改刪除回覆函數
 const deleteReply = async (articleId, commentId, replyId) => {
-  try {
-    const result = await swalWithBootstrapButtons.fire({
-      title: '確定要刪除回覆？',
-      text: '刪除後將無法恢復！',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonText: '刪除',
-      cancelButtonText: '取消',
-      reverseButtons: true
-    });
+  const result = await swalWithBootstrapButtons.fire({
+    title: '確定要刪除回覆？',
+    text: '刪除後將無法恢復！',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: '刪除',
+    cancelButtonText: '取消',
+    reverseButtons: true
+  });
 
-    if (result.isConfirmed) {
-      try {
-        await api.delete(`/articles/${articleId}/comments/${commentId}/replies/${replyId}`);
-        await fetchArticles();
-        await swalWithBootstrapButtons.fire({
-          title: '已刪除！',
-          text: '回覆已成功刪除。',
-          icon: 'success'
-        });
-      } catch (error) {
-        const article = publishedArticles.value.find(a => a.id === articleId);
-        if (article) {
-          const comment = article.comments.find(c => c.id === commentId);
-          if (comment) {
-            comment.replies = comment.replies.filter(r => r.id !== replyId);
+  if (result.isConfirmed) {
+    try {
+      await api.delete(`/articles/${articleId}/comments/${commentId}/replies/${replyId}`);
+      // 找到並移除回覆
+      const article = publishedArticles.value.find(a => a.id === articleId);
+      if (article) {
+        const comment = article.comments.find(c => c.id === commentId);
+        if (comment) {
+          const reply = comment.replies.find(r => r.id === replyId);
+          if (reply) {
+            reply.remove();
           }
         }
-        await swalWithBootstrapButtons.fire({
-          title: '已刪除！',
-          text: '回覆已刪除。',
-          icon: 'success'
-        });
       }
+      await swalWithBootstrapButtons.fire({
+        title: '已刪除！',
+        text: '回覆已刪除。',
+        icon: 'success'
+      });
+    } catch (error) {
+      await swalWithBootstrapButtons.fire({
+        title: '錯誤！',
+        text: '刪除回覆失敗，請稍後再試',
+        icon: 'error'
+      });
     }
-  } catch (error) {
-    console.error('Error deleting reply:', error);
-    await swalWithBootstrapButtons.fire({
-      title: '錯誤！',
-      text: '刪除回覆失敗，請稍後再試',
-      icon: 'error'
-    });
   }
 };
+
 
 const toggleContent = (article) => {
  article.showFullContent = !article.showFullContent;
@@ -305,15 +219,13 @@ const toggleContent = (article) => {
 const toggleReplyForm = (commentId) => {
  if (newReply.value.replyingTo === commentId) {
    newReply.value.replyingTo = null;  // 關閉表單
- } else {
-   newReply.value.replyingTo = commentId;  // 打開表單
- }
+ } newReply.value.replyingTo = commentId;  // 打開表單
 };
 
 // 追蹤當前打開的選單 ID
 const activeMenuId = ref(null);
 
-// 切換選單
+// 打開選單, 關閉選單
 const toggleMenu = (id) => {
   activeMenuId.value = activeMenuId.value === id ? null : id;
 };
@@ -341,7 +253,7 @@ const handleResize = () => {
 
 // 在 onMounted 中調用
 onMounted(async () => {
-  fetchArticles();      // 然後獲取所有文章
+  fetchArticles();      // 獲取所有文章
   document.addEventListener('click', handleClickOutside);
   window.addEventListener('resize', handleResize);
 });

@@ -1,10 +1,11 @@
 <script setup>
 import { useRouter, useRoute } from 'vue-router';
 import Footer from '../components/Footer.vue';
-import { ref, computed, onMounted, onUnmounted } from 'vue';
-
+import { ref, computed, onMounted, onUnmounted, inject } from 'vue';
+import articleData from '../../data/myArticle.json';
 const router = useRouter();
 const route = useRoute();
+const $swal = inject('$swal');
 
 
 
@@ -19,59 +20,8 @@ const handleResize = () => {
   windowWidth.value = window.innerWidth;
 };
 
-// 假資料
-const articles = ref([
-  { 
-    id: 1, 
-    title: '台北車站附近美食推薦', 
-    date: '2024/11/20', 
-    status: 'draft',
-    photo: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=2070&auto=format&fit=crop',
-    rating: '-',
-    content: '這是一篇關於台北車站附近美食的草稿...',
-    location: '台北市中正區'
-  },
-  { 
-    id: 2, 
-    title: '東區下午茶清單', 
-    date: '2024/11/21', 
-    status: 'published',
-    photo: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=2070&auto=format&fit=crop',
-    rating: '4.5',
-    content: '精選東區下午茶店家...',
-    location: '台北市大安區'
-  },
-  { 
-    id: 3, 
-    title: '內湖科學園區美食地圖', 
-    date: '2024/11/22', 
-    status: 'draft',
-    photo: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?q=80&w=2070&auto=format&fit=crop',
-    rating: '-',
-    content: '整理內科附近的平價美食...',
-    location: '台北市內湖區'
-  },
-  { 
-    id: 4, 
-    title: '信義區日式料理推薦', 
-    date: '2024/11/23', 
-    status: 'published',
-    photo: 'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?q=80&w=2070&auto=format&fit=crop',
-    rating: '4.8',
-    content: '精選信義區內的日式料理餐廳...',
-    location: '台北市信義區'
-  },
-  { 
-    id: 5, 
-    title: '中山區韓式烤肉攻略', 
-    date: '2024/11/24', 
-    status: 'draft',
-    photo: 'https://images.unsplash.com/photo-1498654896293-37aacf113fd9?q=80&w=2070&auto=format&fit=crop',
-    rating: '-',
-    content: '整理中山區內的韓式烤肉餐廳...',
-    location: '台北市中山區'
-  }
-]);
+// 文章資料
+const articles = ref(articleData.articles);
 
 // 根據狀態過濾食記
 const filteredArticles = computed(() => {
@@ -85,10 +35,25 @@ const changeStatus = (status) => {
   });
 };
 
-// 模擬 CRUD 操作
-const deleteArticle = (id) => {
-  if (confirm('確定要刪除這篇文章嗎？')) {
+
+const deleteArticle = async (id) => {
+  const result = await swalWithBootstrapButtons.fire({
+    title: '確定要刪除這篇文章嗎？',
+    text: "刪除後將無法恢復！",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: '確定刪除',
+    cancelButtonText: '取消',
+    reverseButtons: true
+  });
+
+  if (result.isConfirmed) {
     articles.value = articles.value.filter(article => article.id !== id);
+    await swalWithBootstrapButtons.fire({
+      title: '已刪除！',
+      text: '文章已成功刪除。',
+      icon: 'success'
+    });
   }
 };
 
@@ -100,7 +65,7 @@ const editArticle = (id) => {
 
 // 在 onMounted 中初始化狀態和加載資料
 onMounted(() => {
-  // 如果 URL 中沒有 status 參數，設置默認值為 'draft' 並加載資料
+  // 如果 URL 中沒有 status 參數，預設為 'draft' 並加載資料
   if (!route.query.status) {
     router.replace({
       path: '/myarticle',
@@ -113,6 +78,17 @@ onMounted(() => {
 
 onUnmounted(() => {
   window.removeEventListener('resize', handleResize);
+});
+
+
+// 配置 SweetAlert 樣式
+const swalWithBootstrapButtons = $swal.mixin({
+  customClass: {
+    confirmButton: 'bg-red-500 text-white px-6 py-2 rounded mx-2 hover:bg-red-600',
+    cancelButton: 'bg-gray-500 text-white px-6 py-2 rounded mx-2 hover:bg-gray-600',
+    actions: 'flex justify-center gap-4'
+  },
+  buttonsStyling: false
 });
 
 </script>

@@ -173,11 +173,7 @@ const handleMouseLeave = () => {
 const StoreId = (placeId) => {
   Store.StoreId(router, placeId)
 }
-
-// const nearSearch = (lat, lng) => {
-//   Search.nearSearch(router,lat ,lng)
-// }
-
+    
 const sortMenu = ref(false);
 const costMenu = ref(false);
 const sortOptions = computed(() => Search.sortOptions)
