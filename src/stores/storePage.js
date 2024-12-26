@@ -18,11 +18,10 @@ export const useStore = defineStore("store", () => {
   const bannerPhoto = ref("");
   const lat = ref("");
   const lng = ref("");
-
-  let placesId = "";
+  let placesId = ref("");
 
   const StoreId = (router, placeId) => {
-    placesId = placeId;
+    placesId.value = placeId
     router.push({
       path: "/store",
       query: { id: placeId },
@@ -39,7 +38,7 @@ export const useStore = defineStore("store", () => {
   const fetchPlaceDetail = async () => {
     try {
       const res = await fetch(
-        `${import.meta.env.VITE_BACKEND_BASE_URL}/restaurants/${placesId}`
+        `${import.meta.env.VITE_BACKEND_BASE_URL}/restaurants/${placesId.value}`
       );
       const resJson = await res.json();
 
@@ -56,9 +55,10 @@ export const useStore = defineStore("store", () => {
       openNow.value = resJson.openNow;
       lat.value = resJson.lat;
       lng.value = resJson.lng;
-      resJson.photoIds.forEach((id) => {
-        photoIds.push(id);
-      }); //一個array含兩組id
+      
+        photoIds.value = resJson.photoIds;
+       //一個array含兩組id
+      console.log(photoIds);
     } catch (err) {
       console.log(err);
     }
@@ -68,7 +68,7 @@ export const useStore = defineStore("store", () => {
     try {
       const res = await fetch(
         `${import.meta.env.VITE_BACKEND_BASE_URL}/restaurants/photos/${
-          photoIds[0]
+          photoIds.value[0]
         }`
       );
       console.log(res);
@@ -83,7 +83,7 @@ export const useStore = defineStore("store", () => {
     try {
       const res = await fetch(
         `${import.meta.env.VITE_BACKEND_BASE_URL}/restaurants/photos/${
-          photoIds[1]
+          photoIds.value[1]
         }`
       );
       console.log(res);
@@ -112,7 +112,7 @@ export const useStore = defineStore("store", () => {
 
     // 先獲取當前餐廳的詳細資訊
     const detailRes = await fetch(
-      `${import.meta.env.VITE_BACKEND_BASE_URL}/restaurants/${placesId}`
+      `${import.meta.env.VITE_BACKEND_BASE_URL}/restaurants/${placesId.value}`
     );
 
     const detailData = await detailRes.json();

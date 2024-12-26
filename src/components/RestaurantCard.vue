@@ -90,6 +90,7 @@
       </div>
     </div>
     
+    <div v-if="Search.filteredResult[0]">
     <div 
     v-for="place in Search.filteredResult" 
     :key="place.id"
@@ -145,6 +146,13 @@
       </div>  
       </div>
     </div>
+    </div>
+    <div v-else >
+      <div class="flex-wrap justify-items-center mt-[70px]">
+        <p class="font-bold text-2xl">沒有符合關鍵字的餐廳</p>
+        <img src="../assets/notfindresult.png" alt="">
+      </div>
+    </div>
   </div>
 </template>
 
@@ -173,10 +181,6 @@ const handleMouseLeave = () => {
 const StoreId = (placeId) => {
   Store.StoreId(router, placeId)
 }
-
-// const nearSearch = (lat, lng) => {
-//   Search.nearSearch(router,lat ,lng)
-// }
 
 const sortMenu = ref(false);
 const costMenu = ref(false);
