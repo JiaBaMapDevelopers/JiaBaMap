@@ -161,10 +161,8 @@ import { useRestaurantStore } from '@/stores/searchPage';
 import { useKeywordStore } from '../stores/keywordStore.js'
 import { computed, ref, watch } from 'vue'
 import { useStore } from '../stores/storePage'
-import { useRouter } from "vue-router";
 import Loader from '../components/Loader.vue'
 
-const router = useRouter();
 const restaurantStore = useRestaurantStore()
 const Search = useKeywordStore()
 const Store = useStore()
@@ -179,7 +177,7 @@ const handleMouseLeave = () => {
 
 
 const StoreId = (placeId) => {
-  Store.StoreId(router, placeId)
+  Store.StoreId(placeId)
 }
 
 const sortMenu = ref(false);

@@ -1,5 +1,6 @@
 import { ref, computed, watch } from "vue";
 import { defineStore } from "pinia";
+import { useRouter } from "vue-router";
 
 export const useStore = defineStore("store", () => {
   // 基本資料的 ref
@@ -19,8 +20,8 @@ export const useStore = defineStore("store", () => {
   const lat = ref("");
   const lng = ref("");
   let placesId = ref("");
-
-  const StoreId = (router, placeId) => {
+  const router = useRouter()
+  const StoreId = (placeId) => {
     placesId.value = placeId
     router.push({
       path: "/store",
@@ -55,8 +56,7 @@ export const useStore = defineStore("store", () => {
       openNow.value = resJson.openNow;
       lat.value = resJson.lat;
       lng.value = resJson.lng;
-      
-        photoIds.value = resJson.photoIds;
+      photoIds.value = resJson.photoIds;
        //一個array含兩組id
       console.log(photoIds);
     } catch (err) {
@@ -109,7 +109,6 @@ export const useStore = defineStore("store", () => {
       similarRestaurants.value = [];
       return;
     }
-
     // 先獲取當前餐廳的詳細資訊
     const detailRes = await fetch(
       `${import.meta.env.VITE_BACKEND_BASE_URL}/restaurants/${placesId.value}`
@@ -223,7 +222,7 @@ export const useStore = defineStore("store", () => {
       openNow: openNow.value,
       lat: lat.value,
       lng: lng.value,
-      placesId,
+      placesId: placesId.value,
     };
     localStorage.setItem("storeData", JSON.stringify(data));
   };
@@ -244,7 +243,7 @@ export const useStore = defineStore("store", () => {
       googleMapsUri.value = data.googleMapsUri || "";
       lat.value = data.lat || "";
       lng.value = data.lng || "";
-      placesId = data.placesId || "";
+      placesId.value = data.placesId || "";
     }
   };
 
