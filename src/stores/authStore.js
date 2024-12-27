@@ -1,10 +1,11 @@
 import { defineStore } from 'pinia'
-import { ref, watch } from "vue"
+import { inject, ref, watch } from "vue"
 import { useRouter } from 'vue-router';
  
 export const useAuth = defineStore('auth', () => {
-  const userData = ref(JSON.parse(localStorage.getItem('userData')) || null);
-  const router = useRouter()
+      const userData = ref(JSON.parse(localStorage.getItem('userData')) || null);
+      const router = useRouter()
+      const Swal = inject("$swal")
 
 // 監聽資料變化並更新 localStorage
 watch(userData, (newValue) => {
@@ -34,7 +35,10 @@ watch(userData, (newValue) => {
          // 初始化 Google 登錄
          window.google.accounts.id.initialize({
            client_id: import.meta.env.VITE_GOOGLE_LOGIN_KEY, 
-           callback: handleCredentialResponse, 
+           callback: handleCredentialResponse,
+           ux_mode: 'popup',  // 使用 popup 模式
+           prompt_parent_id: buttonContainer,  // 指定按鈕容器
+           prompt: 'select_account'  // 總是顯示帳號選擇 
          });
      }
  
@@ -52,6 +56,13 @@ watch(userData, (newValue) => {
  
    const userObject = decodeJwt(response.credential);
    userData.value = userObject;
+   Swal.fire({
+    title: "登入成功",
+    icon: "success",
+    timer: 2000,
+    timerProgressBar: true,
+      })
+    // router.push({ name: 'user' }); 
    localStorage.setItem('userData', JSON.stringify(userObject)); // 存入 localStorage
     router.push({ name: 'user' }); 
    

@@ -20,7 +20,7 @@ if(navigator.geolocation) {
     let lng = position.coords.longitude
     const keyword = "餐廳"
 
-    let storeUrl = `http://localhost:3000/restaurants/search?keyword=${keyword}&lat=${lat}&lng=${lng}`
+    let storeUrl = `${import.meta.env.VITE_BACKEND_BASE_URL}/restaurants/search?keyword=${keyword}&lat=${lat}&lng=${lng}`
     await fetchRestaurants(storeUrl)
 
     //取得目前區域
@@ -55,7 +55,7 @@ function arrayBufferToBase64(buffer) {
 async function fetchImgs(imageId) {
   try {
     const promises = imageId.map(async (id) => {
-      const response = await axios.get(`http://localhost:3000/restaurants/photo?id=${id}`, {
+      const response = await axios.get(`${import.meta.env.VITE_BACKEND_BASE_URL}/restaurants/photos/${id}`, {
         responseType: 'arraybuffer' // 確保響應是二進制數據
       })
       if (response) {

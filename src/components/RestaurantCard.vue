@@ -90,6 +90,7 @@
       </div>
     </div>
     
+    <div v-if="Search.filteredResult[0]">
     <div 
     v-for="place in Search.filteredResult" 
     :key="place.id"
@@ -145,6 +146,13 @@
       </div>  
       </div>
     </div>
+    </div>
+    <div v-else >
+      <div class="flex-wrap justify-items-center mt-[70px]">
+        <p class="font-bold text-2xl">沒有符合關鍵字的餐廳</p>
+        <img src="../assets/notfindresult.png" alt="">
+      </div>
+    </div>
   </div>
 </template>
 
@@ -153,10 +161,8 @@ import { useRestaurantStore } from '@/stores/searchPage';
 import { useKeywordStore } from '../stores/keywordStore.js'
 import { computed, ref, watch } from 'vue'
 import { useStore } from '../stores/storePage'
-import { useRouter } from "vue-router";
 import Loader from '../components/Loader.vue'
 
-const router = useRouter();
 const restaurantStore = useRestaurantStore()
 const Search = useKeywordStore()
 const Store = useStore()
@@ -171,9 +177,10 @@ const handleMouseLeave = () => {
 
 
 const StoreId = (placeId) => {
-  Store.StoreId(router, placeId)
+  Store.StoreId(placeId)
 }
     
+
 const sortMenu = ref(false);
 const costMenu = ref(false);
 const sortOptions = computed(() => Search.sortOptions)

@@ -38,19 +38,19 @@ const isDropdownVisible = ref(false);
 onMounted(async () => {
     try {
         await restaurantStore.fetchPlaceDetail();
-        console.log('Place details fetched');
+        
         
         await restaurantStore.fetchStorePhoto();
-        console.log('storePhoto fetched');
+        
 
         await restaurantStore.fetchBannerPhoto();
-        console.log('bannerPhoto fetched')
+        
         
         await restaurantStore.fetchSimilarRestaurants();
-        console.log('similarRestaurants fetched');
+        
 
         await restaurantStore.fetchRecommendedRestaurants();
-        console.log('recommendedRestaurants fetched');
+        
         
         
     } catch (error) {
@@ -122,11 +122,11 @@ document.addEventListener('click', handleDocumentClick);
                     <div class="flex flex-wrap justify-center gap-3 py-2 md:justify-start">
                         <a v-if="startPrice != null && endPrice != null" class="text-black rounded ">均消價位：{{ `${startPrice}-${endPrice}` }}元</a>
                         <a v-else class="text-black rounded ">均消價位：未提供</a>
-                        <a href="#" class="text-blue-400 rounded"><font-awesome-icon :icon="['fas', 'star']" />找相似餐廳</a>
+                        <!-- <a href="#" class="text-blue-400 rounded"><font-awesome-icon :icon="['fas', 'star']" />找相似餐廳</a>
                         <a href="#" class="hover:text-amber-500">火鍋</a>
                         <a href="#" class="hover:text-amber-500">日本料理</a>
                         <a href="#" class="hover:text-amber-500">咖哩</a>
-                        <a href="#" class="hover:text-amber-500">合菜</a>
+                        <a href="#" class="hover:text-amber-500">合菜</a> -->
                     </div>
                 </div>
             </div>

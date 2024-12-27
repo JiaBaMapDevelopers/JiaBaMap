@@ -14,7 +14,7 @@ const formatDate = (date) => {
  return dayjs(date).format('YYYY-MM-DD HH:mm:ss');
 };
 
-const publishedArticles = ref([]); 
+
 const articles = ref([]);
 
 
@@ -40,15 +40,15 @@ const fetchArticles = async () => {
     // 確保每篇文章都有必要的屬性
     articles.value = data.map(article => ({
       ...article,
-      likesCount: article.likesCount || 0,
+      likesCount: article.likesCount,
       isLiked: false,
       comments: (article.comments || []).map(comment => ({
         ...comment,
-        likesCount: comment.likesCount || 0,
+        likesCount: comment.likesCount,
         isLiked: false,
         replies: (comment.replies || []).map(reply => ({
           ...reply,
-          likesCount: reply.likesCount || 0,
+          likesCount: reply.likesCount,
           isLiked: false
         }))
       }))
@@ -151,22 +151,27 @@ const addComment = async (articleId) => {
   }
 
   try {
-    // 定義新評論的資料
     const newCommentData = {
       content: newComment.value.content.trim(),
       userId: auth.userData.sub,
       user: auth.userData.name,
-      userPhoto: auth.userData.picture || ''
+      userPhoto: auth.userData.picture
     };
-    console.log('newCommentData', newCommentData);
+
     const { data } = await api.post(`/articles/${articleId}/comments`, newCommentData);
+    
     const article = articles.value.find(a => a._id === articleId);
     if (article) {
       if (!article.comments) {
         article.comments = [];
       }
       article.comments.push({
-        ...data,
+        _id: data._id,
+        content: data.content,
+        userId: auth.userData.sub,
+        user: auth.userData.name,
+        userPhoto: auth.userData.picture,
+        createdAt: data.createdAt,
         likesCount: 0,
         isLiked: false,
         replies: []
@@ -247,7 +252,6 @@ const addReply = async (articleId, commentId) => {
   }
 
   try {
-    // 新回覆的資料
     const newReplyData = {
       content: newReply.value.content.trim(),
       userId: auth.userData.sub,
@@ -266,10 +270,10 @@ const addReply = async (articleId, commentId) => {
         comment.replies.push({
           _id: data._id,
           content: data.content,
-          userId: data.userId,
-          user: data.user,
-          userPhoto: data.userPhoto,
-          createdAt: data.date || new Date(),
+          userId: auth.userData.sub,
+          user: auth.userData.name,
+          userPhoto: auth.userData.picture,
+          createdAt: data.createdAt,
           likesCount: 0,
           isLiked: false
         });
@@ -503,15 +507,11 @@ const swalWithBootstrapButtons = $swal.mixin({
               class="bg-white p-3 md:p-4 rounded-lg shadow"
             >
               <div class="flex items-center gap-3 mb-2">
-                <div v-if="auth.userData" class="w-8 h-8">
+                <div class="w-8 h-8">
                   <img 
                     :src="comment.userPhoto"
-                    :alt="comment.user"
                     class="w-full h-full rounded-full object-cover"
                   />
-                </div>
-                <div v-else class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
-                  <font-awesome-icon :icon="['fas', 'user']" class="text-gray-400 text-lg" />
                 </div>
                 <div class="flex flex-col">
                   <span class="font-medium text-sm md:text-base">{{ comment.user }}</span>
@@ -575,15 +575,11 @@ const swalWithBootstrapButtons = $swal.mixin({
                   class="bg-gray-50 p-3 rounded"
                 >
                   <div class="flex items-center gap-3 mb-2">
-                    <div v-if="auth.userData" class="w-6 h-6">
+                    <div class="w-6 h-6">
                       <img 
                         :src="reply.userPhoto"
-                        :alt="reply.user"
                         class="w-full h-full rounded-full object-cover"
                       />
-                    </div>
-                    <div v-else class="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center">
-                      <font-awesome-icon :icon="['fas', 'user']" class="text-gray-400 text-sm" />
                     </div>
                     <div class="flex flex-col">
                       <span class="font-medium text-sm">{{ reply.user }}</span>
@@ -636,7 +632,6 @@ const swalWithBootstrapButtons = $swal.mixin({
                   <div v-if="auth.userData" class="w-6 h-6">
                     <img 
                       :src="auth.userData.picture"
-                      :alt="auth.userData.name"
                       class="w-full h-full rounded-full object-cover"
                     />
                   </div>
@@ -682,7 +677,6 @@ const swalWithBootstrapButtons = $swal.mixin({
               <div v-if="auth.userData" class="w-8 h-8">
                 <img 
                   :src="auth.userData.picture"
-                  :alt="auth.userData.name"
                   class="w-full h-full rounded-full object-cover"
                 />
               </div>
@@ -690,35 +684,38 @@ const swalWithBootstrapButtons = $swal.mixin({
                 <font-awesome-icon :icon="['fas', 'user']" class="text-gray-400 text-lg" />
               </div>
               <div class="flex-1">
-                <div class="relative">
-                  <textarea
-                    v-model="newComment.content"
-                    rows="3"
-                    maxlength="200"
-                    class="w-full border rounded p-2 text-sm md:text-base disabled:bg-gray-100"
-                    :class="{ 'bg-gray-50': newComment.content.length >= 200 }"
-                    :placeholder="auth.userData ? '請輸入評論' : '請先登入後再發表評論...'"
-                    :disabled="!auth.userData"
-                    @input="newComment.content = $event.target.value.slice(0, 200)"
-                  ></textarea>
-                  <p v-if="newComment.content.length > 0" 
-                    class="text-xs mt-1"
-                    :class="newComment.content.length >= 200 ? 'text-red-500' : 'text-gray-500'"
+                <div class="flex flex-col">
+                  <span v-if="auth.userData" class="text-sm font-medium text-gray-700 mb-1">{{ auth.userData.name }}</span>
+                  <div class="relative">
+                    <textarea
+                      v-model="newComment.content"
+                      rows="3"
+                      maxlength="200"
+                      class="w-full border rounded p-2 text-sm md:text-base disabled:bg-gray-100"
+                      :class="{ 'bg-gray-50': newComment.content.length >= 200 }"
+                      :placeholder="auth.userData ? '請輸入評論' : '請先登入後再發表評論...'"
+                      :disabled="!auth.userData"
+                      @input="newComment.content = $event.target.value.slice(0, 200)"
+                    ></textarea>
+                    <p v-if="newComment.content.length > 0" 
+                      class="text-xs mt-1"
+                      :class="newComment.content.length >= 200 ? 'text-red-500' : 'text-gray-500'"
+                    >
+                      {{ newComment.content.length >= 200 ? '已達到字數上限' : `還可以輸入 ${200 - newComment.content.length} 字` }}
+                    </p>
+                  </div>
+                  <button
+                    @click="auth.userData ? addComment(article._id) : swalWithBootstrapButtons.fire({
+                      title: '提醒',
+                      text: '請先登入後再發表評論',
+                      icon: 'warning',
+                      confirmButtonText: '確定'
+                    })"
+                    class="w-full md:w-auto bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors text-sm md:text-base mt-2"
                   >
-                    {{ newComment.content.length >= 200 ? '已達到字數上限' : `還可以輸入 ${200 - newComment.content.length} 字` }}
-                  </p>
+                    發表評論
+                  </button>
                 </div>
-                <button
-                  @click="auth.userData ? addComment(article._id) : swalWithBootstrapButtons.fire({
-                    title: '提醒',
-                    text: '請先登入後再發表評論',
-                    icon: 'warning',
-                    confirmButtonText: '確定'
-                  })"
-                  class="w-full md:w-auto bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors text-sm md:text-base mt-2"
-                >
-                   發表評論
-                </button>
               </div>
             </div>
           </div>

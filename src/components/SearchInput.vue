@@ -1,11 +1,12 @@
 <script setup>
 import { useKeywordStore } from '../stores/keywordStore.js'
-import { computed, watch } from 'vue'
+import { computed, watch, inject } from 'vue'
 import { useRouter, useRoute } from 'vue-router';
 
 const router = useRouter()
 const route = useRoute()
 const Search = useKeywordStore()
+const Swal = inject('$swal');
 
 const keyword = computed( {
   get:() => Search.keyword,
@@ -23,7 +24,10 @@ const handleEnterKey = () => {
   if(keyword.value){
     Search.navigateToSearch(router, keyword.value)
   }else{
-    alert("請輸入有效關鍵字!!!")  
+    Swal.fire({
+      title: "請輸入有效關鍵字！" ,
+      icon: "warning",
+    });
   }
 }
 const myLocation = computed(() => {
@@ -35,17 +39,18 @@ const singleCities = computed(() => {
       );
     });
 
-    const multiCities = computed(() => {
-      return Object.entries(districts.value).filter(
-        ([key, value]) => value && typeof value === "object" && !value.lat // 多行政區縣市 (包含子行政區)
-      );
-    });
+const multiCities = computed(() => {
+  return Object.entries(districts.value).filter(
+    ([key, value]) => value && typeof value === "object" && !value.lat // 多行政區縣市 (包含子行政區)
+  );
+});
+
 
 watch(
   () =>
   route.query.keyword,
   (newKeyword) => {
-    if (newKeyword !== Search.keyword) {
+    if (newKeyword !== undefined && newKeyword !== Search.keyword) {
       Search.setKeyword(newKeyword || ""); 
       handleEnterKey();
     }

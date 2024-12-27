@@ -1,5 +1,5 @@
 <template>
-<div  v-if="visible" class="modal-overlay bg-black/50 w-full h-screen flex justify-center items-center fixed top-0 left-0 z-50 ml-0" @click.self="closeModal">
+<div  v-if="visible && !user.userData" class="modal-overlay bg-black/50 w-full h-screen flex justify-center items-center fixed top-0 left-0 z-50 ml-0" @click.self="closeModal">
         <div class="flex-col w-1/5 min-w-[260px] h-1/2 justify-items-center bg-white rounded-lg p-3 leading-10">
             <h1>登入 「 JiaBaMap 」</h1>
             <div class="">
