@@ -55,7 +55,7 @@ function arrayBufferToBase64(buffer) {
 async function fetchImgs(imageId) {
   try {
     const promises = imageId.map(async (id) => {
-      const response = await axios.get(`http://localhost:3000/restaurants/photo?id=${id}`, {
+      const response = await axios.get(`http://localhost:3000/restaurants/photos/${id}`, {
         responseType: 'arraybuffer' // 確保響應是二進制數據
       })
       if (response) {
