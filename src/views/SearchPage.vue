@@ -1,19 +1,3 @@
-<template>
-    <div>
-        <Header class:="z-100" @search-toggle="handleSearchToggle" />
-        
-        <div 
-        class:="relative"
-        :class="['flex', { 
-        'mt-24': isSearchOpen && windowWidth < 768,
-        'mt-20': !isHome && windowWidth >= 768 && windowWidth < 1167,
-        'mt-8': isHome || windowWidth >= 1167
-        }]">
-            <RestaurantCard class=""/>
-            <MapComponent/>
-        </div>
-    </div>
-</template>
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue';
@@ -48,3 +32,21 @@ onUnmounted(() => {
   window.removeEventListener('resize', handleResize);
 });
 </script>
+
+
+<template>
+    <div>
+        <Header class:="z-100" @search-toggle="handleSearchToggle" />
+        
+        <div 
+        class:="relative"
+        :class="['flex', { 
+        'mt-24': isSearchOpen && windowWidth < 768,
+        'mt-20': !isHome && windowWidth >= 768 && windowWidth < 1167,
+        'mt-8': isHome || windowWidth >= 1167
+        }]">
+            <RestaurantCard class=""/>
+            <MapComponent/>
+        </div>
+    </div>
+</template>

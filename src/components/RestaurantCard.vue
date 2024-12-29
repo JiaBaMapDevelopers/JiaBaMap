@@ -179,6 +179,7 @@ const handleMouseLeave = () => {
 const StoreId = (placeId) => {
   Store.StoreId(placeId)
 }
+    
 
 const sortMenu = ref(false);
 const costMenu = ref(false);
