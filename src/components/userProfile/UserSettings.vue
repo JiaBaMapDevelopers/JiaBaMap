@@ -1,5 +1,5 @@
 <template>
-    <div class="p-4 mb-10 lg:p-8">
+    <div class="p-4 my-10">
         <!-- 非編輯模式 -->
         <div v-if="!isEditing">
             <!-- 個人照片 -->

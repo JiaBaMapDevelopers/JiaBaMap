@@ -1,10 +1,11 @@
 import { defineStore } from 'pinia'
-import { ref, watch } from "vue"
+import { inject, ref, watch } from "vue"
 import { useRouter } from 'vue-router';
  
 export const useAuth = defineStore('auth', () => {
-  const userData = ref(JSON.parse(localStorage.getItem('userData')) || null);
-  const router = useRouter()
+      const userData = ref(JSON.parse(localStorage.getItem('userData')) || null);
+      const router = useRouter()
+      const Swal = inject("$swal")
 
 // 監聽資料變化並更新 localStorage
 watch(userData, (newValue) => {
@@ -52,6 +53,13 @@ watch(userData, (newValue) => {
  
    const userObject = decodeJwt(response.credential);
    userData.value = userObject;
+   Swal.fire({
+    title: "登入成功",
+    icon: "success",
+    timer: 2000,
+    timerProgressBar: true,
+      })
+    // router.push({ name: 'user' }); 
    localStorage.setItem('userData', JSON.stringify(userObject)); // 存入 localStorage
     router.push({ name: 'user' }); 
    
