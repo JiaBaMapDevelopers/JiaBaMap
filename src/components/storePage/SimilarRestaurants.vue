@@ -33,12 +33,12 @@ const { storeName, similarRestaurants } = storeToRefs(restaurantStore);
                     class="flex justify-center"
                 >
                     <Slide 
-                        v-for="restaurant in similarRestaurants.slice(0, 15)" 
+                        v-for="restaurant in similarRestaurants" 
                         :key="restaurant.place_id"
                         class="flex-shrink-0 px-1"
                     >
                         <div class="bg-white rounded-lg shadow-md mb-4 max-w-[250px]">
-                            <a :href="restaurant.googleMapsUri" target="_blank">
+                            <a :href="restaurant.googleMapsUri" target="_blank" class="cursor-pointer block">
                                 <div class="overflow-hidden">
                                     <img 
                                         v-if="restaurant?.photoUrl" 

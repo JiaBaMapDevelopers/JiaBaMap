@@ -11,6 +11,8 @@ import {useAuth} from '@/stores/authStore'
 import { inject } from 'vue'
 import CreateNoteView from '@/views/CreateNoteView.vue';
 import PreviewNoteView from '@/views/PreviewNoteView.vue';
+import Dashboard from '@/views/DashboardView.vue'
+import StoreCart from '@/views/StoreCartView.vue'
 
 const routes = [
   {
@@ -65,6 +67,16 @@ const routes = [
     name: "PreviewNote",
     component: PreviewNoteView,
   },
+  {
+    path: '/dashboard',
+    name: 'dashboard',
+    component: Dashboard,
+  },
+  {
+    path: '/storecart',
+    name: 'storecart',
+    component: StoreCart,
+  }
 ]
 
 
