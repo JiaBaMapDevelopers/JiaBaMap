@@ -10,9 +10,8 @@ import SimilarRestaurants from '../components/storePage/SimilarRestaurants.vue';
 import RecommendedRestaurants from '../components/storePage/RecommendedRestaurants.vue';
 import SearchInput from '../components/SearchInput.vue';
 
-// Store 初始化
-const restaurantStore = useStore();
-
+const restaurantStore = useStore(); // Store 初始化
+const iconClassic = ref("far") //收藏icon切換
 // 從 store 中解構需要的屬性
 const {
     storeName,
@@ -33,6 +32,15 @@ const {
 
 // 下拉選單狀態
 const isDropdownVisible = ref(false);
+
+const toggleIcon = () => {
+    if(iconClassic.value == "far"){
+       return iconClassic.value = "fas"
+    }
+    if(iconClassic.value == "fas"){
+       return iconClassic.value = "far"
+    }
+}
 
 // 頁面載入時的初始化
 onMounted(async () => {
@@ -114,7 +122,12 @@ document.addEventListener('click', handleDocumentClick);
             <div class="flex flex-col items-center space-y-4 md:flex-row md:items-start md:space-y-0 md:space-x-4">
                 <img :src="storePhoto" alt="Store Thumbnail" class="object-cover w-40 h-32 rounded-lg">
                 <div class="space-y-2 text-center md:text-left">
-                     <h2 class="py-1 text-3xl font-black text-gray-700">{{ storeName }}</h2>
+                    <div class="flex relative">
+                        <h2 class="py-1 text-3xl font-black text-gray-700 mr">{{ storeName }}</h2>
+                        <button @click="toggleIcon" class=" absolute right-[-25px] top-3 flex items-center ">
+                            <font-awesome-icon :icon="[iconClassic, 'bookmark']" size="lg" />
+                        </button>
+                    </div> 
                     <div class="flex flex-wrap items-center justify-center gap-3 md:justify-start">
                         <span class="px-2 py-1 rounded-2xl text-yellow-50 bg-orange-600">{{ rating }} ★</span>
                         <a href="#"><span class="text-gray-400">{{ userRatingCount }}則評論</span></a>
