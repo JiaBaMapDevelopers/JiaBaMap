@@ -1,10 +1,18 @@
 <script setup>
 import Header from './components/Header.vue'
 import Footer from './components/Footer.vue'
-import RestaurantCard from './components/RestaurantCard.vue'
-import MapComponent from './components/MapComponent.vue'
-import FilterBar from './components/FilterBar.vue'
 import Login from './components/Login.vue'
+import { computed } from 'vue';
+import { useRoute } from 'vue-router';
+
+// 取得目前路由
+const route = useRoute();
+
+// 判斷是否隱藏 Footer
+const hideFooter = computed(() => {
+  // 在 previewnote 頁面不顯示 Footer
+  return route.path === "/previewnote";
+});
 </script>
 
 <template>

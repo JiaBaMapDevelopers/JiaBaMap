@@ -1,6 +1,6 @@
-import { defineStore } from 'pinia';
-import axios from 'axios';
-import { reactive, ref, computed, inject } from 'vue';
+import { defineStore } from "pinia";
+import axios from "axios";
+import { reactive, ref, computed, inject } from "vue" ;
 
 export const useKeywordStore = defineStore('keyword', () => {
   const keyword = ref('');
@@ -13,20 +13,20 @@ export const useKeywordStore = defineStore('keyword', () => {
   const Swal = inject("$swal");
 
   const sortOptions = {
-    default: '預設',
-    distance: '最近距離',
-    rating: '最高評分',
-    reviews: '最高人氣',
+    default: "預設",
+    distance: "最近距離",
+    rating: "最高評分",
+    reviews: "最高人氣",
   };
 
   const costOptions = {
-    default: '全部',
-    cost1: '200內',
-    cost2: '201~400',
-    cost3: '401~600',
-    cost4: '601~800',
-    cost5: '801~1000',
-    cost6: '1000以上',
+    default: "全部",
+    cost1: "200內",
+    cost2: "201~400",
+    cost3: "401~600",
+    cost4: "601~800",
+    cost5: "801~1000",
+    cost6: "1000以上",
   };
 
   const districts = reactive({
@@ -105,15 +105,21 @@ export const useKeywordStore = defineStore('keyword', () => {
       filtered = filtered.filter((place) => place.openNow);
     }
 
-    if (selectedCost.value !== 'default') {
+    if (selectedCost.value !== "default") {
       filtered = filtered.filter((place) => {
         const price = place.startPrice || 0;
-        if (selectedCost.value === 'cost1') return price <= 200;
-        if (selectedCost.value === 'cost2') return price >= 200 && price < 400;
-        if (selectedCost.value === 'cost3') return price >= 400 && price < 600;
-        if (selectedCost.value === 'cost4') return price >= 600 && price < 800;
-        if (selectedCost.value === 'cost5') return price >= 800 && price < 1000;
-        if (selectedCost.value === 'cost6') return price >= 1000;
+        if (selectedCost.value === "cost1") 
+          return price <= 200;
+        if (selectedCost.value === "cost2") 
+          return price >= 200 && price < 400;
+        if (selectedCost.value === "cost3") 
+          return price >= 400 && price < 600;
+        if (selectedCost.value === "cost4") 
+          return price >= 600 && price < 800;
+        if (selectedCost.value === "cost5") 
+          return price >= 800 && price < 1000;
+        if (selectedCost.value === "cost6") 
+          return price >= 1000;
       });
     }
 
@@ -125,7 +131,9 @@ export const useKeywordStore = defineStore('keyword', () => {
       const dLng = toRadians(lng2 - lng1);
       const a =
         Math.sin(dLat / 2) ** 2 +
-        Math.cos(toRadians(lat1)) * Math.cos(toRadians(lat2)) * Math.sin(dLng / 2) ** 2;
+        Math.cos(toRadians(lat1)) *
+         Math.cos(toRadians(lat2)) *
+         Math.sin(dLng / 2) ** 2;
       const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
       return R * c;
     };
@@ -140,7 +148,7 @@ export const useKeywordStore = defineStore('keyword', () => {
       ),
     }));
 
-    // 排序
+    // 條件排序
     const sortFunctions = {
       default: () => 0,
       rating: (a, b) => (b.rating || 0) - (a.rating || 0),
@@ -152,7 +160,7 @@ export const useKeywordStore = defineStore('keyword', () => {
     return filtered;
   });
 
-  // 方法
+  // 標籤搜尋方法
   const navigateToSearch = (router, tag) => {
     keyword.value = tag;
     router.push({
@@ -174,7 +182,7 @@ export const useKeywordStore = defineStore('keyword', () => {
     }
     try {
       const response = await axios.get(
-        `http://localhost:3000/restaurants/search?keyword=${keyword.value}&lat=${coordinate.value.lat}&lng=${coordinate.value.lng}`
+        `${import.meta.env.VITE_BACKEND_BASE_URL}/restaurants/search?keyword=${keyword.value}&lat=${coordinate.value.lat}&lng=${coordinate.value.lng}`
       );
       if (response.status === 200) {
         result.value = response.data;
@@ -187,9 +195,9 @@ export const useKeywordStore = defineStore('keyword', () => {
   };
 
   const selectDistrict = (districtName) => {
-    if (districtName === '我的位置') {
+    if (districtName === "我的位置") {
       navigator.geolocation.getCurrentPosition((position) => {
-        districts['我的位置'] = {
+        districts["我的位置"] = {
           lat: position.coords.latitude,
           lng: position.coords.longitude,
         };
@@ -231,8 +239,8 @@ export const useKeywordStore = defineStore('keyword', () => {
 
   const nearSearch = (router, lat, lng) => {
     coordinate = {
-      lat:lat,
-      lng:lng
+      lat: lat,
+      lng: lng
     }
     this.navigateToSearch(router, "餐廳")
   };

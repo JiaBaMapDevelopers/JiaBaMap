@@ -1,47 +1,29 @@
 <script setup>
 import { useRouter, useRoute } from 'vue-router';
-import Header from '../components/Header.vue';
 import Footer from '../components/Footer.vue';
-import { ref, computed } from 'vue';
-
+import { ref, computed, onMounted, onUnmounted, inject } from 'vue';
+import articleData from '../../data/myArticle.json';
 const router = useRouter();
 const route = useRoute();
+const $swal = inject('$swal');
 
-// 假資料
-const articles = ref([
-  { 
-    id: 1, 
-    title: '台北車站附近美食推薦', 
-    date: '2024/11/20', 
-    status: 'draft',
-    photo: '/src/assets/food1.jpg',
-    rating: '-',
-    content: '這是一篇關於台北車站附近美食的草稿...',
-    location: '台北市中正區'
-  },
-  { 
-    id: 2, 
-    title: '東區下午茶清單', 
-    date: '2024/11/21', 
-    status: 'published',
-    photo: '/src/assets/food2.jpg',
-    rating: '4.5',
-    content: '精選東區下午茶店家...',
-    location: '台北市大安區'
-  },
-  { 
-    id: 3, 
-    title: '內湖科學園區美食地圖', 
-    date: '2024/11/22', 
-    status: 'draft',
-    photo: '/src/assets/food3.jpg',
-    rating: '-',
-    content: '整理內科附近的平價美食...',
-    location: '台北市內湖區'
-  }
-]);
 
-// 根據狀態過濾文章
+
+// 新增：判斷是否為首頁
+const isHome = computed(() => route.path === '/');
+
+// 新增：視窗寬度狀態
+const windowWidth = ref(window.innerWidth);
+
+// 修改：監聽視窗大小變化
+const handleResize = () => {
+  windowWidth.value = window.innerWidth;
+};
+
+// 文章資料
+const articles = ref(articleData.articles);
+
+// 根據狀態過濾食記
 const filteredArticles = computed(() => {
   return articles.value.filter(article => article.status === route.query.status);
 });
@@ -53,10 +35,25 @@ const changeStatus = (status) => {
   });
 };
 
-// 模擬 CRUD 操作
-const deleteArticle = (id) => {
-  if (confirm('確定要刪除這篇文章嗎？')) {
+
+const deleteArticle = async (id) => {
+  const result = await swalWithBootstrapButtons.fire({
+    title: '確定要刪除這篇文章嗎？',
+    text: "刪除後將無法恢復！",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: '確定刪除',
+    cancelButtonText: '取消',
+    reverseButtons: true
+  });
+
+  if (result.isConfirmed) {
     articles.value = articles.value.filter(article => article.id !== id);
+    await swalWithBootstrapButtons.fire({
+      title: '已刪除！',
+      text: '文章已成功刪除。',
+      icon: 'success'
+    });
   }
 };
 
@@ -66,18 +63,52 @@ const editArticle = (id) => {
   });
 };
 
+// 在 onMounted 中初始化狀態和加載資料
+onMounted(() => {
+  // 如果 URL 中沒有 status 參數，預設為 'draft' 並加載資料
+  if (!route.query.status) {
+    router.replace({
+      path: '/myarticle',
+      query: { status: 'draft' }
+    });
+  }
+  // 添加視窗大小監聽
+  window.addEventListener('resize', handleResize);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('resize', handleResize);
+});
+
+
+// 配置 SweetAlert 樣式
+const swalWithBootstrapButtons = $swal.mixin({
+  customClass: {
+    confirmButton: 'bg-red-500 text-white px-6 py-2 rounded mx-2 hover:bg-red-600',
+    cancelButton: 'bg-gray-500 text-white px-6 py-2 rounded mx-2 hover:bg-gray-600',
+    actions: 'flex justify-center gap-4'
+  },
+  buttonsStyling: false
+});
+
 </script>
 
 <template>
-  <div class="pt-16">
-    <div class="min-h-screen bg-white">
-      <div class="max-w-4xl mx-auto mt-8 px-4">
-        <h2 class="text-5xl font-extrabold mb-6">您的文章</h2>
-        
+  <div>
+    <div 
+      :class="['min-h-screen bg-white', { 
+        'mt-24': windowWidth < 768,
+        'mt-20': !isHome && windowWidth >= 768 && windowWidth < 1167,
+        'mt-8': isHome || windowWidth >= 1167
+      }]">
+      <div class="max-w-4xl mx-auto px-4">
+        <h2 class="text-5xl font-extrabold mb-6">您的食記</h2>
         <div class="flex flex-row-reverse space-x-4 mb-4 text-xl">
-          <button class="px-4 py-1 bg-orange-500 text-white rounded hover:bg-orange-600 transition-colors">
+          <router-link 
+            to="/createnote" 
+            class="px-4 py-1 bg-orange-500 text-white rounded hover:bg-orange-600 transition-colors">
             撰寫食記
-          </button>
+          </router-link>
         </div>
 
         <div class="border-b">
@@ -103,7 +134,7 @@ const editArticle = (id) => {
           </div>
         </div>
 
-        <!-- 文章列表 -->
+        <!-- 食記列表 -->
         <div class="mt-6 space-y-4">
           <article 
             v-for="article in filteredArticles" 
@@ -149,12 +180,12 @@ const editArticle = (id) => {
             </div>
           </article>
 
-          <!-- 無文章提示 -->
+          <!-- 無食記提示 -->
           <div 
             v-if="filteredArticles.length === 0" 
             class="text-center text-gray-500 py-8 bg-white rounded-lg shadow"
           >
-            目前沒有{{ route.query.status === 'draft' ? '草稿' : '已發佈' }}的文章
+            目前沒有{{ route.query.status === 'draft' ? '草稿' : '已發佈' }}的食記
           </div>
         </div>
       </div>
