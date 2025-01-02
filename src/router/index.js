@@ -13,7 +13,7 @@ import CreateNoteView from "@/views/CreateNoteView.vue";
 import PreviewNoteView from "@/views/PreviewNoteView.vue";
 import Dashboard from "@/views/DashboardView.vue";
 import StoreCart from "@/views/StoreCartView.vue";
-import StoreSignUp from "../views/StoreSignUp.vue";
+// import StoreSignUp from "../views/StoreSignUp.vue";
 
 const routes = [
   {
@@ -78,12 +78,18 @@ const routes = [
     name: "storecart",
     component: StoreCart,
   },
+  // {
+  //   path: "/storesignup",
+  //   name: "storesignup",
+  //   component: StoreSignUp,
+  // },
   {
-    path: "/storesignup",
-    name: "storesignup",
-    component: StoreSignUp,
-  },
-];
+    path: '/menu-management',
+    name: 'MenuManagement',
+    component: () => import('../views/MenuManagement.vue')
+  }
+]
+
 
 const router = createRouter({
   history: createWebHistory(),
