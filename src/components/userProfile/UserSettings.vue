@@ -144,8 +144,7 @@ const user = useAuth()
 const { userData, logout } = user
 const menuVisible = ref(false);
 const isEditing = ref(false);
-const profilePicture = ref(''); // 頭像
-// https://via.placeholder.com/100
+const profilePicture = ref("https://via.placeholder.com/100"); // 頭像
 const username = ref('編輯名稱'); // 使用者名稱
 const instagramUsername = ref(''); // IG 帳號
 const defaultPicture=ref('https://via.placeholder.com/100')

@@ -12,9 +12,9 @@ import SimilarRestaurants from '../components/storePage/SimilarRestaurants.vue';
 import RecommendedRestaurants from '../components/storePage/RecommendedRestaurants.vue';
 import SearchInput from '../components/SearchInput.vue';
 
-const restaurantStore = useStore(); // Store 初始化
+const restaurantStore = useStore(); 
 const user = useAuth();
-const iconClassic = ref("far") //收藏icon切換
+const iconClassic = ref("far") 
 // 從 store 中解構需要的屬性
 const {
     storeName,
