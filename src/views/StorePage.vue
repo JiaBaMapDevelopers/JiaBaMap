@@ -1,7 +1,9 @@
 <script setup>
+import  axios from 'axios';
 import { onMounted, ref } from 'vue';
 import { storeToRefs,} from 'pinia';
 import { useStore } from '../stores/storePage';
+import { useAuth } from '../stores/authStore'
 import StoreComment from '../components/storeComment/StoreComment.vue'
 import Header from "../components/Header.vue";
 import StoreType from '../components/HomePage/StoreType.vue';
@@ -11,6 +13,7 @@ import RecommendedRestaurants from '../components/storePage/RecommendedRestauran
 import SearchInput from '../components/SearchInput.vue';
 
 const restaurantStore = useStore(); // Store 初始化
+const user = useAuth();
 const iconClassic = ref("far") //收藏icon切換
 // 從 store 中解構需要的屬性
 const {
@@ -33,9 +36,15 @@ const {
 // 下拉選單狀態
 const isDropdownVisible = ref(false);
 
-const toggleIcon = () => {
+const toggleIcon = async() => {
     if(iconClassic.value == "far"){
-       return iconClassic.value = "fas"
+        iconClassic.value = "fas"
+        await axios.post(`${import.meta.env.VITE_BACKEND_BASE_URL}/user/favorites/${user.userId}`, 
+           {
+            placeId: restaurantStore.placesId,
+            }
+        )
+            return
     }
     if(iconClassic.value == "fas"){
        return iconClassic.value = "far"
