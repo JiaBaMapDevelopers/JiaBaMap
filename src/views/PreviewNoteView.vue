@@ -1,3 +1,20 @@
+<script setup>
+import { ref, onMounted } from "vue";
+
+const note = ref({
+  date: "",
+  title: "",
+  content: "",
+});
+
+onMounted(() => {
+  const noteData = localStorage.getItem("noteData");
+  if (noteData) {
+    note.value = JSON.parse(noteData); // 更新 note 資料
+  }
+});
+</script>
+
 <template>
     <div class="p-6 max-w-4xl mx-auto bg-white shadow-md rounded-md">
       <h1 class="text-2xl font-bold text-gray-800 mb-6 text-center">預覽食記</h1>
@@ -32,28 +49,4 @@
     </div>
   </template>
   
-  <script setup>
-  import { ref, onMounted } from "vue";
-  
-  // 定義響應式資料
-  const note = ref({
-    date: "",
-    title: "",
-    content: "",
-  });
-  
-  // 在元件掛載時執行
-  onMounted(() => {
-    // 從 localStorage 獲取資料
-    const noteData = localStorage.getItem("noteData");
-    if (noteData) {
-      note.value = JSON.parse(noteData); // 更新 note 資料
-    }
-  });
-  </script>
-  
-
-<style scoped>
-  
-</style>
   
