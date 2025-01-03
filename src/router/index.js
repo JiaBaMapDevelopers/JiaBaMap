@@ -41,7 +41,7 @@ const routes = [
   },
   {
     path: '/myarticle',
-    name: 'myArticle',
+    name: 'MyArticle',
     component: MyArticle,
     meta: { requiresAuth: true },
   },

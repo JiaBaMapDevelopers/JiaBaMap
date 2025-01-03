@@ -1,67 +1,324 @@
-<template>
-    <header class="flex flex-wrap items-center justify-between p-2 space-x-4 space-y-2 border-b border-orange-200 text-amber-500 bg-white md:space-y-0">
-        <!-- 左側內容 -->
-      <div class="flex items-center space-x-6">
-        <router-link to="/"><img src="../../assets/logo.jpg" alt="Logo" class="w-[130px]"></router-link>
-        <router-link to="/myarticle" class="p-2 rounded-md hover:bg-amber-100 whitespace-nowrap">
-          回到文章列表
-        </router-link> 
-        <router-link to="/user" class="p-2 rounded-md hover:bg-amber-100 whitespace-nowrap">
-          個人頁面
-        </router-link>
-      </div>
+<script setup>
+import { useAuth } from '../../stores/authStore';
+import { useRouter, useRoute } from 'vue-router';
+import axios from 'axios';
+import { inject } from 'vue';
+
+const auth = useAuth();
+const router = useRouter();
+const route = useRoute();
+const $swal = inject('$swal');
+
+// 修改 emit 宣告，加入 validationErrors
+const emit = defineEmits(['save', 'preview', 'checkContent', 'validationErrors']);
+
+// 定義 props
+const props = defineProps({
+  checkContent: {
+    type: Function,
+    required: true
+  },
+  currentTitle: {
+    type: String,
+    required: true
+  },
+  currentRestaurantName: {
+    type: String,
+    required: true
+  },
+  getCurrentContent: {
+    type: Function,
+    required: true
+  }
+});
+
+// 配置 SweetAlert 樣式
+const swalWithBootstrapButtons = $swal.mixin({
+  customClass: {
+    confirmButton: 'bg-red-500 text-white px-6 py-2 rounded mx-2 hover:bg-red-600',
+    cancelButton: 'bg-gray-500 text-white px-6 py-2 rounded mx-2 hover:bg-gray-600',
+    actions: 'flex justify-center gap-4'
+  },
+  buttonsStyling: false
+});
+
+// 修改驗證函數
+const validateContent = () => {
+  // 直接從 DOM 獲取當前輸入值
+  const title = document.getElementById('title').value;
+  const restaurantName = document.getElementById('restaurant').value;
+
+  // 發出驗證錯誤事件
+  const validationErrors = {};
   
-      <!-- 右側內容 -->
-      <div class="flex items-center space-x-4">
+  // 檢查餐廳名稱
+  if (!restaurantName.trim()) {
+    validationErrors.restaurantName = '請填寫餐廳名稱';
+  } else if (restaurantName.length > 20) {
+    validationErrors.restaurantName = '餐廳名稱不能超過20個字';
+  }
+  
+  // 檢查文章標題
+  if (!title.trim()) {
+    validationErrors.title = '請填寫文章標題';
+  } else if (title.length > 20) {
+    validationErrors.title = '文章標題不能超過20個字';
+  }
+
+  // 發送驗證結果
+  emit('validationErrors', validationErrors);
+
+  // 返回驗證結果
+  return Object.keys(validationErrors).length === 0 && props.checkContent();
+};
+
+// 修改預覽功能
+const handlePreview = async () => {
+  try {
+    // 先進行驗證
+    if (!validateContent()) {
+      return;
+    }
+
+    // 獲取當前表單所有數據
+    const currentFormData = {
+      date: document.getElementById('date')?.value || '',
+      title: document.getElementById('title')?.value || '',
+      content: props.getCurrentContent() || '',
+      restaurantName: document.getElementById('restaurant')?.value || '',
+      fileList: []
+    };
+
+    // 檢查必要欄位
+    if (!currentFormData.title.trim()) {
+      throw new Error('請填寫文章標題');
+    }
+
+    if (!currentFormData.restaurantName.trim()) {
+      throw new Error('請填寫餐廳名稱');
+    }
+
+    if (!currentFormData.content.trim()) {
+      throw new Error('請填寫文章內容');
+    }
+
+    // 保存原始數據到 localStorage
+    localStorage.setItem('formData', JSON.stringify(currentFormData));
+    // 同時保存一份到預覽數據
+    localStorage.setItem('previewNoteData', JSON.stringify(currentFormData));
+    
+    // 導航到預覽頁面
+    router.push('/previewnote');
+  } catch (error) {
+    await swalWithBootstrapButtons.fire({
+      title: '錯誤！',
+      text: error.message || '預覽失敗，請確保所有必要欄位都已填寫',
+      icon: 'error',
+      confirmButtonText: '確定'
+    });
+  }
+};
+
+// 修改存檔功能
+const saveAndRedirect = async () => {
+  try {
+    const isEditingPublished = route.query.type === 'published';
+    const articleId = route.query.id;
+
+    if (isEditingPublished && articleId) {
+      // 如果是編輯已發布的文章，發送 PATCH 請求更新文章
+      const updateData = {
+        userId: auth.userData.sub,
+        restaurantName: document.getElementById('restaurant').value,
+        title: document.getElementById('title').value,
+        content: props.getCurrentContent(),
+        eatdate: document.getElementById('date').value
+      };
+
+      const response = await axios.patch(
+        `${import.meta.env.VITE_BACKEND_BASE_URL}/articles/${articleId}`,
+        updateData,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${auth.token}`
+          }
+        }
+      );
+
+      if (response.status === 200) {
+        await swalWithBootstrapButtons.fire({
+          title: '成功！',
+          text: '文章更新成功',
+          icon: 'success',
+          confirmButtonText: '確定'
+        });
+        router.push('/myarticle?status=published');
+      }
+    } else {
+      // 如果是新建文章或編輯草稿，保存到 localStorage
+      await emit('save');
+      router.push('/myarticle?status=draft');
+    }
+  } catch (error) {
+    await swalWithBootstrapButtons.fire({
+      title: '錯誤！',
+      text: '儲存文章失敗，請稍後再試',
+      icon: 'error',
+      confirmButtonText: '確定'
+    });
+  }
+};
+
+// 修改發送功能，需要檢查
+const submitArticle = async () => {
+  try {
+    if (!auth.userData) {
+      await swalWithBootstrapButtons.fire({
+        title: '提醒',
+        text: '請先登入後再發表食記',
+        icon: 'warning',
+        confirmButtonText: '確定'
+      });
+      return;
+    }
+
+    // 先進行驗證
+    if (!validateContent()) {
+      return;
+    }
+
+    // 先觸發保存操作
+    await emit('save');
+
+    // 使用 props 中的 checkContent 函數進行驗證
+    const isValid = props.checkContent();
+    
+    if (!isValid) {
+      return;
+    }
+
+    // 從 localStorage 獲取資料
+    const formData = JSON.parse(localStorage.getItem('formData'));
+
+    // 準備文章資料
+    const articleData = {
+      userId: auth.userData.sub,
+      user: auth.userData.name,
+      userPhoto: auth.userData.picture || '',
+      restaurantName: formData.restaurantName,
+      title: formData.title,
+      content: formData.content,
+      photo: formData.fileList?.[0]?.data || 'default-image.jpg',
+      eatdate: formData.date 
+    };
+
+    // 檢查必要欄位
+    if (!articleData.userId || !articleData.restaurantName || !articleData.title || 
+        !articleData.content || !articleData.eatdate) {
+      throw new Error('請確保已填寫所有必要欄位');
+    }
+
+    // 發送到後端 API
+    const response = await axios.post(
+      `${import.meta.env.VITE_BACKEND_BASE_URL}/articles`,
+      articleData,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${auth.token}`
+        }
+      }
+    );
+
+    if (response.status === 201) {
+      // 清除 localStorage
+      localStorage.removeItem('formData');
+      localStorage.removeItem('noteData');
+      localStorage.removeItem('storeData');
+      localStorage.removeItem('editingDraft');
+      localStorage.removeItem('previewNoteData');
+
+      // 顯示成功訊息
+      await swalWithBootstrapButtons.fire({
+        title: '成功！',
+        text: '食記發表成功',
+        icon: 'success',
+        confirmButtonText: '確定'
+      });
+
+      // 直接跳轉到文章列表頁面
+      router.push('/articlelist');
+    }
+  } catch (error) {
+    let errorMessage = '發表食記失敗，請稍後再試';
+    if (error.response?.data?.message) {
+      errorMessage = error.response.data.message;
+    }
+
+    await swalWithBootstrapButtons.fire({
+      title: '錯誤！',
+      text: errorMessage,
+      icon: 'error',
+      confirmButtonText: '確定'
+    });
+  }
+};
+
+// 返回編輯的處理函數
+const handleBack = async () => {
+  try {
+    // 直接返回編輯頁面，使用已保存的數據
+    router.push({
+      path: '/createnote',
+      query: {
+        // 如果是已發布文章，保留相關參數
+        ...(route.query.type === 'published' ? {
+          type: 'published',
+          id: route.query.id
+        } : {})
+      }
+    });
+  } catch (error) {
+    await swalWithBootstrapButtons.fire({
+      title: '錯誤',
+      text: '返回時發生錯誤，請稍後再試',
+      icon: 'error',
+      confirmButtonText: '確定'
+    });
+  }
+};
+</script>
+
+<template>
+  <header class="bg-white shadow-md p-4">
+    <div class="flex justify-end items-center max-w-4xl mx-auto">
+      
+      <div class="space-x-4">
         <button
-          class="bg-amber-400 text-white px-4 py-1 rounded hover:bg-amber-500  transition"
-        @click="$emit('save')"
+          class="bg-amber-400 text-white px-4 py-1 rounded hover:bg-amber-500 transition"
+          @click="handlePreview"
+        >
+          預覽
+        </button>
+        <button
+          class="bg-amber-400 text-white px-4 py-1 rounded hover:bg-amber-500 transition"
+          @click="saveAndRedirect"
         >
           存檔
         </button>
         <button
-          class="bg-amber-400 text-white px-4 py-1 rounded hover:bg-amber-500  transition"
-        @click="$emit('preview')"
+          class="bg-amber-400 text-white px-4 py-1 rounded hover:bg-amber-500 transition"
+          @click="submitArticle"
         >
-          預覽
+          發送
         </button>
-        <!-- 會員頭貼 -->
-        <div class="relative inline-block text-left group">
-            <div class="w-10 h-10 rounded-full cursor-pointer bg-slate-400">
-              <img src="" alt="">
-            </div>
-            <!-- 會員下拉選單 -->
-            <div class="absolute right-0 z-10 hidden w-32 mt-0 bg-white rounded-md shadow-md group-hover:block">
-              <ul class="mt-2">
-                <li>
-                  <router-link to="/user" class="block px-4 py-2 text-amber-500 hover:bg-amber-100">
-                    <font-awesome-icon
-                      :icon="['fas', 'user']"
-                      class="mr-4 text-amber-500" />個人檔案
-                  </router-link>
-                </li>
-                <li>
-                    <router-link to="/user" class="block px-4 py-2 text-amber-500 hover:bg-amber-100 rounded-bl-md rounded-br-md">
-                      <font-awesome-icon
-                      :icon="['fas', 'bookmark']"
-                      class="mr-4 text-amber-500" />珍藏餐廳
-                    </router-link>
-                </li>
-              </ul>
-            </div>
-          </div> 
-          <!-- 會員頭貼end -->
       </div>
-    </header>
-  </template>
-  
-  <script>
-  export default {
-    name: "CreateNoteNavbar",
-  };
-  </script>
-  
-  <style scoped>
-  /* 自訂樣式可加於此 */
-  </style>
+    </div>
+  </header>
+</template>
+
+<style scoped>
+/* 自訂樣式可加於此 */
+</style>
   
