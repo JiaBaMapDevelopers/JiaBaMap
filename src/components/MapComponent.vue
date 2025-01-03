@@ -230,7 +230,7 @@ import loader from "./googleMapsLoader";
   }
 });
 
-import { useKeywordStore } from '../stores/keywordStore.js'
+import { useKeywordStore } from '@/stores/keywordStore.js'
 
 const Search = useKeywordStore()
 

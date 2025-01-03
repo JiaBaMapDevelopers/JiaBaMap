@@ -3,8 +3,8 @@ import { ref, computed, onMounted, onUnmounted, watch } from "vue";
 import { storeToRefs } from "pinia";
 import SearchInput from "./SearchInput.vue";
 import { useRoute } from "vue-router";
-import Login from '../components/Login.vue';
-import { useAuth } from '../stores/authStore';
+import Login from '@/components/Login.vue';
+import { useAuth } from '@/stores/authStore';
 import Notification from "./Notification.vue";
 
 
@@ -62,7 +62,7 @@ const checkScreenWidth = () => {
 };
 
 const currentProfilePicture = computed(() => {
-  return userData.value?.picture || '/image/default_user.png';
+  return userData.value?.profilePicture || '/image/default_user.png';
 });
 
 // 當頭像載入失敗時自動替換為備用圖片
@@ -97,7 +97,7 @@ watch(route, () => {
     <div class="flex items-center justify-between w-full">
       <!-- LOGO -->
       <router-link to="/" class="w-[130px] flex-shrink-0">
-        <img src="../assets/logo.jpg" alt="Logo" class="w-full">
+        <img src="@/assets/logo.jpg" alt="Logo" class="w-full">
       </router-link>
 
       <!-- 中間區域：搜尋欄 -->

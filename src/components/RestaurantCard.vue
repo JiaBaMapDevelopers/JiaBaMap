@@ -150,7 +150,7 @@
     <div v-else >
       <div class="flex-wrap justify-items-center mt-[70px]">
         <p class="font-bold text-2xl">沒有符合關鍵字的餐廳</p>
-        <img src="../assets/notfindresult.png" alt="">
+        <img src="@/assets/notfindresult.png" alt="">
       </div>
     </div>
   </div>
@@ -158,10 +158,10 @@
 
 <script setup>
 import { useRestaurantStore } from '@/stores/searchPage';
-import { useKeywordStore } from '../stores/keywordStore.js'
+import { useKeywordStore } from '@/stores/keywordStore.js'
 import { computed, ref, watch } from 'vue'
-import { useStore } from '../stores/storePage'
-import Loader from '../components/Loader.vue'
+import { useStore } from '@/stores/storePage'
+import Loader from '@/components/Loader.vue'
 
 const restaurantStore = useRestaurantStore()
 const Search = useKeywordStore()

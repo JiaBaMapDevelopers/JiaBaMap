@@ -39,7 +39,7 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import { useCommentStore } from '../../stores/commentStore'
+import { useCommentStore } from '@/stores/commentStore'
 
 // 從 Store 獲取評論數據
 const commentStore = useCommentStore()
