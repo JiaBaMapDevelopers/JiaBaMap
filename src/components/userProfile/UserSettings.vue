@@ -5,7 +5,7 @@
             <!-- 個人照片 -->
             <div class="flex justify-center">
                 <img
-                    :src="currentProfilePicture"
+                    :src="editedProfilePicture"
                     alt="Profile Picture"
                     class="object-cover w-24 h-24 border border-gray-300 rounded-full"
                 />
@@ -13,7 +13,7 @@
 
             <!-- 名稱和數據 -->
             <div class="mt-4 text-center" >
-                <h2 class="text-2xl font-bold text-gray-700">{{ displayName }}</h2>  
+                <h2 class="text-2xl font-bold text-gray-700">{{ editedUsername }}</h2>  
             </div>
 
             <!-- 社群連結 -->
@@ -72,7 +72,7 @@
             <!-- 更換照片 -->
             <div class="relative flex justify-center">
                 <img
-                    :src="tempProfilePicture"
+                    :src="editedProfilePicture"
                     alt="Profile Picture"
                     class="object-cover w-24 h-24 border border-gray-300 rounded-full"
                     @error="handleImageError"
@@ -95,7 +95,7 @@
             <!-- 編輯名字 -->
             <div class="mt-4 text-center">
                 <input
-                    v-model="username"
+                    v-model="editedUsername"
                     type="text"
                     class="w-1/2 p-2 text-center border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
                     placeholder="輸入名字"
@@ -145,29 +145,23 @@ const { userData, logout } = storeToRefs(user); // 使用 storeToRefs 確保資�
 const menuVisible = ref(false);
 const isEditing = ref(false);
 const instagramUsername = ref(userData.value?.instagram || ''); // IG 帳號
-const tempProfilePicture = ref(userData.value?.picture || '/image/default_user.png');
+const editedUsername = ref(userData.value?.name || "使用者");
+const editedProfilePicture = ref(userData.value?.picture || '/image/default_user.png');
 
 // 計算屬性 - 生成 IG 連結
-const instagramLink = computed(() => {
-    return `https://instagram.com/${instagramUsername.value}`;
-});
-
-// 計算屬性 - 確定目前顯示的圖片
-const currentProfilePicture = computed(() => {
-    return userData.value?.picture || '/image/default_user.png';
-});
+const instagramLink = computed(() => `https://instagram.com/${instagramUsername.value}`);
 
 const handleImageError = (event) => {
     event.target.src = '/image/default_user.png';
 };
 
-const username = computed(() => userData.value?.name || "使用者");
 
 // 切換編輯模式
 const toggleEditMode = () => {
     isEditing.value = true; // 切換編輯模式
     instagramUsername.value = userData.value?.instagram || ''; // 保留 IG 
-    tempProfilePicture.value = userData.value?.picture || '/image/default_user.png'; // 同步圖片資料
+    editedUsername.value = userData.value?.name || "使用者";
+    editedProfilePicture.value = userData.value?.picture || '/image/default_user.png'; // 同步圖片資料
 };
 
 // 保存使用者資料並退出編輯模式
@@ -175,9 +169,9 @@ const saveProfile = () => {
     isEditing.value = false; // 結束編輯模式
     userData.value = {
         ...userData.value, // 保留其他資料
-        name: username.value, // 更新名稱
+        name: editedUsername.value, // 更新名稱
         instagram: instagramUsername.value, // 更新 IG
-        picture: tempProfilePicture.value // 更新圖片
+        picture: editedProfilePicture.value // 更新圖片
     };
 };
 
@@ -185,7 +179,8 @@ const saveProfile = () => {
 const cancelEdit = () => {
     isEditing.value = false; // 結束編輯模式
     instagramUsername.value = userData.value?.instagram || ''; // 恢復 IG 帳號
-    tempProfilePicture.value = userData.value?.picture || '/image/default_user.png'; // 恢復圖片
+    editedUsername.value = userData.value?.name || "使用者"; // 回復名稱
+    editedProfilePicture.value = userData.value?.picture || '/image/default_user.png'; // 恢復圖片
 };
 
 // 切換選單顯示/隱藏
@@ -203,7 +198,7 @@ const onPhotoChange = (event) => {
     const file = event.target.files[0]; // 獲取檔案
     if (file) {
         const newImage = URL.createObjectURL(file); // 建立預覽圖片連結
-        tempProfilePicture.value = newImage; // 更新暫存圖片變數
+        editedProfilePicture.value = newImage; // 更新圖片
     }
 };
 
