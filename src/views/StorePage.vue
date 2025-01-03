@@ -10,6 +10,7 @@ import SearchTag from '@/components/SearchTag.vue';
 import SimilarRestaurants from '@/components/storePage/SimilarRestaurants.vue';
 import RecommendedRestaurants from '@/components/storePage/RecommendedRestaurants.vue';
 import SearchInput from '@/components/SearchInput.vue';
+import { useAuth } from '@/stores/authStore';
 
 const restaurantStore = useStore(); 
 const user = useAuth();
