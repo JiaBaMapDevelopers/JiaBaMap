@@ -13,7 +13,7 @@
 
             <!-- 名稱和數據 -->
             <div class="mt-4 text-center" >
-                <h2 class="text-2xl font-bold text-gray-700">{{ userData.name || "使用者" }}</h2>  
+                <h2 class="text-2xl font-bold text-gray-700">{{ displayName }}</h2>  
             </div>
 
             <!-- 社群連結 -->
@@ -72,11 +72,11 @@
             <!-- 更換照片 -->
             <div class="relative flex justify-center">
                 <img
-                    :src="currentProfilePicture"
+                    :src="tempProfilePicture"
                     alt="Profile Picture"
                     class="object-cover w-24 h-24 border border-gray-300 rounded-full"
+                    @error="handleImageError"
                 />
-
                 <label
                     for="photo-upload"
                     class="absolute inset-0 flex items-center justify-center bg-black rounded-full cursor-pointer bg-opacity-20"
@@ -136,19 +136,16 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useAuth } from '@/stores/authStore'
-// import { useRouter } from 'vue-router';
+import { storeToRefs } from 'pinia';
 
 const user = useAuth()
-const { userData, logout } = user
+const { userData, logout } = storeToRefs(user); // 使用 storeToRefs 確保資料響應式
 const menuVisible = ref(false);
 const isEditing = ref(false);
-const profilePicture = ref('https://via.placeholder.com/100'); // 頭像
-const username = ref('編輯名稱'); // 使用者名稱
-const instagramUsername = ref(''); // IG 帳號
-const defaultPicture=ref('https://via.placeholder.com/100')
-// const router = useRouter();
+const instagramUsername = ref(userData.value?.instagram || ''); // IG 帳號
+const tempProfilePicture = ref(userData.value?.picture || '/image/default_user.png');
 
 // 計算屬性 - 生成 IG 連結
 const instagramLink = computed(() => {
@@ -157,47 +154,39 @@ const instagramLink = computed(() => {
 
 // 計算屬性 - 確定目前顯示的圖片
 const currentProfilePicture = computed(() => {
-    return profilePicture.value || userData.picture || defaultPicture.value;
+    return userData.value?.picture || '/image/default_user.png';
 });
 
-// 監聽 userData.picture 的更新
-watch(
-    () => userData.picture,
-    (newValue) => {
-        if (newValue) {
-            profilePicture.value = newValue; // 使用 Google 圖片作為初始值
-        }
-    },
-    { immediate: true } // 登入後立即執行
-);
+const handleImageError = (event) => {
+    event.target.src = '/image/default_user.png';
+};
+
+const username = computed(() => userData.value?.name || "使用者");
 
 // 切換編輯模式
 const toggleEditMode = () => {
-    isEditing.value = true;
-    username.value = userData.name || "使用者"; // 初始化為 Google 名稱
-    instagramUsername.value = userData.instagram || ''; // 保留現有 Instagram 資料
+    isEditing.value = true; // 切換編輯模式
+    instagramUsername.value = userData.value?.instagram || ''; // 保留 IG 
+    tempProfilePicture.value = userData.value?.picture || '/image/default_user.png'; // 同步圖片資料
 };
 
 // 保存使用者資料並退出編輯模式
 const saveProfile = () => {
-    isEditing.value = false;
-    userData.name = username.value;
-    // 如果有新圖片，更新到 `userData`
-    if (profilePicture.value) {
-        userData.picture = profilePicture.value;
-    }    
-    userData.instagram = instagramUsername.value; // 更新 userData 的 IG 資料
+    isEditing.value = false; // 結束編輯模式
+    userData.value = {
+        ...userData.value, // 保留其他資料
+        name: username.value, // 更新名稱
+        instagram: instagramUsername.value, // 更新 IG
+        picture: tempProfilePicture.value // 更新圖片
+    };
 };
-
 
 // 取消編輯，恢復原始值（可擴展為重置到用戶原始數據）
 const cancelEdit = () => {
-    isEditing.value = false;
-    username.value = userData.name; // 恢復 Google 名稱
-    profilePicture.value = userData.picture || defaultPicture.value;
-    instagramUsername.value = userData.instagram
+    isEditing.value = false; // 結束編輯模式
+    instagramUsername.value = userData.value?.instagram || ''; // 恢復 IG 帳號
+    tempProfilePicture.value = userData.value?.picture || '/image/default_user.png'; // 恢復圖片
 };
-
 
 // 切換選單顯示/隱藏
 const toggleMenu = () => {
@@ -211,10 +200,10 @@ const writeReview = () => {
 
 // 更新頭像
 const onPhotoChange = (event) => {
-    const file = event.target.files[0];
+    const file = event.target.files[0]; // 獲取檔案
     if (file) {
-        const newImage = URL.createObjectURL(file);
-        user.setPicture(newImage); // 更新 Pinia 資料
+        const newImage = URL.createObjectURL(file); // 建立預覽圖片連結
+        tempProfilePicture.value = newImage; // 更新暫存圖片變數
     }
 };
 
@@ -229,7 +218,6 @@ const handleClickOutside = (event) => {
     }
 };
 
-
 // 添加全域事件監聽器
 onMounted(() => {
     document.addEventListener('click', handleClickOutside);
@@ -240,7 +228,6 @@ onUnmounted(() => {
     document.removeEventListener('click', handleClickOutside);
 });
 </script>
-
 
 <style scoped>
     /* 標籤覆蓋樣式 */
