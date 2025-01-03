@@ -1,9 +1,48 @@
+<script setup>
+import axios from "axios"
+import { ref, onMounted } from "vue";
+import { useAuth } from "@/stores/authStore"
+import { useStore } from "@/stores/storePage"
+
+const user = useAuth();
+const Store = useStore()
+const { userData } = user
+const dataReady = ref(false)
+const restaurants = ref([]);
+
+const getDetails = async() => {
+    const placeIds = userData.favorites
+    const response = await Promise.all(
+        placeIds.map((placeId) =>
+        axios.get(`http://localhost:3000/restaurants/${placeId}`)
+    )
+)
+restaurants.value = response.map((response) => response.data)
+dataReady.value = true; 
+}
+
+const photos = (photoId) => {
+    return `${import.meta.env.VITE_BACKEND_BASE_URL}/restaurants/photos/${photoId}`
+}
+
+const StoreId = (placeId) => {
+    Store.StoreId(placeId)
+}
+
+onMounted(() => {
+    getDetails();
+}) 
+
+</script>
+
+
 <template>
+    <div v-if="dataReady">
     <div class="box-border w-full h-screen pt-2 mt-2 overflow-y-auto lg:mt-12">
-        <div class="flex items-center pb-2 mt-2 border-b">
+        <div v-for="restaurant in restaurants" class="flex items-center pb-2 mt-2 border-b">
                 <!-- 餐廳圖 -->
                 <div class="w-40 h-32">
-                <img src="https://lh3.googleusercontent.com/GN-TM_OkaDI-lsN8ADeP84BQqZmKrWoquqrF3GbFGZYFNKGcSg6JnFS-WVO4--3jXHGwGzwy9-r59Pq5Sf_cx0EIwi0ZcQ=s200" 
+                <img :src="photos(restaurant.photoIds[0])" 
                  class="object-cover w-full h-full mx-3 rounded-md"
                 >
                 </div>
@@ -11,8 +50,8 @@
                 <div class="flex flex-col justify-between ml-3 sm:text-xl">
                     <div class="ml-3 text-left">
                         <h2 class="text-base font-bold text-gray-500">
-                            {{ restaurant.rank }}. 
-                            <a href="#" class="text-amber-500 hover:text-orange-300">{{ restaurant.name }}</a>
+                            . 
+                            <a href="#" @click="StoreId(restaurant.placeId)" class="text-amber-500 hover:text-orange-300">{{ restaurant.displayName }}</a>
                         </h2>
                     </div>
                     <!-- 餐廳內容 -->
@@ -22,21 +61,23 @@
                             <p>{{ restaurant.rating }} <font-awesome-icon :icon="['fas', 'star']" /></p>
                         </div>
 
-                        <p class="mr-2 font-light">(評論數: {{ restaurant.reviews }})</p>
-                        <p class="mr-2 font-bold">均消: {{ restaurant.cost }}</p>
+                        <p class="mr-2 font-light">(評論數: {{ restaurant.userRatingCount }})</p>
+                        <p v-if="restaurant.startPrice && restaurant.endPrice" class="mr-2 font-bold">均消: {{ restaurant.startPrice }} ~ {{ restaurant.endPrice }}</p>
+                        <p v-else class="mr-2 font-bold">均消: 未提供</p>
                     </div>
 
                     <!-- 需判斷是否營業 -->
                     <div class="items-center hidden mx-3 mt-3 text-sm md:flex">
-                        <span class="mr-2 text-center text-green-600">
+                        <!-- <span class="mr-2 text-center text-green-600">
                             <font-awesome-icon :icon="['fas', 'circle']" style="font-size: 8px;" />
-                        </span>
-                        <p>營業時間: {{ restaurant.openingHours }}</p>
+                        </span> -->
+                        <!-- <p>營業時間: {{ restaurant.openingHours }}</p> -->
+                        <p>地址: {{ restaurant.formattedAddress }}</p>
                     </div>
 
                     <div class="flex flex-wrap items-center mt-3 ml-3">
 
-                        <span>
+                        <!-- <span>
                             <a href="#" 
                                class="items-center hidden px-3 py-1 mb-1 mr-2 text-sm bg-gray-200 rounded-full md:block">
                                 <font-awesome-icon :icon="['fas', 'wand-magic-sparkles']" class="text-orange-400"/>
@@ -60,28 +101,11 @@
                             >
                             {{ tag }}
                             </a>
-                        </span>
+                        </span> -->
                     </div>    
                 </div>
          </div>
     </div>
+    </div>
 </template>
  
-
-<script setup>
-import { ref } from "vue";
-
-const restaurant = ref(
-    {
-    rank: 1,
-    name: "麻的 小辛辣｜麻辣干鍋 台中美村店",
-    rating: 4.9,
-    reviews: 2,
-    cost: 600,
-    openingHours: "12:00-14:30, 16:00-22:00",
-    tags: ["新開幕", "午餐", "晚餐"],
-    imageUrl: "/image/麻的小辛辣.jpeg"
-    },
-);
-
-</script>

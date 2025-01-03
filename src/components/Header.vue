@@ -1,14 +1,18 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch } from "vue";
+import { storeToRefs } from "pinia";
 import SearchInput from "./SearchInput.vue";
 import { useRoute } from "vue-router";
 import Login from '../components/Login.vue';
 import { useAuth } from '../stores/authStore';
 import Notification from "./Notification.vue";
 
+
 const emit = defineEmits(['search-toggle']);
 const route = useRoute();
 const user = useAuth();
+const { userData } = storeToRefs(user); // 使用 storeToRefs 讓資料響應式
+
 
 // 響應式狀態
 const isMenuOpen = ref(false);
@@ -28,25 +32,28 @@ const isUserProfile = computed(() => route.path === '/user');
 // 切換搜尋欄
 const toggleSearch = () => {
   isSearchOpen.value = !isSearchOpen.value;
+  isMenuOpen.value = false;
   emit('search-toggle', isSearchOpen.value);
 };
 
 
 // 切換選單開關
-const toggleMenu = () => isMenuOpen.value = !isMenuOpen.value;
+const toggleMenu = () => {
+  isMenuOpen.value = !isMenuOpen.value;
+  isSearchOpen.value = false;
+};
 
-// 事件處理函數，控制下拉選單的開關
+// 控制下拉選單的開關
 const handleClickOutside = (event) => {
   if (!event.target.closest('.menu-button') && !event.target.closest('.mobile-menu')) {
     isMenuOpen.value = false;
   }
 };
 
-// 事件處理函數，控制登入模態的開關
+//控制登入模態的開關
 const openLoginModal = () => showLoginModal.value = true;
 const closeLoginModal = () => showLoginModal.value = false;
 
-// 螢幕寬度檢查，如果寬度大於768px，則關閉下拉選單  
 const checkScreenWidth = () => {
   windowWidth.value = window.innerWidth;
   if (windowWidth.value > 768) {
@@ -54,10 +61,14 @@ const checkScreenWidth = () => {
   }
 };
 
-// 頭像的計算屬性
 const currentProfilePicture = computed(() => {
-  return user.userData.picture || '/src/assets/default_user.png';
+  return userData.value?.picture || '/image/default_user.png';
 });
+
+// 當頭像載入失敗時自動替換為備用圖片
+const handleImageError = (event) => {
+  event.target.src = '/image/default_user.png';
+};
 
 // 生命週期鉤子
 onMounted(() => {
@@ -81,7 +92,7 @@ watch(route, () => {
 <template>
   <Login :visible="showLoginModal" @close="closeLoginModal" />
   <header class="fixed top-0 left-0 right-0 z-50 flex items-center p-2 bg-white border-b border-orange-200"
-         :class="{ 'flex-wrap': !isHome && windowWidth >= 768 && windowWidth < 1167 }">
+          :class="{ 'flex-wrap': !isHome && windowWidth >= 768 && windowWidth < 1167 }">
     <!-- 第一行：LOGO 和搜尋欄 -->
     <div class="flex items-center justify-between w-full">
       <!-- LOGO -->
@@ -114,17 +125,17 @@ watch(route, () => {
       enter-to-class="transform translate-y-0 opacity-100"
     >
       <div v-if="isSearchOpen" 
-           class="absolute left-0 right-0 p-2 bg-white shadow-md top-full md:hidden">
+          class="absolute left-0 right-0 p-2 bg-white shadow-md top-full md:hidden">
         <SearchInput />
       </div>
     </Transition>
 
     <!-- 手機版選單 -->
     <div v-if="isMenuOpen" 
-         ref="menuContainer"
-         class="absolute right-0 bg-white shadow-lg top-full md:hidden mobile-menu">
-      <div class="py-2 text-center w-26">
-        <ul class="space-y-2">
+        ref="menuContainer"
+        class="absolute right-0 bg-white shadow-lg top-full md:hidden mobile-menu">
+      <div class="pt-2 text-center w-26">
+        <ul>
           <li v-if="!user.userData">
             <button @click="openLoginModal" class="w-full p-2 text-center text-amber-500 hover:bg-amber-100">
               登入
@@ -132,7 +143,12 @@ watch(route, () => {
           </li>
           <li v-if="user.userData" class="flex cursor-pointer align-center">
             <div class="w-10 h-10 ml-2 rounded-full bg-slate-400">
-              <img :src="currentProfilePicture" alt="avatar" class="object-cover w-full h-full rounded-full">
+              <img 
+                :src="currentProfilePicture" 
+                alt="avatar" 
+                class="object-cover w-full h-full rounded-full"
+                @error="handleImageError"
+              />
             </div>
             <router-link to="/user" class="pl-4 font-bold leading-10 text-amber-500">{{ user.userData?.name || '使用者' }}</router-link>
           </li>
@@ -162,7 +178,7 @@ watch(route, () => {
 
     <!-- 桌面版主選單 -->
     <div v-if="!isHome" 
-         class="items-center justify-start hidden w-full pl-4 mt-2 space-x-4 md:flex xl:w-auto xl:mt-0 xl:justify-end xl:pl-0">
+        class="items-center justify-start hidden w-full pl-4 mt-2 space-x-4 md:flex xl:w-auto xl:mt-0 xl:justify-end xl:pl-0">
       <!-- 登入/登出按鈕 -->
       <div class="flex items-center space-x-4">
         <button v-if="!user.userData" 
@@ -210,7 +226,12 @@ watch(route, () => {
         <!-- 會員頭貼 -->
         <div v-if="user.userData" class="relative inline-block text-left group">
           <div class="w-10 h-10 overflow-hidden rounded-full cursor-pointer">
-            <img :src="currentProfilePicture" alt="avatar" class="object-cover w-full h-full">
+            <img 
+              :src="currentProfilePicture" 
+              alt="avatar" 
+              class="object-cover w-full h-full rounded-full"
+              @error="handleImageError"
+            />
           </div>
           <div class="absolute right-0 z-50 hidden mt-0 bg-white rounded-md shadow-lg w-36 group-hover:block">
             <ul class="py-1">
@@ -288,7 +309,12 @@ watch(route, () => {
         <!-- 會員頭貼 -->
         <div v-if="user.userData" class="relative inline-block text-left group">
           <div class="w-10 h-10 overflow-hidden rounded-full cursor-pointer">
-            <img :src="currentProfilePicture" alt="avatar" class="object-cover w-full h-full">
+            <img 
+              :src="currentProfilePicture" 
+              alt="avatar" 
+              class="object-cover w-full h-full rounded-full"
+              @error="handleImageError"
+            />
           </div>
           <div class="absolute right-0 z-50 hidden mt-0 bg-white rounded-md shadow-lg w-36 group-hover:block">
             <ul class="py-1">
@@ -322,12 +348,10 @@ watch(route, () => {
 </template>
 
 <style scoped>
-/* 基本樣式 */
 header {
   transition: all 0.3s ease;
 }
 
-/* 手機版（小於768px） */
 @media (max-width: 767px) {
   header {
     flex-wrap: nowrap;
