@@ -136,15 +136,15 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import { useAuth } from '@/stores/authStore'
 import { storeToRefs } from 'pinia';
 
 const user = useAuth()
-const { userData, logout } = storeToRefs(user); // 使用 storeToRefs 確保資料響應式
+const { userData, logout } = storeToRefs(user); 
 const menuVisible = ref(false);
 const isEditing = ref(false);
-const instagramUsername = ref(userData.value?.instagram || ''); // IG 帳號
+const instagramUsername = ref(userData.value?.instagram || ''); 
 const editedUsername = ref(userData.value?.name || "使用者");
 const editedProfilePicture = ref(userData.value?.picture || '/image/default_user.png');
 
@@ -153,34 +153,34 @@ const instagramLink = computed(() => `https://instagram.com/${instagramUsername.
 
 const handleImageError = (event) => {
     event.target.src = '/image/default_user.png';
+    editedProfilePicture.value = '/image/default_user.png'; 
 };
-
 
 // 切換編輯模式
 const toggleEditMode = () => {
-    isEditing.value = true; // 切換編輯模式
-    instagramUsername.value = userData.value?.instagram || ''; // 保留 IG 
+    isEditing.value = true; 
+    instagramUsername.value = userData.value?.instagram || '';
     editedUsername.value = userData.value?.name || "使用者";
-    editedProfilePicture.value = userData.value?.picture || '/image/default_user.png'; // 同步圖片資料
+    editedProfilePicture.value = userData.value?.picture || '/image/default_user.png'; 
 };
 
 // 保存使用者資料並退出編輯模式
 const saveProfile = () => {
-    isEditing.value = false; // 結束編輯模式
+    isEditing.value = false; 
     userData.value = {
-        ...userData.value, // 保留其他資料
-        name: editedUsername.value, // 更新名稱
-        instagram: instagramUsername.value, // 更新 IG
-        picture: editedProfilePicture.value // 更新圖片
+        ...userData.value, 
+        name: editedUsername.value, 
+        instagram: instagramUsername.value,
+        picture: editedProfilePicture.value 
     };
 };
 
 // 取消編輯，恢復原始值（可擴展為重置到用戶原始數據）
 const cancelEdit = () => {
-    isEditing.value = false; // 結束編輯模式
-    instagramUsername.value = userData.value?.instagram || ''; // 恢復 IG 帳號
-    editedUsername.value = userData.value?.name || "使用者"; // 回復名稱
-    editedProfilePicture.value = userData.value?.picture || '/image/default_user.png'; // 恢復圖片
+    isEditing.value = false;
+    instagramUsername.value = userData.value?.instagram || ''; 
+    editedUsername.value = userData.value?.name || "使用者";
+    editedProfilePicture.value = userData.value?.picture || '/image/default_user.png'; 
 };
 
 // 切換選單顯示/隱藏
@@ -195,27 +195,36 @@ const writeReview = () => {
 
 // 更新頭像
 const onPhotoChange = (event) => {
-    const file = event.target.files[0]; // 獲取檔案
+    const file = event.target.files[0]; 
     if (file) {
         const newImage = URL.createObjectURL(file); // 建立預覽圖片連結
-        editedProfilePicture.value = newImage; // 更新圖片
+        editedProfilePicture.value = newImage;
     }
 };
+
+watch(
+    () => userData.value,
+    (newValue) => {
+        editedProfilePicture.value = newValue?.picture || '/image/default_user.png';
+    },
+    { immediate: true }
+);
 
 // 點擊其他地方時關閉下拉選單
 const handleClickOutside = (event) => {
     if (
         menuVisible.value &&
         !event.target.closest('#dropdownMenu') && // 點擊的元素不在選單內
-        !event.target.closest('#dropdownButton') // 點擊的元素不在按鈕內
+        !event.target.closest('#dropdownButton') 
     ) {
-        menuVisible.value = false; // 關閉選單
+        menuVisible.value = false;
     }
 };
 
 // 添加全域事件監聽器
 onMounted(() => {
     document.addEventListener('click', handleClickOutside);
+    editedProfilePicture.value =userData.value?.picture || '/image/default_user.png';
 });
 
 // 移除全域事件監聽器
@@ -225,7 +234,6 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-    /* 標籤覆蓋樣式 */
     label {
         width: 6rem; 
         height: 6rem; 
