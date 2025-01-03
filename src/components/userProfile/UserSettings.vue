@@ -1,66 +1,58 @@
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import { useAuth } from '@/stores/authStore'
-// import { useRouter } from 'vue-router';
+import { storeToRefs } from 'pinia';
 
 const user = useAuth()
-const { userData, logout } = user
+const { userData, logout } = storeToRefs(user); 
 const menuVisible = ref(false);
 const isEditing = ref(false);
-const profilePicture = ref("https://via.placeholder.com/100"); // 頭像
-const username = ref('編輯名稱'); // 使用者名稱
-const instagramUsername = ref(''); // IG 帳號
-const defaultPicture=ref('https://via.placeholder.com/100')
-// const router = useRouter();
+const instagramUsername = ref(userData.value?.instagram || ''); 
+const editedUsername = ref(userData.value?.name || "使用者");
+const editedProfilePicture = ref('/image/default_user.png');
 
 // 計算屬性 - 生成 IG 連結
-const instagramLink = computed(() => {
-    return `https://instagram.com/${instagramUsername.value}`;
-});
+const instagramLink = computed(() => `https://instagram.com/${instagramUsername.value}`);
 
-// 計算屬性 - 確定目前顯示的圖片
-const currentProfilePicture = computed(() => {
-    return profilePicture.value || userData.picture || defaultPicture.value;
-});
-
-// 監聽 userData.picture 的更新
-watch(
-    () => userData.picture,
-    (newValue) => {
-        if (newValue) {
-            profilePicture.value = newValue; // 使用 Google 圖片作為初始值
-        }
-    },
-    { immediate: true } // 登入後立即執行
-);
+const handleImageError = (event) => {
+    event.target.src = '/image/default_user.png';
+    editedProfilePicture.value = '/image/default_user.png';
+    // 更新 localStorage 中的圖片資料
+    const updatedData = {
+        ...userData.value,
+        picture: '/image/default_user.png',
+    };
+    localStorage.setItem('userData', JSON.stringify(updatedData));
+    userData.value = updatedData;
+};
 
 // 切換編輯模式
 const toggleEditMode = () => {
-    isEditing.value = true;
-    username.value = userData.name || "使用者"; // 初始化為 Google 名稱
-    instagramUsername.value = userData.instagram || ''; // 保留現有 Instagram 資料
+    isEditing.value = true; 
+    instagramUsername.value = userData.value?.instagram || '';
+    editedUsername.value = userData.value?.name || "使用者";
+    editedProfilePicture.value = userData.value?.picture || '/image/default_user.png'; 
 };
 
 // 保存使用者資料並退出編輯模式
 const saveProfile = () => {
-    isEditing.value = false;
-    userData.name = username.value;
-    // 如果有新圖片，更新到 `userData`
-    if (profilePicture.value) {
-        userData.picture = profilePicture.value;
-    }    
-    userData.instagram = instagramUsername.value; // 更新 userData 的 IG 資料
+    isEditing.value = false; // 結束編輯模式
+    const updatedData = {
+        name: editedUsername.value,
+        instagram: instagramUsername.value,
+        picture: editedProfilePicture.value,
+    };
+    localStorage.setItem('userData', JSON.stringify(updatedData)); // 保存到 localStorage
+    userData.value = updatedData; // 更新 userData
 };
-
 
 // 取消編輯，恢復原始值（可擴展為重置到用戶原始數據）
 const cancelEdit = () => {
     isEditing.value = false;
-    username.value = userData.name; // 恢復 Google 名稱
-    profilePicture.value = userData.picture || defaultPicture.value;
-    instagramUsername.value = userData.instagram
+    instagramUsername.value = userData.value?.instagram || ''; 
+    editedUsername.value = userData.value?.name || "使用者";
+    editedProfilePicture.value = userData.value?.picture || '/image/default_user.png'; 
 };
-
 
 // 切換選單顯示/隱藏
 const toggleMenu = () => {
@@ -74,28 +66,37 @@ const writeReview = () => {
 
 // 更新頭像
 const onPhotoChange = (event) => {
-    const file = event.target.files[0];
+    const file = event.target.files[0]; 
     if (file) {
-        const newImage = URL.createObjectURL(file);
-        user.setPicture(newImage); // 更新 Pinia 資料
+        const newImage = URL.createObjectURL(file); // 建立預覽圖片連結
+        editedProfilePicture.value = newImage;
     }
 };
+
+// 使用 watch 確保即時更新圖片
+watch(
+    () => userData.value?.picture,
+    (newValue) => {
+        editedProfilePicture.value = newValue || '/image/default_user.png';
+    },
+    { immediate: true }
+);
 
 // 點擊其他地方時關閉下拉選單
 const handleClickOutside = (event) => {
     if (
         menuVisible.value &&
         !event.target.closest('#dropdownMenu') && // 點擊的元素不在選單內
-        !event.target.closest('#dropdownButton') // 點擊的元素不在按鈕內
+        !event.target.closest('#dropdownButton') 
     ) {
-        menuVisible.value = false; // 關閉選單
+        menuVisible.value = false;
     }
 };
-
 
 // 添加全域事件監聽器
 onMounted(() => {
     document.addEventListener('click', handleClickOutside);
+    editedProfilePicture.value =userData.value?.picture || '/image/default_user.png';
 });
 
 // 移除全域事件監聽器
@@ -104,7 +105,6 @@ onUnmounted(() => {
 });
 </script>
 
-
 <template>
     <div class="p-4 my-10">
         <!-- 非編輯模式 -->
@@ -112,7 +112,7 @@ onUnmounted(() => {
             <!-- 個人照片 -->
             <div class="flex justify-center">
                 <img
-                    :src="currentProfilePicture"
+                    :src="editedProfilePicture"
                     alt="Profile Picture"
                     class="object-cover w-24 h-24 border border-gray-300 rounded-full"
                 />
@@ -120,7 +120,7 @@ onUnmounted(() => {
 
             <!-- 名稱和數據 -->
             <div class="mt-4 text-center" >
-                <h2 class="text-2xl font-bold text-gray-700">{{ userData.name || "使用者" }}</h2>  
+                <h2 class="text-2xl font-bold text-gray-700">{{ editedUsername }}</h2>  
             </div>
 
             <!-- 社群連結 -->
@@ -179,11 +179,11 @@ onUnmounted(() => {
             <!-- 更換照片 -->
             <div class="relative flex justify-center">
                 <img
-                    :src="currentProfilePicture"
+                    :src="editedProfilePicture"
                     alt="Profile Picture"
                     class="object-cover w-24 h-24 border border-gray-300 rounded-full"
+                    @error="handleImageError"
                 />
-
                 <label
                     for="photo-upload"
                     class="absolute inset-0 flex items-center justify-center bg-black rounded-full cursor-pointer bg-opacity-20"
@@ -202,7 +202,7 @@ onUnmounted(() => {
             <!-- 編輯名字 -->
             <div class="mt-4 text-center">
                 <input
-                    v-model="username"
+                    v-model="editedUsername"
                     type="text"
                     class="w-1/2 p-2 text-center border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
                     placeholder="輸入名字"
@@ -242,9 +242,11 @@ onUnmounted(() => {
     </div>
 </template>
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 2dcdefcc4519c57a2978c2f34a4dd2a615117b7e
 <style scoped>
-    /* 標籤覆蓋樣式 */
     label {
         width: 6rem; 
         height: 6rem; 

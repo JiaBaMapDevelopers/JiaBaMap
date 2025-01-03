@@ -5,39 +5,50 @@ import Login from './components/Login.vue'
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
 
-// 取得目前路由
 const route = useRoute();
 
-// 判斷是否隱藏 Footer
 const hideFooter = computed(() => {
-  // 在 previewnote 頁面不顯示 Footer
   return route.path === "/previewnote";
 });
+
+const hideHeader = computed(() => {
+  return route.path === "/createnote" || route.path === "/previewnote";
+});
+
+// 移除 padding 的條件
+const noPadding = computed(() => {
+  return route.path === "/createnote";
+});
+
 </script>
 
 <template>
   <Login />
   <div class="relative min-h-screen">
-    <Header />
-    <div class="overflow-x-auto hide-scrollbar">
+    <Header v-if="!hideHeader" />
+    <div :class="['overflow-x-auto hide-scrollbar', { 'no-padding': noPadding }]">
       <RouterView />
-      <Footer />
+      <Footer v-if="!hideFooter" />
     </div>
   </div>
 </template>
 
 <style scoped>
-/* 隱藏滾動條 */
-.hide-scrollbar {
+.hide-scrollbar:not(.no-padding) {
   overflow-x: auto;
   -ms-overflow-style: none;
   scrollbar-width: none;
   padding-top: 60px;
 }
 
-.hide-scrollbar::-webkit-scrollbar {
+/* .hide-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
+.no-padding {
+  padding-top: 0 !important;
+} */
 </style>
+
 
 
