@@ -4,17 +4,17 @@ import App from './App.vue'
 import router from './router';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-import {   faEllipsis ,faUtensils, faSearch, faMapMarkerAlt, faCalendarWeek, faArrowUpFromBracket, faBars, faMagnifyingGlass, faStar, faDollarSign, faCircle, faChevronRight, faChevronDown, faWandMagicSparkles, faBowlFood,  faStarHalfStroke, faBookmark, faUser, faCamera, faRightFromBracket} from '@fortawesome/free-solid-svg-icons';
+import {   faEllipsis ,faUtensils, faSearch, faMapMarkerAlt, faCalendarWeek, faArrowUpFromBracket, faBars, faMagnifyingGlass, faStar, faDollarSign, faCircle, faChevronRight, faChevronDown, faWandMagicSparkles, faBowlFood,  faStarHalfStroke, faBookmark, faUser, faCamera, faRightFromBracket, faBell} from '@fortawesome/free-solid-svg-icons';
 import { faInstagram } from '@fortawesome/free-brands-svg-icons';
 import { createPinia } from 'pinia';
 import { faGoogle } from '@fortawesome/free-brands-svg-icons'
-import { faThumbsUp as farThumbsUp } from '@fortawesome/free-regular-svg-icons';
+import { faThumbsUp as farThumbsUp, faBookmark as farBookmark } from '@fortawesome/free-regular-svg-icons';
 import { faThumbsUp as fasThumbsUp } from '@fortawesome/free-solid-svg-icons';
 import { faComment } from '@fortawesome/free-regular-svg-icons';
 import VueSweetalert2 from 'vue-sweetalert2';
 import 'sweetalert2/dist/sweetalert2.min.css';
 
-library.add(faEllipsis ,fasThumbsUp ,farThumbsUp, faGoogle, faUtensils, faSearch, faMapMarkerAlt, faCalendarWeek, faArrowUpFromBracket, faBars, faMagnifyingGlass, faStar, faDollarSign, faCircle, faChevronRight, faChevronDown, faWandMagicSparkles, faBowlFood, faInstagram, faStarHalfStroke, faBookmark, faUser, faCamera, faRightFromBracket, faComment);
+library.add(faEllipsis ,fasThumbsUp ,farThumbsUp, faGoogle, faUtensils, faSearch, faMapMarkerAlt, faCalendarWeek, faArrowUpFromBracket, faBars, faMagnifyingGlass, faStar, faDollarSign, faCircle, faChevronRight, faChevronDown, faWandMagicSparkles, faBowlFood, faInstagram, faStarHalfStroke, faBookmark, farBookmark, faUser, faCamera, faRightFromBracket, faBell, faComment);
 
 
 

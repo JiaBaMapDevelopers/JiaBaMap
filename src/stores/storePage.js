@@ -110,15 +110,15 @@ export const useStore = defineStore("store", () => {
 
       const detailData = await detailRes.json();
 
-      // 使用當前餐廳的位置搜尋附近餐廳
-      const searchRes = await fetch(
-        `${import.meta.env.VITE_BACKEND_BASE_URL}/restaurants/search?keyword=餐廳&lat=${detailData.lat}&lng=${detailData.lng}`
-      );
+    // 使用當前餐廳的位置搜尋附近餐廳
+    const searchRes = await fetch(
+      `${import.meta.env.VITE_BACKEND_BASE_URL}/restaurants/search?keyword=餐廳&lat=${detailData.lat}&lng=${detailData.lng}`
+    );
 
-      const resJson = await searchRes.json();
-      
-      // 使用 Set 來儲存已經添加的餐廳 ID
-      const addedIds = new Set();
+    const resJson = await searchRes.json();
+    
+    // 使用 Set 來儲存已經添加的餐廳 ID
+    const addedIds = new Set();
 
       // 過濾掉當前餐廳和重複的餐廳
       const filteredRestaurants = resJson
@@ -307,6 +307,7 @@ export const useStore = defineStore("store", () => {
     bannerPhoto,
     googleMapsUri,
     openNow,
+    placesId,
     StoreId,
 
     // API 方法

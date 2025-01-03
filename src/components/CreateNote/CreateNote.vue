@@ -603,12 +603,11 @@ const getCurrentContent = () => {
 
 
 <style scoped>
-/* 圖片樣式 */
 img {
   display: block;
   margin: auto;
   max-width: 100%;
-  border-radius: 0.375rem; /* 圓角 */
+  border-radius: 0.375rem; 
 }
 
 input[type="file"]::-webkit-file-upload-button {
@@ -618,5 +617,9 @@ input[type="file"]::-webkit-file-upload-button {
 /* 添加錯誤提示的間距 */
 .mb-4 {
   margin-bottom: 2rem;
+}
+ /* 全局選擇器，避免作用範圍問題 */
+div.overflow-x-auto.hide-scrollbar {
+  padding-top: 0 !important;
 }
 </style>

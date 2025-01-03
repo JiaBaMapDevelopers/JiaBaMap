@@ -1,18 +1,19 @@
 <script setup>
+import  axios from 'axios';
 import { onMounted, ref } from 'vue';
 import { storeToRefs,} from 'pinia';
-import { useStore } from '../stores/storePage';
-import StoreComment from '../components/storeComment/StoreComment.vue'
-import Header from "../components/Header.vue";
-import StoreType from '../components/HomePage/StoreType.vue';
-import SearchTag from '../components/SearchTag.vue';
-import SimilarRestaurants from '../components/storePage/SimilarRestaurants.vue';
-import RecommendedRestaurants from '../components/storePage/RecommendedRestaurants.vue';
-import SearchInput from '../components/SearchInput.vue';
+import { useStore } from '@/stores/storePage';
+import StoreComment from '@/components/storeComment/StoreComment.vue'
+import Header from "@/components/Header.vue";
+import StoreType from '@/components/HomePage/StoreType.vue';
+import SearchTag from '@/components/SearchTag.vue';
+import SimilarRestaurants from '@/components/storePage/SimilarRestaurants.vue';
+import RecommendedRestaurants from '@/components/storePage/RecommendedRestaurants.vue';
+import SearchInput from '@/components/SearchInput.vue';
 
-// Store 初始化
-const restaurantStore = useStore();
-
+const restaurantStore = useStore(); 
+const user = useAuth();
+const iconClassic = ref("far") 
 // 從 store 中解構需要的屬性
 const {
     storeName,
@@ -34,25 +35,47 @@ const {
 // 下拉選單狀態
 const isDropdownVisible = ref(false);
 
+const updateFavorite = async() => {
+    if(!user.userData){
+        alert("請登入")
+        return
+    }
+    const isFavorite = iconClassic.value === "fas"
+    iconClassic.value = isFavorite ? "far" : "fas";
+    if(!isFavorite){
+        // iconClassic.value = "fas"
+        await axios.post(`${import.meta.env.VITE_BACKEND_BASE_URL}/user/favorites/${user.userId}`, 
+           {
+            placeId: restaurantStore.placesId,
+            },
+        );
+    } else {
+        // iconClassic.value = "far"
+        await axios.delete(`${import.meta.env.VITE_BACKEND_BASE_URL}/user/favorites/delete/${user.userId}`, {
+            data: {
+                    placeId: restaurantStore.placesId,
+                },
+            },
+        );
+    }
+    await user.getUserdata();
+}
+
+const checkFavorite = () => {
+    if(user.userData){
+    iconClassic.value = user.userData.favorites.includes(restaurantStore.placesId) ? "fas" : "far";
+    }
+}
+
 // 頁面載入時的初始化
 onMounted(async () => {
     try {
         await restaurantStore.fetchPlaceDetail();
-        
-        
         await restaurantStore.fetchStorePhoto();
-        
-
         await restaurantStore.fetchBannerPhoto();
-        
-        
         await restaurantStore.fetchSimilarRestaurants();
-        
-
         await restaurantStore.fetchRecommendedRestaurants();
-        
-        
-        
+        checkFavorite()
     } catch (error) {
         console.error('數據載入錯誤：', error);
     }
@@ -92,7 +115,7 @@ document.addEventListener('click', handleDocumentClick);
             />
             <img 
                 v-else 
-                src="../assets/logo.jpg" 
+                src="@/assets/logo.jpg" 
                 alt="Banner" 
                 class="object-cover w-full h-full"
             />
@@ -114,7 +137,12 @@ document.addEventListener('click', handleDocumentClick);
             <div class="flex flex-col items-center space-y-4 md:flex-row md:items-start md:space-y-0 md:space-x-4">
                 <img :src="storePhoto" alt="Store Thumbnail" class="object-cover w-40 h-32 rounded-lg">
                 <div class="space-y-2 text-center md:text-left">
-                     <h2 class="py-1 text-3xl font-black text-gray-700">{{ storeName }}</h2>
+                    <div class="flex relative">
+                        <h2 class="py-1 text-3xl font-black text-gray-700 mr">{{ storeName }}</h2>
+                        <button @click="updateFavorite" class=" absolute right-[-25px] top-3 flex items-center ">
+                            <font-awesome-icon :icon="[iconClassic, 'bookmark']" size="lg" />
+                        </button>
+                    </div> 
                     <div class="flex flex-wrap items-center justify-center gap-3 md:justify-start">
                         <span class="px-2 py-1 rounded-2xl text-yellow-50 bg-orange-600">{{ rating }} ★</span>
                         <a href="#"><span class="text-gray-400">{{ userRatingCount }}則評論</span></a>
@@ -218,8 +246,3 @@ document.addEventListener('click', handleDocumentClick);
 </template>
 
 
-<style scoped>
-
-
-
-</style>

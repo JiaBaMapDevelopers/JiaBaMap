@@ -38,28 +38,6 @@ import loader from "./googleMapsLoader";
     }
 })
 
-
-    
-
-
-
-    // 從 Local Storage 加載地點資料
-    // const fetchPlacesFromLocalStorage = () => {
-    //   const localStorageUtil = {
-    //     get(key) {
-    //       const value = localStorage.getItem(key);
-    //       return value ? JSON.parse(value) : [];
-    //     },
-    //   };
-    //   places.value = localStorageUtil.get("places") || []; // 更新地點資料
-    //   districts.value = localStorageUtil.get("districts") || [];
-    //   if (map.value && districts.value) {
-    //     map.value.setCenter(districts.value); // 動態設置地圖的中心點
-    //   }
-    //   updateMarkers(); // 每次加載新資料時更新標記
-    // };
-    
-
     // 初始化 Google 地圖
     const initMap = async () => {
       
@@ -80,8 +58,6 @@ import loader from "./googleMapsLoader";
           zoom: 15,
           styles: customMapStyle, // 套用自定義樣式
         });
-
-        console.log("地圖初始化完成");
 
         // 地圖加載完成後首次更新標記
         google.maps.event.addListenerOnce(map.value, "tilesloaded", () => {
@@ -254,7 +230,7 @@ import loader from "./googleMapsLoader";
   }
 });
 
-import { useKeywordStore } from '../stores/keywordStore.js'
+import { useKeywordStore } from '@/stores/keywordStore.js'
 
 const Search = useKeywordStore()
 
