@@ -1,3 +1,110 @@
+<script setup>
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
+import { useAuth } from '@/stores/authStore'
+import { storeToRefs } from 'pinia';
+
+const user = useAuth()
+const { userData, logout } = storeToRefs(user); 
+const menuVisible = ref(false);
+const isEditing = ref(false);
+const instagramUsername = ref(userData.value?.instagram || ''); 
+const editedUsername = ref(userData.value?.name || "使用者");
+const editedProfilePicture = ref('/image/default_user.png');
+
+// 計算屬性 - 生成 IG 連結
+const instagramLink = computed(() => `https://instagram.com/${instagramUsername.value}`);
+
+const handleImageError = (event) => {
+    event.target.src = '/image/default_user.png';
+    editedProfilePicture.value = '/image/default_user.png';
+    // 更新 localStorage 中的圖片資料
+    const updatedData = {
+        ...userData.value,
+        picture: '/image/default_user.png',
+    };
+    localStorage.setItem('userData', JSON.stringify(updatedData));
+    userData.value = updatedData;
+};
+
+// 切換編輯模式
+const toggleEditMode = () => {
+    isEditing.value = true; 
+    instagramUsername.value = userData.value?.instagram || '';
+    editedUsername.value = userData.value?.name || "使用者";
+    editedProfilePicture.value = userData.value?.picture || '/image/default_user.png'; 
+};
+
+// 保存使用者資料並退出編輯模式
+const saveProfile = () => {
+    isEditing.value = false; // 結束編輯模式
+    const updatedData = {
+        name: editedUsername.value,
+        instagram: instagramUsername.value,
+        picture: editedProfilePicture.value,
+    };
+    localStorage.setItem('userData', JSON.stringify(updatedData)); // 保存到 localStorage
+    userData.value = updatedData; // 更新 userData
+};
+
+// 取消編輯，恢復原始值（可擴展為重置到用戶原始數據）
+const cancelEdit = () => {
+    isEditing.value = false;
+    instagramUsername.value = userData.value?.instagram || ''; 
+    editedUsername.value = userData.value?.name || "使用者";
+    editedProfilePicture.value = userData.value?.picture || '/image/default_user.png'; 
+};
+
+// 切換選單顯示/隱藏
+const toggleMenu = () => {
+    menuVisible.value = !menuVisible.value;
+};
+
+// 撰寫食記的功能
+const writeReview = () => {
+    alert('撰寫食評功能即將啟用！');
+};
+
+// 更新頭像
+const onPhotoChange = (event) => {
+    const file = event.target.files[0]; 
+    if (file) {
+        const newImage = URL.createObjectURL(file); // 建立預覽圖片連結
+        editedProfilePicture.value = newImage;
+    }
+};
+
+// 使用 watch 確保即時更新圖片
+watch(
+    () => userData.value?.picture,
+    (newValue) => {
+        editedProfilePicture.value = newValue || '/image/default_user.png';
+    },
+    { immediate: true }
+);
+
+// 點擊其他地方時關閉下拉選單
+const handleClickOutside = (event) => {
+    if (
+        menuVisible.value &&
+        !event.target.closest('#dropdownMenu') && // 點擊的元素不在選單內
+        !event.target.closest('#dropdownButton') 
+    ) {
+        menuVisible.value = false;
+    }
+};
+
+// 添加全域事件監聽器
+onMounted(() => {
+    document.addEventListener('click', handleClickOutside);
+    editedProfilePicture.value =userData.value?.picture || '/image/default_user.png';
+});
+
+// 移除全域事件監聽器
+onUnmounted(() => {
+    document.removeEventListener('click', handleClickOutside);
+});
+</script>
+
 <template>
     <div class="p-4 my-10">
         <!-- 非編輯模式 -->
@@ -134,104 +241,6 @@
         </div>
     </div>
 </template>
-
-<script setup>
-import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
-import { useAuth } from '@/stores/authStore'
-import { storeToRefs } from 'pinia';
-
-const user = useAuth()
-const { userData, logout } = storeToRefs(user); 
-const menuVisible = ref(false);
-const isEditing = ref(false);
-const instagramUsername = ref(userData.value?.instagram || ''); 
-const editedUsername = ref(userData.value?.name || "使用者");
-const editedProfilePicture = ref(userData.value?.picture || '/image/default_user.png');
-
-// 計算屬性 - 生成 IG 連結
-const instagramLink = computed(() => `https://instagram.com/${instagramUsername.value}`);
-
-const handleImageError = (event) => {
-    event.target.src = '/image/default_user.png';
-    editedProfilePicture.value = '/image/default_user.png'; 
-};
-
-// 切換編輯模式
-const toggleEditMode = () => {
-    isEditing.value = true; 
-    instagramUsername.value = userData.value?.instagram || '';
-    editedUsername.value = userData.value?.name || "使用者";
-    editedProfilePicture.value = userData.value?.picture || '/image/default_user.png'; 
-};
-
-// 保存使用者資料並退出編輯模式
-const saveProfile = () => {
-    isEditing.value = false; 
-    userData.value = {
-        ...userData.value, 
-        name: editedUsername.value, 
-        instagram: instagramUsername.value,
-        picture: editedProfilePicture.value 
-    };
-};
-
-// 取消編輯，恢復原始值（可擴展為重置到用戶原始數據）
-const cancelEdit = () => {
-    isEditing.value = false;
-    instagramUsername.value = userData.value?.instagram || ''; 
-    editedUsername.value = userData.value?.name || "使用者";
-    editedProfilePicture.value = userData.value?.picture || '/image/default_user.png'; 
-};
-
-// 切換選單顯示/隱藏
-const toggleMenu = () => {
-    menuVisible.value = !menuVisible.value;
-};
-
-// 撰寫食記的功能
-const writeReview = () => {
-    alert('撰寫食評功能即將啟用！');
-};
-
-// 更新頭像
-const onPhotoChange = (event) => {
-    const file = event.target.files[0]; 
-    if (file) {
-        const newImage = URL.createObjectURL(file); // 建立預覽圖片連結
-        editedProfilePicture.value = newImage;
-    }
-};
-
-watch(
-    () => userData.value,
-    (newValue) => {
-        editedProfilePicture.value = newValue?.picture || '/image/default_user.png';
-    },
-    { immediate: true }
-);
-
-// 點擊其他地方時關閉下拉選單
-const handleClickOutside = (event) => {
-    if (
-        menuVisible.value &&
-        !event.target.closest('#dropdownMenu') && // 點擊的元素不在選單內
-        !event.target.closest('#dropdownButton') 
-    ) {
-        menuVisible.value = false;
-    }
-};
-
-// 添加全域事件監聽器
-onMounted(() => {
-    document.addEventListener('click', handleClickOutside);
-    editedProfilePicture.value =userData.value?.picture || '/image/default_user.png';
-});
-
-// 移除全域事件監聽器
-onUnmounted(() => {
-    document.removeEventListener('click', handleClickOutside);
-});
-</script>
 
 <style scoped>
     label {
