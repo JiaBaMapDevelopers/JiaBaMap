@@ -10,9 +10,6 @@
                 <Stars class="my-2" />
                 <div class="flex flex-col relative" v-if="isExpanded">
                     <div v-if="user.userData">
-                    <!-- <div v-if="!user.userData" class=" absolute top-[-5px] left-[-10px] flex justify-center items-center bg-gray-900 h-[110%] w-[110%] opacity-50" >
-                        <p class="font-black text-yellow-200">請先<a href="#" class="m-2 text-orange-600">登入</a>以使用更多功能!</p>                        
-                    </div> -->
                     <textarea
                         v-model="commentText"
                         maxlength="200"
@@ -39,6 +36,7 @@
 </template>
 
 <script setup>
+import axios from "axios"
 import { ref } from 'vue'
 import Stars from "./Stars.vue"
 import UploadPic from "./UploadPic.vue"
@@ -46,9 +44,12 @@ import { useStarsStore } from '../../stores/starStore';
 import { useCommentStore } from '../../stores/commentStore';
 import { usePicStore } from '../../stores/picStore';
 import { useAuth } from '@/stores/authStore'
+import { useStore } from "@/stores/storePage"
 import Login from '@/components/Login.vue';
 
 const user = useAuth()
+const store = useStore()
+const { userData, userId } = user
 
 const time = new Date()
 const price = ref('')
@@ -60,26 +61,23 @@ const starsStore = useStarsStore()
 const commentStore = useCommentStore()
 const picStore = usePicStore()
 
-const submitComment = () => {
+const submitComment = async() => {
     if(!commentText.value.trim()){
         alert('請輸入評論')
         return
     }
 
     const newComment = {
-        id: crypto.randomUUID(),
-        userName: "Julie Wang",
-        avatar: 'https://cats.com/wp-content/uploads/2024/05/A-long-haired-orange-cat-looks-up-with-gentle-eyes-compressed.jpg',
-        reviewNum: 999,
-        commentTime: time.toLocaleDateString(),
-        star: starsStore.selectIndex,
-        price: price.value,
-        commentText: commentText.value,
-        pictures: picStore.pictures,
-        likeStatus: false,
-        likeHint: "表示讚賞",
-        likeNum: 0
+        userId: userId,
+        placeId: store.placesId,
+        content: commentText.value,
+        rating: starsStore.selectIndex,
+        AvgPrice: price.value,
     }
+    console.log(newComment);
+    
+    await axios.post(`${import.meta.env.VITE_BACKEND_BASE_URL}/comments/`, newComment)
+    
     commentStore.addComment(newComment); // 使用 Pinia Store 更新評論
     //重置輸入框
     commentText.value = ''

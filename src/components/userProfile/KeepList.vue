@@ -49,9 +49,8 @@ onMounted(() => {
                 <!-- 餐廳排名、名稱 -->
                 <div class="flex flex-col justify-between ml-3 sm:text-xl">
                     <div class="ml-3 text-left">
-                        <h2 class="text-base font-bold text-gray-500">
-                            . 
-                            <a href="#" @click="StoreId(restaurant.placeId)" class="text-amber-500 hover:text-orange-300">{{ restaurant.displayName }}</a>
+                        <h2 class="text-base font-bold text-gray-500 text-ellipsis whitespace-nowrap overflow-hidden w-[200px]">
+                            <a href="#" @click="StoreId(restaurant.placeId)" class="text-amber-500 hover:text-orange-300" >{{ restaurant.displayName }}</a>
                         </h2>
                     </div>
                     <!-- 餐廳內容 -->

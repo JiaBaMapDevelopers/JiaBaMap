@@ -5,21 +5,21 @@
                 <img :src="comment.avatar ? comment.avatar : '/src/assets/default_user.png'" alt="avatar" class="object-cover w-full h-full">
             </div>
             <div class="flex flex-col flex-1 w-0 text-left">
-                <router-link to="/user" class="font-bold cursor-pointer text-amber-500">{{ comment.userName }}（{{ comment.reviewNum }} 則評論）</router-link>
+                <router-link to="/user" class="font-bold cursor-pointer text-amber-500">Name（ reviewNum 則評論）</router-link>
                 <div class="flex gap-3">
-                    <span v-if="comment.star" class="px-2 py-1 text-sm font-bold text-white rounded-full bg-amber-500">{{ comment.star }}.0 ★</span>
-                    <p v-if="comment.price">均消價位：${{ comment.price }}</p>
+                    <span v-if="comment.rating" class="px-2 py-1 text-sm font-bold text-white rounded-full bg-amber-500">{{ comment.rating }}.0 ★</span>
+                    <p v-if="comment.AvgPrice">均消價位：${{ comment.AvgPrice }}</p>
                 </div>
-                <p class="text-slate-500">評論日期：{{ comment.commentTime }}</p>
-                <p class="my-3">{{ comment.commentText }}</p>
+                <p class="text-slate-500">評論日期：{{ comment.createdAt }}</p>
+                <p class="my-3">{{ comment.content }}</p>
                 <div>
-                    <button @click="toggleLike(comment)" class="p-2 rounded-lg shadow ">{{ comment.likeHint }}</button>
+                    <button @click="toggleLike(comment)" class="p-2 rounded-lg shadow ">likeHint</button>
                     <button class="p-2 ml-2 rounded-lg shadow" @click="shareComment(comment)">分享評論</button>
                 </div>
                 <div class="flex gap-4 mt-4 overflow-x-auto scrollbar-hide" style="scroll-snap-type: x mandatory;">
-                    <div v-for="(imageUrl, index) in comment.pictures" :key="index" class="flex-shrink-0 w-32 h-32 overflow-hidden">
+                    <!-- <div v-for="(imageUrl, index) in comment.pictures" :key="index" class="flex-shrink-0 w-32 h-32 overflow-hidden">
                         <img :src="imageUrl" @click="showPopup(imageUrl)" class="object-cover w-full h-full cursor-pointer">
-                    </div>
+                    </div> -->
                 </div>
             </div>
         </div>
@@ -38,12 +38,16 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import axios from 'axios'
+import { ref, computed, onMounted } from 'vue'
 import { useCommentStore } from '../../stores/commentStore'
+import { useStore } from "@/stores/storePage"
 
+const store = useStore()
 // 從 Store 獲取評論數據
 const commentStore = useCommentStore()
-const comments = computed(() => commentStore.comments)
+// const comments = computed(() => commentStore.comments)
+const comments = ref([])
 
 // 圖片popup
 const popupImage = ref(null)
@@ -54,6 +58,16 @@ const showPopup = (imageUrl) => {
 const closePopup = () => {
       popupImage.value = null;
 }
+
+const getComment = async() => {
+    const response = await axios.get(`${import.meta.env.VITE_BACKEND_BASE_URL}/comments/restaurant/${store.placesId}`)
+    comments.value = response.data
+    
+    const userRes = await Promise.all(comments.value.map((comment) => axios.get(`${import.meta.env.VITE_BACKEND_BASE_URL}/user/${comment.userId}`)))
+    
+    
+}
+
 
 // 讚數+1
 const toggleLike = (comment) => {
@@ -81,5 +95,11 @@ const shareComment = (comment) => {
         alert('您的瀏覽器不支援分享功能')
     }
 }
+
+onMounted(() => {
+    getComment()
+}) 
+
+
 
 </script>
