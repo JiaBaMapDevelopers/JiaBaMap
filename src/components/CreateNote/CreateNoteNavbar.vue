@@ -1,6 +1,6 @@
 <script setup>
 import { storeToRefs } from 'pinia';
-import { useAuth } from '../../stores/authStore';
+import { useAuth } from '@/stores/authStore';
 import { ref, watchEffect } from "vue";
 
 const user = useAuth();
@@ -10,7 +10,7 @@ const currentProfilePicture = ref('/image/default_user.png');
 
 // 動態監聽
 watchEffect(() => {
-  currentProfilePicture.value = userData.value?.picture || '/image/default_user.png';
+  currentProfilePicture.value = userData.value?.profilePicture || '/image/default_user.png';
 });
 
 // 處理圖片錯誤
@@ -30,7 +30,7 @@ defineEmits(["save", "preview"]);
     <div class="flex items-center space-x-4">
       <router-link to="/">
         <img 
-          src="../../assets/logo.jpg" 
+          src="@/assets/logo.jpg" 
           alt="Logo" 
           class="w-auto min-w-[60px] max-w-[100px] md:max-w-[130px] h-auto"
           />

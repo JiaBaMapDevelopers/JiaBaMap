@@ -26,7 +26,7 @@ export const useAuth = defineStore("auth", () => {
   // 新增更新大頭貼的方法
   const setPicture = (newPicture) => {
     if (userData.value) {
-      userData.value.picture = newPicture; // 更新圖片資料
+      userData.value.profilePicture = newPicture; // 更新圖片資料
       localStorage.setItem("userData", JSON.stringify(userData.value)); // 更新 localStorage
     }
   };
@@ -70,6 +70,7 @@ export const useAuth = defineStore("auth", () => {
       });
       //token解碼後可取得使用者id
       userId.value = jose.decodeJwt(resToken.data.token).id;
+      userData.value = jose.decodeJwt(resToken.data.token);
     }
     router.push({ name: "user" });
   };

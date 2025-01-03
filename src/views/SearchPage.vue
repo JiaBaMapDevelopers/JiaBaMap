@@ -2,9 +2,9 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRoute } from 'vue-router';
-import RestaurantCard from '../components/RestaurantCard.vue';
-import MapComponent from '../components/MapComponent.vue';
-import Header from "../components/Header.vue";
+import RestaurantCard from '@/components/RestaurantCard.vue';
+import MapComponent from '@/components/MapComponent.vue';
+import Header from "@/components/Header.vue";
 
 const route = useRoute();
 const isHome = computed(() => route.path === '/');

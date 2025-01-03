@@ -1,14 +1,14 @@
 <script setup>
 import { onMounted, ref } from 'vue';
 import { storeToRefs,} from 'pinia';
-import { useStore } from '../stores/storePage';
-import StoreComment from '../components/storeComment/StoreComment.vue'
-import Header from "../components/Header.vue";
-import StoreType from '../components/HomePage/StoreType.vue';
-import SearchTag from '../components/SearchTag.vue';
-import SimilarRestaurants from '../components/storePage/SimilarRestaurants.vue';
-import RecommendedRestaurants from '../components/storePage/RecommendedRestaurants.vue';
-import SearchInput from '../components/SearchInput.vue';
+import { useStore } from '@/stores/storePage';
+import StoreComment from '@/components/storeComment/StoreComment.vue'
+import Header from "@/components/Header.vue";
+import StoreType from '@/components/HomePage/StoreType.vue';
+import SearchTag from '@/components/SearchTag.vue';
+import SimilarRestaurants from '@/components/storePage/SimilarRestaurants.vue';
+import RecommendedRestaurants from '@/components/storePage/RecommendedRestaurants.vue';
+import SearchInput from '@/components/SearchInput.vue';
 
 const restaurantStore = useStore();
 
@@ -91,7 +91,7 @@ document.addEventListener('click', handleDocumentClick);
             />
             <img 
                 v-else 
-                src="../assets/logo.jpg" 
+                src="@/assets/logo.jpg" 
                 alt="Banner" 
                 class="object-cover w-full h-full"
             />

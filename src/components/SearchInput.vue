@@ -1,5 +1,5 @@
 <script setup>
-import { useKeywordStore } from '../stores/keywordStore.js'
+import { useKeywordStore } from '@/stores/keywordStore.js'
 import { computed, watch, inject } from 'vue'
 import { useRouter, useRoute } from 'vue-router';
 
