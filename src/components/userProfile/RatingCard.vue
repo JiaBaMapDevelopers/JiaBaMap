@@ -2,7 +2,7 @@
 import { computed, ref, TrackOpTypes } from "vue";
 import { useRouter } from "vue-router";
 import { useKeywordStore } from "@/stores/keywordStore";
-import Loader from "../Loader.vue";
+import Loader from "@/components/Loader.vue";
 import axios from "axios";
 
 let restaurants = ref(null)

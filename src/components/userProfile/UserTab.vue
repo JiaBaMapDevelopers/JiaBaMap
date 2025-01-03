@@ -91,7 +91,7 @@
 <script setup>
 import { ref } from 'vue';
 import KeepList from './KeepList.vue';
-import PreviousReview from '../storeComment/PreviousReview.vue';
+import PreviousReview from '@/components/storeComment/PreviousReview.vue';
 const activeTab = ref('review')
 
 const clickReview = () => activeTab.value = 'review'

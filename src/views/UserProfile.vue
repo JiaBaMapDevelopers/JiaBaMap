@@ -1,7 +1,7 @@
 <script setup>
-import UserTab from '../components/userProfile/UserTab.vue'
-import RatingCard from '../components/userProfile/RatingCard.vue';
-import UserSettings from '../components/userProfile/UserSettings.vue';
+import UserTab from '@/components/userProfile/UserTab.vue'
+import RatingCard from '@/components/userProfile/RatingCard.vue';
+import UserSettings from '@/components/userProfile/UserSettings.vue';
 </script>
 
 <template>

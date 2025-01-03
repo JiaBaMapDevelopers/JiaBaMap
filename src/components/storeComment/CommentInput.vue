@@ -2,7 +2,7 @@
     <Login :visible="showLoginModal" @close="closeLoginModal" />
     <div class="flex gap-5 mb-4">
         <div class="flex-shrink-0 w-16 h-16 rounded-full bg-slate-300">
-            <img src="../../assets/default_user.png" alt="avatar" class="w-full h-auto overflow-hidden ">
+            <img src="@/assets/default_user.png" alt="avatar" class="w-full h-auto overflow-hidden ">
         </div>
         <div class="flex flex-1 md:flex-none md:basis-2/3">
             <div class="w-full text-left md:w-96">
@@ -42,9 +42,9 @@
 import { ref } from 'vue'
 import Stars from "./Stars.vue"
 import UploadPic from "./UploadPic.vue"
-import { useStarsStore } from '../../stores/starStore';
-import { useCommentStore } from '../../stores/commentStore';
-import { usePicStore } from '../../stores/picStore';
+import { useStarsStore } from '@/stores/starStore';
+import { useCommentStore } from '@/stores/commentStore';
+import { usePicStore } from '@/stores/picStore';
 import { useAuth } from '@/stores/authStore'
 import Login from '@/components/Login.vue';
 

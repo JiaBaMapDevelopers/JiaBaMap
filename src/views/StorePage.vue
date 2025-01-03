@@ -2,15 +2,14 @@
 import  axios from 'axios';
 import { onMounted, ref } from 'vue';
 import { storeToRefs,} from 'pinia';
-import { useStore } from '../stores/storePage';
-import { useAuth } from '../stores/authStore'
-import StoreComment from '../components/storeComment/StoreComment.vue'
-import Header from "../components/Header.vue";
-import StoreType from '../components/HomePage/StoreType.vue';
-import SearchTag from '../components/SearchTag.vue';
-import SimilarRestaurants from '../components/storePage/SimilarRestaurants.vue';
-import RecommendedRestaurants from '../components/storePage/RecommendedRestaurants.vue';
-import SearchInput from '../components/SearchInput.vue';
+import { useStore } from '@/stores/storePage';
+import StoreComment from '@/components/storeComment/StoreComment.vue'
+import Header from "@/components/Header.vue";
+import StoreType from '@/components/HomePage/StoreType.vue';
+import SearchTag from '@/components/SearchTag.vue';
+import SimilarRestaurants from '@/components/storePage/SimilarRestaurants.vue';
+import RecommendedRestaurants from '@/components/storePage/RecommendedRestaurants.vue';
+import SearchInput from '@/components/SearchInput.vue';
 
 const restaurantStore = useStore(); 
 const user = useAuth();
@@ -116,7 +115,7 @@ document.addEventListener('click', handleDocumentClick);
             />
             <img 
                 v-else 
-                src="../assets/logo.jpg" 
+                src="@/assets/logo.jpg" 
                 alt="Banner" 
                 class="object-cover w-full h-full"
             />
@@ -138,16 +137,12 @@ document.addEventListener('click', handleDocumentClick);
             <div class="flex flex-col items-center space-y-4 md:flex-row md:items-start md:space-y-0 md:space-x-4">
                 <img :src="storePhoto" alt="Store Thumbnail" class="object-cover w-40 h-32 rounded-lg">
                 <div class="space-y-2 text-center md:text-left">
-<<<<<<< HEAD
                     <div class="flex relative">
                         <h2 class="py-1 text-3xl font-black text-gray-700 mr">{{ storeName }}</h2>
                         <button @click="updateFavorite" class=" absolute right-[-25px] top-3 flex items-center ">
                             <font-awesome-icon :icon="[iconClassic, 'bookmark']" size="lg" />
                         </button>
                     </div> 
-=======
-                    <h2 class="py-1 text-3xl font-black text-gray-700">{{ storeName }}</h2>
->>>>>>> 2dcdefcc4519c57a2978c2f34a4dd2a615117b7e
                     <div class="flex flex-wrap items-center justify-center gap-3 md:justify-start">
                         <span class="px-2 py-1 rounded-2xl text-yellow-50 bg-orange-600">{{ rating }} ★</span>
                         <a href="#"><span class="text-gray-400">{{ userRatingCount }}則評論</span></a>

@@ -1,6 +1,6 @@
 <script setup>
 import { useRouter, useRoute } from 'vue-router';
-import Footer from '../components/Footer.vue';
+import Footer from '@/components/Footer.vue';
 import { ref, computed, onMounted, onUnmounted, inject } from 'vue';
 import articleData from '../../data/myArticle.json';
 const router = useRouter();

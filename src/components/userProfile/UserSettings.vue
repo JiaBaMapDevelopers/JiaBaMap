@@ -9,7 +9,9 @@ const menuVisible = ref(false);
 const isEditing = ref(false);
 const instagramUsername = ref(userData.value?.instagram || ''); 
 const editedUsername = ref(userData.value?.name || "使用者");
-const editedProfilePicture = ref('/image/default_user.png');
+const editedProfilePicture = ref(userData.value?.profilePicture ||'/image/default_user.png');
+
+console.log(userData.value);
 
 // 計算屬性 - 生成 IG 連結
 const instagramLink = computed(() => `https://instagram.com/${instagramUsername.value}`);
@@ -20,7 +22,7 @@ const handleImageError = (event) => {
     // 更新 localStorage 中的圖片資料
     const updatedData = {
         ...userData.value,
-        picture: '/image/default_user.png',
+        profilePicture: '/image/default_user.png', // 使用正確 key
     };
     localStorage.setItem('userData', JSON.stringify(updatedData));
     userData.value = updatedData;
@@ -31,16 +33,16 @@ const toggleEditMode = () => {
     isEditing.value = true; 
     instagramUsername.value = userData.value?.instagram || '';
     editedUsername.value = userData.value?.name || "使用者";
-    editedProfilePicture.value = userData.value?.picture || '/image/default_user.png'; 
+    editedProfilePicture.value = userData.value?.profilePicture || '/image/default_user.png'; 
 };
 
 // 保存使用者資料並退出編輯模式
 const saveProfile = () => {
-    isEditing.value = false; // 結束編輯模式
+    isEditing.value = false;
     const updatedData = {
         name: editedUsername.value,
         instagram: instagramUsername.value,
-        picture: editedProfilePicture.value,
+        profilePicture: editedProfilePicture.value,
     };
     localStorage.setItem('userData', JSON.stringify(updatedData)); // 保存到 localStorage
     userData.value = updatedData; // 更新 userData
@@ -51,7 +53,7 @@ const cancelEdit = () => {
     isEditing.value = false;
     instagramUsername.value = userData.value?.instagram || ''; 
     editedUsername.value = userData.value?.name || "使用者";
-    editedProfilePicture.value = userData.value?.picture || '/image/default_user.png'; 
+    editedProfilePicture.value = userData.value?.profilePicture || '/image/default_user.png';
 };
 
 // 切換選單顯示/隱藏
@@ -68,14 +70,18 @@ const writeReview = () => {
 const onPhotoChange = (event) => {
     const file = event.target.files[0]; 
     if (file) {
-        const newImage = URL.createObjectURL(file); // 建立預覽圖片連結
-        editedProfilePicture.value = newImage;
+        const newImage = URL.createObjectURL(file);
+        editedProfilePicture.value = newImage; // 更新圖片
+        userData.value = {
+            ...userData.value,
+            profilePicture: newImage, // 同步更新 Pinia 資料
+        };
     }
 };
 
 // 使用 watch 確保即時更新圖片
 watch(
-    () => userData.value?.picture,
+    () => userData.value?.profilePicture,
     (newValue) => {
         editedProfilePicture.value = newValue || '/image/default_user.png';
     },
@@ -95,8 +101,9 @@ const handleClickOutside = (event) => {
 
 // 添加全域事件監聽器
 onMounted(() => {
+    const savedData = JSON.parse(localStorage.getItem('userData')) || {}; 
     document.addEventListener('click', handleClickOutside);
-    editedProfilePicture.value =userData.value?.picture || '/image/default_user.png';
+    editedProfilePicture.value = savedData.profilePicture || '/image/default_user.png';
 });
 
 // 移除全域事件監聽器

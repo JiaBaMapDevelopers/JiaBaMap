@@ -66,7 +66,7 @@
 <script setup>
 import { onMounted } from 'vue';
 import { storeToRefs } from 'pinia';
-import { useRestaurantStore } from '../stores/storePage';
+import { useRestaurantStore } from '@/stores/storePage';
 
 const restaurantStore = useRestaurantStore();
 const { 

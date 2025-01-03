@@ -2,9 +2,9 @@
 import { ref, onMounted, onUnmounted, inject } from 'vue';
 import axios from 'axios';
 import dayjs from 'dayjs'
-import Header from "../components/Header.vue";
+import Header from "@/components/Header.vue";
 import articleData from '../../data/articleList.json';
-import { useAuth } from '../stores/authStore';
+import { useAuth } from '@/stores/authStore';
 
 const auth = useAuth();
 
