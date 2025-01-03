@@ -1,3 +1,110 @@
+<script setup>
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
+import { useAuth } from '@/stores/authStore'
+// import { useRouter } from 'vue-router';
+
+const user = useAuth()
+const { userData, logout } = user
+const menuVisible = ref(false);
+const isEditing = ref(false);
+const profilePicture = ref("https://via.placeholder.com/100"); // 頭像
+const username = ref('編輯名稱'); // 使用者名稱
+const instagramUsername = ref(''); // IG 帳號
+const defaultPicture=ref('https://via.placeholder.com/100')
+// const router = useRouter();
+
+// 計算屬性 - 生成 IG 連結
+const instagramLink = computed(() => {
+    return `https://instagram.com/${instagramUsername.value}`;
+});
+
+// 計算屬性 - 確定目前顯示的圖片
+const currentProfilePicture = computed(() => {
+    return profilePicture.value || userData.picture || defaultPicture.value;
+});
+
+// 監聽 userData.picture 的更新
+watch(
+    () => userData.picture,
+    (newValue) => {
+        if (newValue) {
+            profilePicture.value = newValue; // 使用 Google 圖片作為初始值
+        }
+    },
+    { immediate: true } // 登入後立即執行
+);
+
+// 切換編輯模式
+const toggleEditMode = () => {
+    isEditing.value = true;
+    username.value = userData.name || "使用者"; // 初始化為 Google 名稱
+    instagramUsername.value = userData.instagram || ''; // 保留現有 Instagram 資料
+};
+
+// 保存使用者資料並退出編輯模式
+const saveProfile = () => {
+    isEditing.value = false;
+    userData.name = username.value;
+    // 如果有新圖片，更新到 `userData`
+    if (profilePicture.value) {
+        userData.picture = profilePicture.value;
+    }    
+    userData.instagram = instagramUsername.value; // 更新 userData 的 IG 資料
+};
+
+
+// 取消編輯，恢復原始值（可擴展為重置到用戶原始數據）
+const cancelEdit = () => {
+    isEditing.value = false;
+    username.value = userData.name; // 恢復 Google 名稱
+    profilePicture.value = userData.picture || defaultPicture.value;
+    instagramUsername.value = userData.instagram
+};
+
+
+// 切換選單顯示/隱藏
+const toggleMenu = () => {
+    menuVisible.value = !menuVisible.value;
+};
+
+// 撰寫食記的功能
+const writeReview = () => {
+    alert('撰寫食評功能即將啟用！');
+};
+
+// 更新頭像
+const onPhotoChange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+        const newImage = URL.createObjectURL(file);
+        user.setPicture(newImage); // 更新 Pinia 資料
+    }
+};
+
+// 點擊其他地方時關閉下拉選單
+const handleClickOutside = (event) => {
+    if (
+        menuVisible.value &&
+        !event.target.closest('#dropdownMenu') && // 點擊的元素不在選單內
+        !event.target.closest('#dropdownButton') // 點擊的元素不在按鈕內
+    ) {
+        menuVisible.value = false; // 關閉選單
+    }
+};
+
+
+// 添加全域事件監聽器
+onMounted(() => {
+    document.addEventListener('click', handleClickOutside);
+});
+
+// 移除全域事件監聽器
+onUnmounted(() => {
+    document.removeEventListener('click', handleClickOutside);
+});
+</script>
+
+
 <template>
     <div class="p-4 my-10">
         <!-- 非編輯模式 -->
@@ -134,112 +241,6 @@
         </div>
     </div>
 </template>
-
-<script setup>
-import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
-import { useAuth } from '@/stores/authStore'
-// import { useRouter } from 'vue-router';
-
-const user = useAuth()
-const { userData, logout } = user
-const menuVisible = ref(false);
-const isEditing = ref(false);
-const profilePicture = ref("https://via.placeholder.com/100"); // 頭像
-const username = ref('編輯名稱'); // 使用者名稱
-const instagramUsername = ref(''); // IG 帳號
-const defaultPicture=ref('https://via.placeholder.com/100')
-// const router = useRouter();
-
-// 計算屬性 - 生成 IG 連結
-const instagramLink = computed(() => {
-    return `https://instagram.com/${instagramUsername.value}`;
-});
-
-// 計算屬性 - 確定目前顯示的圖片
-const currentProfilePicture = computed(() => {
-    return profilePicture.value || userData.picture || defaultPicture.value;
-});
-
-// 監聽 userData.picture 的更新
-watch(
-    () => userData.picture,
-    (newValue) => {
-        if (newValue) {
-            profilePicture.value = newValue; // 使用 Google 圖片作為初始值
-        }
-    },
-    { immediate: true } // 登入後立即執行
-);
-
-// 切換編輯模式
-const toggleEditMode = () => {
-    isEditing.value = true;
-    username.value = userData.name || "使用者"; // 初始化為 Google 名稱
-    instagramUsername.value = userData.instagram || ''; // 保留現有 Instagram 資料
-};
-
-// 保存使用者資料並退出編輯模式
-const saveProfile = () => {
-    isEditing.value = false;
-    userData.name = username.value;
-    // 如果有新圖片，更新到 `userData`
-    if (profilePicture.value) {
-        userData.picture = profilePicture.value;
-    }    
-    userData.instagram = instagramUsername.value; // 更新 userData 的 IG 資料
-};
-
-
-// 取消編輯，恢復原始值（可擴展為重置到用戶原始數據）
-const cancelEdit = () => {
-    isEditing.value = false;
-    username.value = userData.name; // 恢復 Google 名稱
-    profilePicture.value = userData.picture || defaultPicture.value;
-    instagramUsername.value = userData.instagram
-};
-
-
-// 切換選單顯示/隱藏
-const toggleMenu = () => {
-    menuVisible.value = !menuVisible.value;
-};
-
-// 撰寫食記的功能
-const writeReview = () => {
-    alert('撰寫食評功能即將啟用！');
-};
-
-// 更新頭像
-const onPhotoChange = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-        const newImage = URL.createObjectURL(file);
-        user.setPicture(newImage); // 更新 Pinia 資料
-    }
-};
-
-// 點擊其他地方時關閉下拉選單
-const handleClickOutside = (event) => {
-    if (
-        menuVisible.value &&
-        !event.target.closest('#dropdownMenu') && // 點擊的元素不在選單內
-        !event.target.closest('#dropdownButton') // 點擊的元素不在按鈕內
-    ) {
-        menuVisible.value = false; // 關閉選單
-    }
-};
-
-
-// 添加全域事件監聽器
-onMounted(() => {
-    document.addEventListener('click', handleClickOutside);
-});
-
-// 移除全域事件監聽器
-onUnmounted(() => {
-    document.removeEventListener('click', handleClickOutside);
-});
-</script>
 
 
 <style scoped>
