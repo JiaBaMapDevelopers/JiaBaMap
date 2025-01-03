@@ -242,6 +242,10 @@ onUnmounted(() => {
     </div>
 </template>
 
+<<<<<<< HEAD
+
+=======
+>>>>>>> 2dcdefcc4519c57a2978c2f34a4dd2a615117b7e
 <style scoped>
     label {
         width: 6rem; 

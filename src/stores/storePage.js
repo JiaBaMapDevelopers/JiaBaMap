@@ -71,7 +71,6 @@ export const useStore = defineStore("store", () => {
           photoIds.value[0]
         }`
       );
-      console.log(res);
       storePhoto.value = URL.createObjectURL(await res.blob());
     } catch (err) {
       console.log("Failed to fetch place photos from Google API.");
@@ -86,7 +85,6 @@ export const useStore = defineStore("store", () => {
           photoIds.value[1]
         }`
       );
-      console.log(res);
       bannerPhoto.value = URL.createObjectURL(await res.blob());
     } catch (err) {
       console.log("Failed to fetch place photos from Google API.");
@@ -279,6 +277,7 @@ export const useStore = defineStore("store", () => {
     bannerPhoto,
     googleMapsUri,
     openNow,
+    placesId,
     StoreId,
 
     // API 方法
