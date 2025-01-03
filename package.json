@@ -24,6 +24,7 @@
     "@googlemaps/js-api-loader": "^1.16.8",
     "axios": "^1.7.9",
     "dayjs": "^1.11.13",
+    "jose": "^5.9.6",
     "lodash": "^4.17.21",
     "pinia": "^2.2.6",
     "socket.io": "^4.8.1",
