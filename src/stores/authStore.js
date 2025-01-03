@@ -70,10 +70,15 @@ export const useAuth = defineStore("auth", () => {
       });
       //token解碼後可取得使用者id
       userId.value = jose.decodeJwt(resToken.data.token).id;
-      userData.value = jose.decodeJwt(resToken.data.token);
+      getUserdata();
     }
-    router.push({ name: "user" });
+    // router.push({ name: "user" });
   };
+
+  const getUserdata = async() => {
+    const response = await axios.get(`${import.meta.env.VITE_BACKEND_BASE_URL}/user/${userId.value}`)
+    userData.value = response.data
+  }
 
   const logout = () => {
     userData.value = null;
@@ -88,5 +93,7 @@ export const useAuth = defineStore("auth", () => {
     userData,
     setPicture, // 新增 setPicture 方法
     logout,
+    getUserdata,
+    userId,
   };
 });
