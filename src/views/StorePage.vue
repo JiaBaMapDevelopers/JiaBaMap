@@ -101,7 +101,7 @@ document.addEventListener('click', handleDocumentClick);
 
 <template>
     <div>
-        <Header/>
+        <Header />
         <div class="fixed top-2 left-1/2 transform -translate-x-1/2 z-40 w-[600px] hidden md:block">
             <SearchInput />
         </div>
@@ -137,14 +137,14 @@ document.addEventListener('click', handleDocumentClick);
             <div class="flex flex-col items-center space-y-4 md:flex-row md:items-start md:space-y-0 md:space-x-4">
                 <img :src="storePhoto" alt="Store Thumbnail" class="object-cover w-40 h-32 rounded-lg">
                 <div class="space-y-2 text-center md:text-left">
-                    <div class="flex relative">
+                    <div class="relative flex">
                         <h2 class="py-1 text-3xl font-black text-gray-700 mr">{{ storeName }}</h2>
                         <button @click="updateFavorite" class=" absolute right-[-25px] top-3 flex items-center ">
                             <font-awesome-icon :icon="[iconClassic, 'bookmark']" size="lg" />
                         </button>
                     </div> 
                     <div class="flex flex-wrap items-center justify-center gap-3 md:justify-start">
-                        <span class="px-2 py-1 rounded-2xl text-yellow-50 bg-orange-600">{{ rating }} ★</span>
+                        <span class="px-2 py-1 bg-orange-600 rounded-2xl text-yellow-50">{{ rating }} ★</span>
                         <a href="#"><span class="text-gray-400">{{ userRatingCount }}則評論</span></a>
                     </div>
                     <div class="flex flex-wrap justify-center gap-3 py-2 md:justify-start">

@@ -28,12 +28,12 @@ export const useStore = defineStore("store", () => {
     router.push({
       path: "/store",
       query: { id: placeId },
-    });
-  };
+    })
+  }
 
   // 相似餐廳相關狀態
   const similarRestaurants = ref([]);
-
+  
   // 推薦餐廳相關狀態
   const recommendedRestaurants = ref([]);
 
@@ -60,6 +60,7 @@ export const useStore = defineStore("store", () => {
       photoIds.value = resJson.photoIds;
        //一個array含兩組id
     } catch (err) {
+      console.log("Failed to fetch place detail from Google API.");
       console.log(err);
     }
   };
@@ -94,7 +95,7 @@ export const useStore = defineStore("store", () => {
 
   const staticMapUrl = computed(() => {
     // 如果沒有位置資訊，返回空
-    if (!lat.value || !lng.value) return null;
+    if (!formattedAddress.value || !lat.value || !lng.value) return null;
 
     return `${import.meta.env.VITE_BACKEND_BASE_URL}/restaurants/staticmap?lat=${lat.value}&lng=${lng.value}`;
   });
@@ -198,8 +199,8 @@ export const useStore = defineStore("store", () => {
 
   // 儲存餐廳資料到本地
   const saveToLocalStorage = () => {
-    const data = {
-      storeName: storeName.value,
+    const data ={
+      storeName:storeName.value,
       rating: rating.value,
       userRatingCount: userRatingCount.value,
       startPrice: startPrice.value,
@@ -214,8 +215,8 @@ export const useStore = defineStore("store", () => {
       lng: lng.value,
       placesId: placesId.value,
     };
-    localStorage.setItem("storeData", JSON.stringify(data));
-  };
+    localStorage.setItem('storeData', JSON.stringify(data));
+  }
 
   const loadFromLocalStorage = () => {
     const data = JSON.parse(localStorage.getItem("storeData"));
@@ -238,7 +239,7 @@ export const useStore = defineStore("store", () => {
   };
 
   // 在資料變化時自動保存
-  watch(
+   watch(
     [
       storeName,
       rating,
@@ -253,7 +254,7 @@ export const useStore = defineStore("store", () => {
       googleMapsUri,
       lat,
       lng,
-      placesId,
+      placesId
     ],
     saveToLocalStorage,
     { deep: true }
@@ -285,8 +286,10 @@ export const useStore = defineStore("store", () => {
     fetchStorePhoto,
     fetchBannerPhoto,
     staticMapUrl,
+    // 相似餐廳相關
     similarRestaurants,
     fetchSimilarRestaurants,
+    // 推薦餐廳相關
     recommendedRestaurants,
     fetchRecommendedRestaurants,
     lat,
