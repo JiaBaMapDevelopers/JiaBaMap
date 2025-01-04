@@ -1,15 +1,18 @@
 <script setup>
 import axios from "axios";
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, inject } from "vue";
 import { useCommentStore } from "../../stores/commentStore";
 import { useStore } from "@/stores/storePage";
+import { useAuth } from "@/stores/authStore";
 
 const store = useStore();
+const user = useAuth();
 // 從 Store 獲取評論數據
 const commentStore = useCommentStore();
 const comments = computed(() => commentStore.comments);
 const getComment = commentStore.getComment();
-
+const userData = computed(() => user.userData);
+const Swal = inject("$swal");
 // 圖片popup
 const popupImage = ref(null);
 
@@ -20,16 +23,24 @@ const closePopup = () => {
   popupImage.value = null;
 };
 
-// 讚數+1
-const toggleLike = (comment) => {
-  if (comment.likeStatus) {
-    comment.likeNum--;
-    comment.likeHint = "表示讚賞";
-  } else {
-    comment.likeNum++;
-    comment.likeHint = `❤ + ${comment.likeNum}`;
+const toggleLike = async (commentId) => {
+  if (!userData.value) {
+    Swal.fire({
+      title: "請先登入！",
+      icon: "error",
+      timer: 2000,
+      timerProgressBar: true,
+    });
+    return;
   }
-  comment.likeStatus = !comment.likeStatus;
+  const response = await axios.put(
+    `${import.meta.env.VITE_BACKEND_BASE_URL}/comments/likes/${commentId}`,
+    {
+      userId: userData.value._id,
+    },
+  );
+  console.log("Response:", response.data);
+  commentStore.getComment();
 };
 
 //分享
@@ -47,8 +58,6 @@ const shareComment = (comment) => {
     alert("您的瀏覽器不支援分享功能");
   }
 };
-
-onMounted(() => {});
 </script>
 
 <template>
@@ -84,8 +93,20 @@ onMounted(() => {});
         <p class="text-slate-500">評論日期：{{ comment.createdAt }}</p>
         <p class="my-3">{{ comment.content }}</p>
         <div>
-          <button @click="toggleLike(comment)" class="p-2 rounded-lg shadow">
-            likeHint
+          <div>❤ + {{ comment.likes }}</div>
+          <button
+            v-if="userData"
+            @click="toggleLike(comment._id)"
+            class="p-2 rounded-lg shadow"
+          >
+            {{ comment.likedBy.includes(userData._id) ? "收回" : "按讚" }}
+          </button>
+          <button
+            v-else
+            @click="toggleLike(comment._id)"
+            class="p-2 rounded-lg shadow"
+          >
+            按讚
           </button>
           <button
             class="p-2 ml-2 rounded-lg shadow"
