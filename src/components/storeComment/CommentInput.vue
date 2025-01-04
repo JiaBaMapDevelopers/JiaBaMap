@@ -9,6 +9,7 @@ import { usePicStore } from "../../stores/picStore";
 import { useAuth } from "@/stores/authStore";
 import { useStore } from "@/stores/storePage";
 import Login from "@/components/Login.vue";
+import PreviousReview from "@/components/storeComment/PreviousReview.vue";
 
 const user = useAuth();
 const store = useStore();
@@ -44,8 +45,6 @@ const submitComment = async () => {
     });
   }
 
-  console.log(formData);
-
   await axios.post(
     `${import.meta.env.VITE_BACKEND_BASE_URL}/comments/`,
     formData,
@@ -60,6 +59,7 @@ const submitComment = async () => {
   price.value = "";
   picStore.resetPic(); // 重置圖片
   starsStore.resetStars(); // 重置星星狀態
+  commentStore.getComment();
 };
 
 const openComment = () => {

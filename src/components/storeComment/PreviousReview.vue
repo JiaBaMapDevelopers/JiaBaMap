@@ -7,8 +7,8 @@ import { useStore } from "@/stores/storePage";
 const store = useStore();
 // 從 Store 獲取評論數據
 const commentStore = useCommentStore();
-// const comments = computed(() => commentStore.comments)
-const comments = ref([]);
+const comments = computed(() => commentStore.comments);
+const getComment = commentStore.getComment();
 
 // 圖片popup
 const popupImage = ref(null);
@@ -18,31 +18,6 @@ const showPopup = (imageUrl) => {
 };
 const closePopup = () => {
   popupImage.value = null;
-};
-
-const getComment = async () => {
-  const response = await axios.get(
-    `${import.meta.env.VITE_BACKEND_BASE_URL}/comments/restaurant/${
-      store.placesId
-    }`,
-  );
-  comments.value = response.data;
-
-  const userRes = await Promise.all(
-    comments.value.map((comment) =>
-      axios.get(
-        `${import.meta.env.VITE_BACKEND_BASE_URL}/user/${comment.userId}`,
-      ),
-    ),
-  );
-  comments.value = comments.value.map((comment, index) => {
-    const user = userRes[index].data; // 假設 userRes 每個元素是完整的用戶數據
-    return {
-      ...comment, // 保留原有的 comment 屬性
-      name: user.name, // 添加用戶的名稱
-      avatar: user.profilePicture, // 添加用戶的頭像
-    };
-  });
 };
 
 // 讚數+1
@@ -73,9 +48,7 @@ const shareComment = (comment) => {
   }
 };
 
-onMounted(() => {
-  getComment();
-});
+onMounted(() => {});
 </script>
 
 <template>
