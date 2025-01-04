@@ -2,10 +2,9 @@
 import { ref, onMounted } from "vue";
 import CreateNoteNavbar from "@/components/CreateNote/CreateNoteNavbar.vue";
 import { useRouter } from "vue-router";
-import Swal from 'sweetalert2';
+import Swal from "sweetalert2";
 
-
-const router = useRouter(); 
+const router = useRouter();
 
 // 定義響應式變數
 const date = ref("");
@@ -25,7 +24,7 @@ onMounted(() => {
 
     // 填充 contenteditable 區域
     if (editor.value) {
-      editor.value.innerHTML = content.value; 
+      editor.value.innerHTML = content.value;
     }
   }
 });
@@ -42,7 +41,7 @@ const updateContent = () => {
 
     // 3. 過濾 fileList，只保留仍在內容中的圖片
     fileList.value = fileList.value.filter((file) =>
-      existingImages.includes(file.data)
+      existingImages.includes(file.data),
     );
   }
 };
@@ -62,7 +61,7 @@ const onImageSelect = (event) => {
           style="max-width: auto; height: 300px;">
       </div>
     `;
-    insertHtmlAtCursor(imageHtml); 
+    insertHtmlAtCursor(imageHtml);
 
     // 更新檔案清單
     fileList.value.push({
@@ -77,14 +76,14 @@ const onImageSelect = (event) => {
 
 // 強制插入 HTML 到游標位置
 const insertHtmlAtCursor = (html) => {
-  const selection = window.getSelection(); 
+  const selection = window.getSelection();
   const editorElement = editor.value;
 
   // 若未選取範圍或未聚焦，將游標移動到內容末尾
   if (!selection || selection.rangeCount === 0) {
-    editorElement.focus(); 
+    editorElement.focus();
     const range = document.createRange();
-    range.selectNodeContents(editorElement); 
+    range.selectNodeContents(editorElement);
     range.collapse(false);
     selection.removeAllRanges();
     selection.addRange(range);
@@ -114,12 +113,12 @@ const saveNote = () => {
   // 檢查內容是否為空
   if (!content.value.trim()) {
     Swal.fire({
-    icon: 'error', 
-    title: '錯誤！',
-    text: '請填寫內容後再存檔！',
-    confirmButtonText: '確定', 
-  });
-    fileList.value = []; 
+      icon: "error",
+      title: "錯誤！",
+      text: "請填寫內容後再存檔！",
+      confirmButtonText: "確定",
+    });
+    fileList.value = [];
     localStorage.removeItem("noteData");
     return;
   }
@@ -129,16 +128,15 @@ const saveNote = () => {
     date: date.value,
     title: title.value,
     content: content.value,
-    fileList: fileList.value, 
+    fileList: fileList.value,
   };
   localStorage.setItem("noteData", JSON.stringify(noteData));
   Swal.fire({
-  icon: 'success',
-  title: '存檔成功！',
-  text: '文章已成功存檔！',
-  confirmButtonText: '確定',
-});
-
+    icon: "success",
+    title: "存檔成功！",
+    text: "文章已成功存檔！",
+    confirmButtonText: "確定",
+  });
 };
 
 // 預覽筆記
@@ -166,77 +164,86 @@ const goToPreview = () => {
 };
 </script>
 
-
 <template>
   <div class="min-h-screen w-full bg-white">
-  <div class="no-scrollbar">
-    <CreateNoteNavbar @save="saveNote" @preview="goToPreview" />
-    <div class="max-w-4xl mx-auto mt-6 m-11 p-4 md:p-4 bg-white rounded-lg shadow-lg
-    ">
-      <div class="mb-4 flex items-center">
-        <label for="date" class="block text-sm font-medium text-gray-700 mr-2">用餐日期：</label>
-        <input
-          type="date"
-          id="date"
-          v-model="date"
-          class="border border-gray-300 px-3 py-2 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
-        />
-      </div>
-      <div class="mb-4">
-        <label for="title" class="block text-sm font-medium text-gray-700 mb-1">文章標題</label>
-        <input
-          id="title"
-          type="text"
-          v-model="title"
-          placeholder="輸入文章標題"
-          class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-xl focus:outline-none focus:ring-2 focus:ring-amber-500"
-        />
-      </div>
-      <div class="mb-4">
-        <label class="block text-sm font-medium text-gray-700 mb-1">文章內容</label>
-        <div
-          contenteditable="true"
-          ref="editor"
-          class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-500 text-base h-100 overflow-y-auto"
-          @input="updateContent"
-        ></div>
-      </div>
-      <div class="mb-4">
-        <label class="block text-sm font-medium text-gray-700 mb-1">插入圖片</label>
-        <input
-          type="file"
-          @change="onImageSelect"
-          class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md  file:bg-amber-400 file:text-white hover:file:bg-amber-500 file:transition file:cursor-pointer"
-        />
-        <!-- 顯示已插入的檔案名稱 -->
-        <ul class="mt-2">
-          <li
-            v-for="file in fileList"
-            :key="file.name"
-            class="text-sm text-gray-600"
+    <div class="no-scrollbar">
+      <CreateNoteNavbar @save="saveNote" @preview="goToPreview" />
+      <div
+        class="max-w-4xl mx-auto mt-6 m-11 p-4 md:p-4 bg-white rounded-lg shadow-lg"
+      >
+        <div class="mb-4 flex items-center">
+          <label for="date" class="block text-sm font-medium text-gray-700 mr-2"
+            >用餐日期：</label
           >
-            已插入檔案：{{ file.name }}
-          </li>
-        </ul>
+          <input
+            type="date"
+            id="date"
+            v-model="date"
+            class="border border-gray-300 px-3 py-2 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
+          />
+        </div>
+        <div class="mb-4">
+          <label
+            for="title"
+            class="block text-sm font-medium text-gray-700 mb-1"
+            >文章標題</label
+          >
+          <input
+            id="title"
+            type="text"
+            v-model="title"
+            placeholder="輸入文章標題"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-xl focus:outline-none focus:ring-2 focus:ring-amber-500"
+          />
+        </div>
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-1"
+            >文章內容</label
+          >
+          <div
+            contenteditable="true"
+            ref="editor"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-500 text-base h-100 overflow-y-auto"
+            @input="updateContent"
+          ></div>
+        </div>
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-1"
+            >插入圖片</label
+          >
+          <input
+            type="file"
+            @change="onImageSelect"
+            class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:bg-amber-400 file:text-white hover:file:bg-amber-500 file:transition file:cursor-pointer"
+          />
+          <!-- 顯示已插入的檔案名稱 -->
+          <ul class="mt-2">
+            <li
+              v-for="file in fileList"
+              :key="file.name"
+              class="text-sm text-gray-600"
+            >
+              已插入檔案：{{ file.name }}
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
   </div>
-</div>
 </template>
-
 
 <style scoped>
 img {
   display: block;
   margin: auto;
   max-width: 100%;
-  border-radius: 0.375rem; 
+  border-radius: 0.375rem;
 }
 
 input[type="file"]::-webkit-file-upload-button {
   border: none;
 }
- /* 全局選擇器，避免作用範圍問題 */
+/* 全局選擇器，避免作用範圍問題 */
 div.overflow-x-auto.hide-scrollbar {
   padding-top: 0 !important;
 }

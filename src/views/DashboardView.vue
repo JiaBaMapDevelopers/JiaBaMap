@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import { ref } from "vue";
 
 const navigation = ref([
   { name: "首頁", link: "/dashboard" },
@@ -48,7 +48,6 @@ const currency = (value) => {
 };
 </script>
 
-
 <template>
   <div class="flex h-screen bg-gray-100">
     <aside class="w-64 bg-white shadow-md">
@@ -95,19 +94,29 @@ const currency = (value) => {
           <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-100">
               <tr>
-                <th class="px-4 py-2 text-left text-sm font-semibold text-gray-600">
+                <th
+                  class="px-4 py-2 text-left text-sm font-semibold text-gray-600"
+                >
                   訂單編號
                 </th>
-                <th class="px-4 py-2 text-left text-sm font-semibold text-gray-600">
+                <th
+                  class="px-4 py-2 text-left text-sm font-semibold text-gray-600"
+                >
                   顧客名稱
                 </th>
-                <th class="px-4 py-2 text-left text-sm font-semibold text-gray-600">
+                <th
+                  class="px-4 py-2 text-left text-sm font-semibold text-gray-600"
+                >
                   總金額
                 </th>
-                <th class="px-4 py-2 text-left text-sm font-semibold text-gray-600">
+                <th
+                  class="px-4 py-2 text-left text-sm font-semibold text-gray-600"
+                >
                   狀態
                 </th>
-                <th class="px-4 py-2 text-left text-sm font-semibold text-gray-600">
+                <th
+                  class="px-4 py-2 text-left text-sm font-semibold text-gray-600"
+                >
                   取貨時間
                 </th>
               </tr>
@@ -115,8 +124,12 @@ const currency = (value) => {
             <tbody class="divide-y divide-gray-200">
               <tr v-for="order in recentOrders" :key="order.id">
                 <td class="px-4 py-2 text-sm text-gray-800">{{ order.id }}</td>
-                <td class="px-4 py-2 text-sm text-gray-800">{{ order.customer }}</td>
-                <td class="px-4 py-2 text-sm text-gray-800">{{ order.total | currency }}</td>
+                <td class="px-4 py-2 text-sm text-gray-800">
+                  {{ order.customer }}
+                </td>
+                <td class="px-4 py-2 text-sm text-gray-800">
+                  {{ order.total | currency }}
+                </td>
                 <td class="px-4 py-2 text-sm">
                   <span
                     :class="{

@@ -84,12 +84,11 @@ const routes = [
     component: StoreSignUp,
   },
   {
-    path: '/menu-management',
-    name: 'MenuManagement',
-    component: () => import('../views/MenuManagement.vue')
-  }
-]
-
+    path: "/menu-management",
+    name: "MenuManagement",
+    component: () => import("../views/MenuManagement.vue"),
+  },
+];
 
 const router = createRouter({
   history: createWebHistory(),

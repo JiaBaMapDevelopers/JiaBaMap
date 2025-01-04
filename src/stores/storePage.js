@@ -28,19 +28,19 @@ export const useStore = defineStore("store", () => {
     router.push({
       path: "/store",
       query: { id: placeId },
-    })
-  }
+    });
+  };
 
   // 相似餐廳相關狀態
   const similarRestaurants = ref([]);
-  
+
   // 推薦餐廳相關狀態
   const recommendedRestaurants = ref([]);
 
   const fetchPlaceDetail = async () => {
     try {
       const res = await fetch(
-        `${import.meta.env.VITE_BACKEND_BASE_URL}/restaurants/${placesId.value}`
+        `${import.meta.env.VITE_BACKEND_BASE_URL}/restaurants/${placesId.value}`,
       );
       const resJson = await res.json();
 
@@ -58,7 +58,7 @@ export const useStore = defineStore("store", () => {
       lat.value = resJson.lat;
       lng.value = resJson.lng;
       photoIds.value = resJson.photoIds;
-       //一個array含兩組id
+      //一個array含兩組id
     } catch (err) {
       console.log("Failed to fetch place detail from Google API.");
       console.log(err);
@@ -70,7 +70,7 @@ export const useStore = defineStore("store", () => {
       const res = await fetch(
         `${import.meta.env.VITE_BACKEND_BASE_URL}/restaurants/photos/${
           photoIds.value[0]
-        }`
+        }`,
       );
       storePhoto.value = URL.createObjectURL(await res.blob());
     } catch (err) {
@@ -84,7 +84,7 @@ export const useStore = defineStore("store", () => {
       const res = await fetch(
         `${import.meta.env.VITE_BACKEND_BASE_URL}/restaurants/photos/${
           photoIds.value[1]
-        }`
+        }`,
       );
       bannerPhoto.value = URL.createObjectURL(await res.blob());
     } catch (err) {
@@ -105,18 +105,18 @@ export const useStore = defineStore("store", () => {
     similarRestaurants.value = [];
     // 先獲取當前餐廳的詳細資訊
     const detailRes = await fetch(
-      `${import.meta.env.VITE_BACKEND_BASE_URL}/restaurants/${placesId.value}`
+      `${import.meta.env.VITE_BACKEND_BASE_URL}/restaurants/${placesId.value}`,
     );
 
     const detailData = await detailRes.json();
 
     // 使用當前餐廳的位置搜尋附近餐廳
     const searchRes = await fetch(
-      `${import.meta.env.VITE_BACKEND_BASE_URL}/restaurants/search?keyword=餐廳&lat=${detailData.lat}&lng=${detailData.lng}`
+      `${import.meta.env.VITE_BACKEND_BASE_URL}/restaurants/search?keyword=餐廳&lat=${detailData.lat}&lng=${detailData.lng}`,
     );
 
     const resJson = await searchRes.json();
-    
+
     // 使用 Set 來儲存已經添加的餐廳 ID
     const addedIds = new Set();
 
@@ -143,7 +143,7 @@ export const useStore = defineStore("store", () => {
             }`
           : null,
         place_id: restaurant.id,
-        googleMapsUri: restaurant.googleMapsUri
+        googleMapsUri: restaurant.googleMapsUri,
       }));
   };
 
@@ -151,56 +151,58 @@ export const useStore = defineStore("store", () => {
   const fetchRecommendedRestaurants = async () => {
     // 先獲取當前餐廳的詳細資訊
     const detailRes = await fetch(
-      `${import.meta.env.VITE_BACKEND_BASE_URL}/restaurants/${placesId.value}`
+      `${import.meta.env.VITE_BACKEND_BASE_URL}/restaurants/${placesId.value}`,
     );
 
     const detailData = await detailRes.json();
 
     // 使用當前餐廳的位置搜尋附近餐廳
     const searchRes = await fetch(
-      `${import.meta.env.VITE_BACKEND_BASE_URL}/restaurants/search?keyword=餐廳&lat=${detailData.lat}&lng=${detailData.lng}`
+      `${import.meta.env.VITE_BACKEND_BASE_URL}/restaurants/search?keyword=餐廳&lat=${detailData.lat}&lng=${detailData.lng}`,
     );
 
     const resJson = await searchRes.json();
 
     // 獲取相似餐廳的 ID 列表
-    const similarRestaurantIds = similarRestaurants.value.map(r => r.place_id);
-    
+    const similarRestaurantIds = similarRestaurants.value.map(
+      (r) => r.place_id,
+    );
+
     // 使用 Set 來儲存已經添加的餐廳 ID
     const addedIds = new Set();
-    
+
     // 過濾掉當前餐廳、相似餐廳和重複的餐廳
     recommendedRestaurants.value = resJson
-    .filter(restaurant => {
-      // 如果是當前餐廳、相似餐廳或已經添加過，則跳過
-      if (
-        restaurant.id === placesId.value ||
-        similarRestaurantIds.includes(restaurant.id) ||
-        addedIds.has(restaurant.id)
-      ) {
-        return false;
-      }
-      // 將餐廳 ID 加入已添加集合
-      addedIds.add(restaurant.id);
-      return true;
-    })
-    .map(restaurant => ({
-      name: restaurant.name,
-      rating: restaurant.rating || "N/A",
-      userRatingCount: restaurant.userRatingCount || 0,
-      photoUrl: restaurant.photoId
-      ? `${import.meta.env.VITE_BACKEND_BASE_URL}/restaurants/photos/${restaurant.photoId}`
-      : null,
-      place_id: restaurant.id,
-      googleMapsUri: restaurant.googleMapsUri
-    }));
+      .filter((restaurant) => {
+        // 如果是當前餐廳、相似餐廳或已經添加過，則跳過
+        if (
+          restaurant.id === placesId.value ||
+          similarRestaurantIds.includes(restaurant.id) ||
+          addedIds.has(restaurant.id)
+        ) {
+          return false;
+        }
+        // 將餐廳 ID 加入已添加集合
+        addedIds.add(restaurant.id);
+        return true;
+      })
+      .map((restaurant) => ({
+        name: restaurant.name,
+        rating: restaurant.rating || "N/A",
+        userRatingCount: restaurant.userRatingCount || 0,
+        photoUrl: restaurant.photoId
+          ? `${import.meta.env.VITE_BACKEND_BASE_URL}/restaurants/photos/${restaurant.photoId}`
+          : null,
+        place_id: restaurant.id,
+        googleMapsUri: restaurant.googleMapsUri,
+      }));
     recommendedRestaurants.value = [];
   };
 
   // 儲存餐廳資料到本地
   const saveToLocalStorage = () => {
-    const data ={
-      storeName:storeName.value,
+    const data = {
+      storeName: storeName.value,
       rating: rating.value,
       userRatingCount: userRatingCount.value,
       startPrice: startPrice.value,
@@ -215,8 +217,8 @@ export const useStore = defineStore("store", () => {
       lng: lng.value,
       placesId: placesId.value,
     };
-    localStorage.setItem('storeData', JSON.stringify(data));
-  }
+    localStorage.setItem("storeData", JSON.stringify(data));
+  };
 
   const loadFromLocalStorage = () => {
     const data = JSON.parse(localStorage.getItem("storeData"));
@@ -239,7 +241,7 @@ export const useStore = defineStore("store", () => {
   };
 
   // 在資料變化時自動保存
-   watch(
+  watch(
     [
       storeName,
       rating,
@@ -254,10 +256,10 @@ export const useStore = defineStore("store", () => {
       googleMapsUri,
       lat,
       lng,
-      placesId
+      placesId,
     ],
     saveToLocalStorage,
-    { deep: true }
+    { deep: true },
   );
 
   // 頁面加載時還原資料
@@ -293,6 +295,6 @@ export const useStore = defineStore("store", () => {
     recommendedRestaurants,
     fetchRecommendedRestaurants,
     lat,
-    lng
+    lng,
   };
 });
