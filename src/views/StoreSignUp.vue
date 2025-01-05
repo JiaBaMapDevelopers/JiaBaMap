@@ -8,6 +8,7 @@ const password = ref("");
 const storeName = ref("");
 const storeAddress = ref("");
 const storePhone = ref("");
+const storeIntro = ref("");
 const storeTaxId = ref("");
 const contactName = ref("");
 const contactEmail = ref("");
@@ -54,6 +55,7 @@ function handleSubmit() {
         storeName: storeName.value,
         storeAddress: storeAddress.value,
         storePhone: storePhone.value,
+        storeIntro: storeIntro.value,
         storeTaxId: storeTaxId.value,
         contactName: contactName.value,
         contactEmail: contactEmail.value,
@@ -111,6 +113,7 @@ onMounted(
                 <label class="block text-gray-700 text-sm font-bold mb-2" for="storeAddress">✨ 店家地址:</label>
                 <div class="relative w-full border rounded hover:shadow-md">
                     <input v-model="storeAddress" @input="fetchSuggestions" id="storeAddress" type="text" placeholder="請輸入店家地址" class="appearance-none py-2 px-3 text-gray-700 leading-tight w-full pr-10 focus:outline-orange-300">
+                    <font-awesome-icon :icon="['fa', 'circle-xmark']" @click="clear" class="absolute top-1/2 right-3 transform -translate-y-1/2 text-gray-400 cursor-pointer w-5 h-5"/>
                 </div>
                 <div v-if="predictions.length !== 0" class=" mt-1">
                     <ul class=" border w-full rounded">
@@ -121,6 +124,10 @@ onMounted(
             <div class="mb-4">
                 <label class="block text-gray-700 text-sm font-bold mb-2" for="storePhone">✨ 店家電話:</label>
                 <input v-model="storePhone" id="storePhone" type="tel" placeholder="請輸入店家電話" class="appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight hover:shadow-md focus:outline-orange-300">
+            </div>
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="storeIntro">✨ 店家簡介:</label>
+                <textarea v-model="storeIntro" id="storeIntro" type="text" placeholder="請輸入店家簡介" class="appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight hover:shadow-md focus:outline-orange-300"></textarea>
             </div>
             <div class="mb-4">
                 <label class="block text-gray-700 text-sm font-bold mb-2" for="storeTaxId">✨ 店家統一編號:</label>
@@ -135,8 +142,8 @@ onMounted(
                 <input v-model="contactEmail" id="contactEmail" type="text" placeholder="請輸入聯絡人信箱" class="appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight hover:shadow-md focus:outline-orange-300">
             </div>
             <div class="mb-8">
-                <label class="block text-gray-700 text-sm font-bold mb-2" for="contactPhone">✨ 聯絡人電話:</label>
-                <input v-model="contactPhone" id="contactPhone" type="tel" placeholder="請輸入聯絡人電話" class="appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight hover:shadow-md focus:outline-orange-300">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="contactPhone">✨ 聯絡人手機號碼:</label>
+                <input v-model="contactPhone" id="contactPhone" type="tel" placeholder="請輸入聯絡人手機號碼" class="appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight hover:shadow-md focus:outline-orange-300">
             </div>
             <div class="flex items-center justify-center">
                 <button type="submit" class="bg-orange-400 hover:bg-orange-500 hover:shadow-lg text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
