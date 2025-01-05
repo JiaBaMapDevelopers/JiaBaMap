@@ -1,6 +1,6 @@
 <script setup>
 import axios from "axios";
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import Stars from "./Stars.vue";
 import UploadPic from "./UploadPic.vue";
 import { useStarsStore } from "../../stores/starStore";
@@ -13,7 +13,7 @@ import PreviousReview from "@/components/storeComment/PreviousReview.vue";
 
 const user = useAuth();
 const store = useStore();
-const { userData, userId } = user;
+const userData = computed(() => user.userData);
 
 const time = new Date();
 const price = ref("");
@@ -33,7 +33,7 @@ const submitComment = async () => {
 
   const formData = new FormData();
 
-  formData.append("userId", userData._id); // 用戶 ID
+  formData.append("userId", userData.value._id); // 用戶 ID
   formData.append("placeId", store.placesId); // 餐廳 ID
   formData.append("content", commentText.value.trim()); // 評論內容
   formData.append("rating", starsStore.selectIndex); // 評分
@@ -99,7 +99,7 @@ const closeLoginModal = () => {
         </button>
         <Stars class="my-2" />
         <div class="flex flex-col relative" v-if="isExpanded">
-          <div v-if="user.userData">
+          <div v-if="userData">
             <textarea
               v-model="commentText"
               maxlength="200"
