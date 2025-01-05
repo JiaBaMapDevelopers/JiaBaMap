@@ -2,6 +2,7 @@
 import { ref, onMounted, shallowRef } from 'vue';
 import googleMapsLoader from '../components/googleMapsLoader.js';
 import Swal from 'sweetalert2';
+import { z } from "zod";
 
 const username = ref("");
 const password = ref("");
@@ -46,6 +47,16 @@ function clickPrediction(predict) {
     predictions.value = [];
     request.sessionToken = new AutocompleteSessionToken();
 }
+
+function handleEnter(event){
+    if(event.target.tagName === "TEXTAREA"){
+        return;
+    }
+    event.preventDefault();
+}
+
+function clear(){
+    storeAddress.value = "";
 }
 
 function handleSubmit() {
@@ -61,27 +72,38 @@ function handleSubmit() {
         contactEmail: contactEmail.value,
         contactPhone: contactPhone.value,
         autoComplete: autocomplete.value,
+        placeId,
     }
-    if(form){
-        console.log(form);
+    const registerSchema = z.object({
+        username: z.string().min(5, "帳號至少需要5個字元"),
+        password: z.string().min(8, "密碼至少需要8個字元"),
+        storeName: z.string().min(1, "店名至少需要1個字元"),
+        placeId: z.string().min(1, "地址需自選單中選取"),
+        storePhone: z.string().regex(/^0\d{1,9}$/, "請輸入正確電話格式"),
+        storeIntro: z.string().max(50, "店家簡介最多50字元"),
+        storeTaxId: z.string().regex(/\d{8}/, "請輸入正確統一編號格式"),
+        contactName: z.string().min(1, "姓名至少需1個字元"),
+        contactEmail: z.string().email("請輸入正確的email"),
+        contactPhone: z.string().regex(/^09\d{8}$/, "請輸入正確手機號碼"),
+    })
+
+    try{
+        registerSchema.parse(form);
         Swal.fire({
         title: 'Success',
         text: '註冊成功',
         icon: 'success',
         confirmButtonText: 'OK'
-    })
-    }else{
+        })
+    }catch(err){
         Swal.fire({
         title: 'Error',
-        text: '註冊失敗',
+        html: err.errors.map(error => error.message).join("<br>"),
         icon: 'error',
         confirmButtonText: 'OK'
         })
     }
 }
-onMounted(() => {
-    initAutocomplete();
-});
 
 onMounted(
     initGoogleAutocomplete
@@ -96,7 +118,7 @@ onMounted(
             <h2 class="font-bold text-2xl">成為我們的合作夥伴，</h2>
             <h2 class="font-bold text-2xl">拓展更多可能！</h2>
         </div>
-        <form @submit.prevent="handleSubmit">
+        <form @submit.prevent="handleSubmit" @keydown.enter="handleEnter">
             <div class="mb-4">
                 <label class="block text-gray-700 text-sm font-bold mb-2" for="username">✨ 帳號名稱:</label>
                 <input v-model="username" id="username" type="text" placeholder="請輸入帳號" class="appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight hover:shadow-md focus:outline-orange-300">
