@@ -15,6 +15,7 @@ const { recommendedRestaurants } = storeToRefs(restaurantStore);
             <h3 class="mb-2 text-2xl font-bold">推薦餐廳</h3>
             <div v-if="recommendedRestaurants && recommendedRestaurants.length" class="relative">
                 <Carousel 
+                    :items-to-show="1"
                     :breakpoints="{
                         640: {
                             itemsToShow: 2,
@@ -22,7 +23,7 @@ const { recommendedRestaurants } = storeToRefs(restaurantStore);
                         },
                         768: {
                             itemsToShow: 3,
-                            snapAlign: 'center',
+                            snapAlign: 'start',
                         }
                     }"
                     :wrap-around="true"
