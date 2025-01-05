@@ -36,7 +36,7 @@ const loadDrafts = () => {
 // 從資料庫讀取已發布文章
 const loadPublishedArticles = async () => {
   try {
-    if (!auth.userData?.sub) {
+    if (!auth.userData?._id) {
       await swalWithBootstrapButtons.fire({
         title: '提醒',
         text: '請先登入後再查看已發佈文章',
@@ -46,7 +46,7 @@ const loadPublishedArticles = async () => {
       return;
     }
 
-    const response = await axios.get(`${import.meta.env.VITE_BACKEND_BASE_URL}/articles/published/${auth.userData.sub}`);
+    const response = await axios.get(`${import.meta.env.VITE_BACKEND_BASE_URL}/articles/published/${auth.userData._id}`);
     articles.value = response.data;
     
   } catch (error) {
@@ -60,42 +60,7 @@ const loadPublishedArticles = async () => {
   }
 };
 
-// 刪除草稿
-const deleteDraft = async () => {
-  if (!isComponentMounted.value) return;
-  
-  try {
-    const result = await swalWithBootstrapButtons.fire({
-      title: '確定要刪除嗎？',
-      text: '刪除後將無法恢復！',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonText: '確定刪除',
-      cancelButtonText: '取消',
-      reverseButtons: true
-    });
 
-    if (result.isConfirmed && isComponentMounted.value) {
-      localStorage.removeItem('formData');
-      articles.value = [];
-      
-      if (isComponentMounted.value) {
-        await swalWithBootstrapButtons.fire({
-          title: '已刪除！',
-          text: '草稿已成功刪除',
-          icon: 'success',
-          confirmButtonText: '確定'
-        });
-      }
-    }
-  } catch (error) {
-    console.error('刪除草稿失敗:', error);
-  }
-};
-
-const formatDate = (dateString) => {
-  return new Date(dateString).toLocaleString('zh-TW');
-};
 
 // 編輯草稿
 const editDraft = (article) => {
@@ -217,6 +182,10 @@ const handleDelete = (articleId = null) => {
   if (!isComponentMounted.value) return;
   deleteArticle(articleId);
 };
+
+
+
+
 
 </script>
 <template>
