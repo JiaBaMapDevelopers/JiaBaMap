@@ -11,7 +11,7 @@ import UserSettings from '@/components/userProfile/UserSettings.vue';
                 <UserSettings />
                 <UserTab />
             </div>
-            <div class="w-full h-screen my-10 sm:w-1/3">
+            <div class="w-full h-screen my-16 md:my-20 sm:w-1/3">
                 <RatingCard />
             </div>
         </div>
