@@ -77,7 +77,7 @@ export const useAuth = defineStore("auth", () => {
 
   const getUserdata = async () => {
     const response = await axios.get(
-      `${import.meta.env.VITE_BACKEND_BASE_URL}/user/${userData.value._id}`,
+      `${import.meta.env.VITE_BACKEND_BASE_URL}/user/${userId.value}`,
     );
     userData.value = response.data;
   };

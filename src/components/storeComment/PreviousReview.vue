@@ -79,9 +79,9 @@ const shareComment = (comment) => {
         />
       </div>
       <div class="flex flex-col flex-1 w-0 text-left">
-        <router-link to="/user" class="font-bold cursor-pointer text-amber-500"
-          >{{ comment.name }}（ reviewNum 則評論）</router-link
-        >
+        <div class="font-bold cursor-pointer text-amber-500">
+          {{ comment.name }}
+        </div>
         <div class="flex gap-3">
           <span
             v-if="comment.rating"

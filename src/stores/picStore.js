@@ -25,6 +25,7 @@ export const usePicStore = defineStore("picture", () => {
   };
   const resetPic = () => {
     pictures.value = [];
+    files.value = [];
   };
 
   return {
