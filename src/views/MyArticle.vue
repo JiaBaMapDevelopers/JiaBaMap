@@ -255,7 +255,7 @@ const handleDelete = (articleId = null) => {
 
     <!-- 無文章時顯示 -->
     <div v-if="articles.length === 0" class="text-center py-8 text-gray-500">
-      目前沒有{{ route.query.status === 'published' ? '已發布的文章' : '草稿' }}
+      目前沒有{{ route.query.status === 'published' ? '已發佈的文章' : '草稿' }}
     </div>
   </div>
 </template>
