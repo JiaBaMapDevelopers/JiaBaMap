@@ -27,7 +27,7 @@
 </template>
 
 <script setup>
-import { useStarsStore } from "../../stores/starStore";
+import { useStarsStore } from "@/stores/starStore";
 const starsStore = useStarsStore();
 
 const resetHoverIndex = () => {

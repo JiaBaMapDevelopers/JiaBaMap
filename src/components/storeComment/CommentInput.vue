@@ -3,7 +3,7 @@
   <div class="flex gap-5 mb-4">
     <div class="flex-shrink-0 w-16 h-16 rounded-full bg-slate-300">
       <img
-        src="../../assets/default_user.png"
+        src="@/assets/default_user.png"
         alt="avatar"
         class="w-full h-auto overflow-hidden"
       />
@@ -17,7 +17,7 @@
           留下您對餐廳的評論
         </button>
         <Stars class="my-2" />
-        <div class="flex flex-col relative" v-if="isExpanded">
+        <div class="relative flex flex-col" v-if="isExpanded">
           <div v-if="user.userData">
             <!-- <div v-if="!user.userData" class=" absolute top-[-5px] left-[-10px] flex justify-center items-center bg-gray-900 h-[110%] w-[110%] opacity-50" >
                         <p class="font-black text-yellow-200">請先<a href="#" class="m-2 text-orange-600">登入</a>以使用更多功能!</p>                        
@@ -68,9 +68,9 @@
 import { ref } from "vue";
 import Stars from "./Stars.vue";
 import UploadPic from "./UploadPic.vue";
-import { useStarsStore } from "../../stores/starStore";
-import { useCommentStore } from "../../stores/commentStore";
-import { usePicStore } from "../../stores/picStore";
+import { useStarsStore } from "@/stores/starStore";
+import { useCommentStore } from "@/stores/commentStore";
+import { usePicStore } from "@/stores/picStore";
 import { useAuth } from "@/stores/authStore";
 import Login from "@/components/Login.vue";
 

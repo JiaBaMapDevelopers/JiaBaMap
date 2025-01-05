@@ -35,7 +35,7 @@
 
 <script setup>
 import { computed, ref } from "vue";
-import { usePicStore } from "../../stores/picStore";
+import { usePicStore } from "@/stores/picStore";
 
 const picStore = usePicStore();
 const fileInput = ref(null);

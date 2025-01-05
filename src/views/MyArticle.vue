@@ -1,6 +1,6 @@
 <script setup>
 import { useRouter, useRoute } from "vue-router";
-import Footer from "../components/Footer.vue";
+import Footer from "@/components/Footer.vue";
 import { ref, computed, onMounted, onUnmounted, inject } from "vue";
 import articleData from "../../data/myArticle.json";
 const router = useRouter();
@@ -104,12 +104,12 @@ const swalWithBootstrapButtons = $swal.mixin({
         },
       ]"
     >
-      <div class="max-w-4xl mx-auto px-4">
-        <h2 class="text-5xl font-extrabold mb-6">您的食記</h2>
-        <div class="flex flex-row-reverse space-x-4 mb-4 text-xl">
+      <div class="max-w-4xl px-4 mx-auto">
+        <h2 class="mb-6 text-5xl font-extrabold">您的食記</h2>
+        <div class="flex flex-row-reverse mb-4 space-x-4 text-xl">
           <router-link
             to="/createnote"
-            class="px-4 py-1 bg-orange-500 text-white rounded hover:bg-orange-600 transition-colors"
+            class="px-4 py-1 text-white transition-colors bg-orange-500 rounded hover:bg-orange-600"
           >
             撰寫食記
           </router-link>
@@ -147,17 +147,17 @@ const swalWithBootstrapButtons = $swal.mixin({
           <article
             v-for="article in filteredArticles"
             :key="article.id"
-            class="flex space-x-4 p-4 bg-white rounded-lg shadow hover:shadow-md transition-shadow"
+            class="flex p-4 space-x-4 transition-shadow bg-white rounded-lg shadow hover:shadow-md"
           >
-            <div class="w-24 h-24 bg-gray-200 rounded overflow-hidden">
+            <div class="w-24 h-24 overflow-hidden bg-gray-200 rounded">
               <img
                 :src="article.photo"
                 :alt="article.title"
-                class="w-full h-full object-cover"
+                class="object-cover w-full h-full"
               />
             </div>
             <div class="flex-1">
-              <div class="flex justify-between items-start">
+              <div class="flex items-start justify-between">
                 <h3 class="text-lg font-medium text-gray-800">
                   {{ article.title }}
                 </h3>
@@ -165,7 +165,7 @@ const swalWithBootstrapButtons = $swal.mixin({
                   {{ article.location }}
                 </div>
               </div>
-              <p class="text-sm text-gray-500 mt-1">
+              <p class="mt-1 text-sm text-gray-500">
                 {{ article.date }} ·
                 <button
                   @click="editArticle(article.id)"
@@ -181,10 +181,10 @@ const swalWithBootstrapButtons = $swal.mixin({
                   刪除
                 </button>
               </p>
-              <p class="text-sm text-gray-400 mt-1">
+              <p class="mt-1 text-sm text-gray-400">
                 滿意評分：{{ article.rating }}
               </p>
-              <p class="text-sm text-gray-600 mt-2 line-clamp-2">
+              <p class="mt-2 text-sm text-gray-600 line-clamp-2">
                 {{ article.content }}
               </p>
             </div>
@@ -193,7 +193,7 @@ const swalWithBootstrapButtons = $swal.mixin({
           <!-- 無食記提示 -->
           <div
             v-if="filteredArticles.length === 0"
-            class="text-center text-gray-500 py-8 bg-white rounded-lg shadow"
+            class="py-8 text-center text-gray-500 bg-white rounded-lg shadow"
           >
             目前沒有{{
               route.query.status === "draft" ? "草稿" : "已發佈"

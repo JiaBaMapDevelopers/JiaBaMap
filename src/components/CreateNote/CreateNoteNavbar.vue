@@ -1,6 +1,6 @@
 <script setup>
 import { storeToRefs } from "pinia";
-import { useAuth } from "../../stores/authStore";
+import { useAuth } from "@/stores/authStore";
 import { ref, watchEffect } from "vue";
 
 const user = useAuth();
@@ -11,7 +11,7 @@ const currentProfilePicture = ref("/image/default_user.png");
 // 動態監聽
 watchEffect(() => {
   currentProfilePicture.value =
-    userData.value?.picture || "/image/default_user.png";
+    userData.value?.profilePicture || "/image/default_user.png";
 });
 
 // 處理圖片錯誤
@@ -25,13 +25,13 @@ defineEmits(["save", "preview"]);
 <template>
   <!-- 導覽列 -->
   <header
-    class="fixed top-0 left-0 w-full z-50 bg-white shadow-md border-b border-orange-200 px-4 py-2 flex flex-wrap items-center gap-4 md:flex-nowrap md:gap-0"
+    class="fixed top-0 left-0 z-50 flex flex-wrap items-center w-full gap-4 px-4 py-2 bg-white border-b border-orange-200 shadow-md md:flex-nowrap md:gap-0"
   >
     <!-- 左側內容 -->
     <div class="flex items-center space-x-4">
       <router-link to="/">
         <img
-          src="../../assets/logo.jpg"
+          src="@/assets/logo.jpg"
           alt="Logo"
           class="w-auto min-w-[60px] max-w-[100px] md:max-w-[130px] h-auto"
         />
@@ -51,21 +51,21 @@ defineEmits(["save", "preview"]);
     </div>
 
     <!-- 右側內容 -->
-    <div class="flex items-center space-x-4 ml-auto">
+    <div class="flex items-center ml-auto space-x-4">
       <button
-        class="bg-amber-400 text-white px-4 py-2 rounded hover:bg-amber-500 transition text-sm md:text-base whitespace-nowrap"
+        class="px-4 py-2 text-sm text-white transition rounded bg-amber-400 hover:bg-amber-500 md:text-base whitespace-nowrap"
         @click="$emit('save')"
       >
         存檔
       </button>
       <button
-        class="bg-amber-400 text-white px-4 py-2 rounded hover:bg-amber-500 transition text-sm md:text-base whitespace-nowrap"
+        class="px-4 py-2 text-sm text-white transition rounded bg-amber-400 hover:bg-amber-500 md:text-base whitespace-nowrap"
         @click="$emit('preview')"
       >
         預覽
       </button>
       <button
-        class="bg-amber-400 text-white px-4 py-2 rounded hover:bg-amber-500 transition text-sm md:text-base whitespace-nowrap"
+        class="px-4 py-2 text-sm text-white transition rounded bg-amber-400 hover:bg-amber-500 md:text-base whitespace-nowrap"
       >
         發送
       </button>
@@ -75,7 +75,7 @@ defineEmits(["save", "preview"]);
           <img
             :src="currentProfilePicture"
             alt="avatar"
-            class="w-full h-full object-cover rounded-full"
+            class="object-cover w-full h-full rounded-full"
             @error="handleImageError"
           />
         </div>
@@ -84,7 +84,7 @@ defineEmits(["save", "preview"]);
   </header>
 
   <!-- 內容區域 -->
-  <div class="mt-16 md:mt-20 p-2">
+  <div class="p-2 mt-16 md:mt-20">
     <slot></slot>
   </div>
 </template>

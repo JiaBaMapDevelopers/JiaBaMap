@@ -1,5 +1,5 @@
 <script setup>
-import { useKeywordStore } from "../stores/keywordStore.js";
+import { useKeywordStore } from "@/stores/keywordStore.js";
 import { computed, watch, inject } from "vue";
 import { useRouter, useRoute } from "vue-router";
 
@@ -59,7 +59,7 @@ watch(
 <template>
   <!-- 統一的搜尋框 -->
   <form
-    class="flex items-center px-4 space-x-2 bg-white border rounded-full shadow-sm border-amber-500 h-11 md:space-x-4 w-full"
+    class="flex items-center w-full px-4 space-x-2 bg-white border rounded-full shadow-sm border-amber-500 h-11 md:space-x-4"
     @submit.prevent="handleEnterKey"
   >
     <!-- 輸入框 -->
@@ -69,14 +69,14 @@ watch(
         v-model="keyword"
         id="keyword"
         placeholder="美食分類、餐廳"
-        class="w-full text-amber-500 placeholder-amber-300 px-2 py-1 outline-none"
+        class="w-full px-2 py-1 outline-none text-amber-500 placeholder-amber-300"
       />
     </div>
 
     <!-- 桌面版餐廳圖示 -->
     <font-awesome-icon
       :icon="['fas', 'utensils']"
-      class="w-5 h-5 text-amber-500 md:block hidden"
+      class="hidden w-5 h-5 text-amber-500 md:block"
     />
 
     <div class="h-full mx-2 -my-2 border-l border-gray-300"></div>
@@ -126,7 +126,7 @@ watch(
 
     <!-- 搜尋按鈕 -->
     <button
-      class="px-4 py-1 text-white rounded-full shadow-md bg-amber-500 focus:outline-none cursor-pointer"
+      class="px-4 py-1 text-white rounded-full shadow-md cursor-pointer bg-amber-500 focus:outline-none"
     >
       <font-awesome-icon :icon="['fas', 'search']" class="w-4 h-4" />
     </button>

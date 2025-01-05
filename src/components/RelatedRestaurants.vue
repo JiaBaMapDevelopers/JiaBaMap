@@ -8,7 +8,7 @@
       <h3 class="mb-2 text-2xl font-bold">
         {{ restaurantStore.storeName }} 的相似餐廳
       </h3>
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div class="grid grid-cols-2 gap-4 md:grid-cols-4">
         <div
           v-for="restaurant in restaurantStore.similarRestaurants"
           :key="restaurant.id"
@@ -17,10 +17,10 @@
           <img
             :src="restaurant.image"
             :alt="restaurant.name"
-            class="w-full h-40 object-cover rounded-t-lg"
+            class="object-cover w-full h-40 rounded-t-lg"
           />
           <div class="p-4">
-            <h4 class="font-bold text-lg">{{ restaurant.name }}</h4>
+            <h4 class="text-lg font-bold">{{ restaurant.name }}</h4>
             <p class="text-gray-500">{{ restaurant.cuisine }}</p>
           </div>
         </div>
@@ -35,7 +35,7 @@
       <h3 class="mb-2 text-2xl font-bold">
         {{ restaurantStore.storeName }} 的其他推薦餐廳
       </h3>
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div class="grid grid-cols-2 gap-4 md:grid-cols-4">
         <div
           v-for="restaurant in restaurantStore.recommendedRestaurants"
           :key="restaurant.id"
@@ -44,10 +44,10 @@
           <img
             :src="restaurant.image"
             :alt="restaurant.name"
-            class="w-full h-40 object-cover rounded-t-lg"
+            class="object-cover w-full h-40 rounded-t-lg"
           />
           <div class="p-4">
-            <h4 class="font-bold text-lg">{{ restaurant.name }}</h4>
+            <h4 class="text-lg font-bold">{{ restaurant.name }}</h4>
             <p class="text-gray-500">{{ restaurant.cuisine }}</p>
           </div>
         </div>
@@ -61,7 +61,7 @@
         <button
           v-for="topic in restaurantStore.searchTopics"
           :key="topic"
-          class="px-3 py-1 bg-amber-100 text-amber-500 rounded-full hover:bg-amber-200"
+          class="px-3 py-1 rounded-full bg-amber-100 text-amber-500 hover:bg-amber-200"
         >
           {{ topic }}
         </button>
@@ -73,7 +73,7 @@
 <script setup>
 import { onMounted } from "vue";
 import { storeToRefs } from "pinia";
-import { useRestaurantStore } from "../stores/storePage";
+import { useRestaurantStore } from "@/stores/storePage";
 
 const restaurantStore = useRestaurantStore();
 const { storeName, similarRestaurants, recommendedRestaurants, searchTopics } =

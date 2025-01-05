@@ -2,9 +2,9 @@
 import { ref, onMounted, onUnmounted, inject } from "vue";
 import axios from "axios";
 import dayjs from "dayjs";
-import Header from "../components/Header.vue";
+import Header from "@/components/Header.vue";
 import articleData from "../../data/articleList.json";
-import { useAuth } from "../stores/authStore";
+import { useAuth } from "@/stores/authStore";
 
 const auth = useAuth();
 
@@ -432,7 +432,7 @@ const swalWithBootstrapButtons = $swal.mixin({
       <article
         v-for="article in articles"
         :key="article._id"
-        class="bg-white rounded-lg shadow-lg overflow-hidden mb-8"
+        class="mb-8 overflow-hidden bg-white rounded-lg shadow-lg"
       >
         <!-- 桌面版排版 (>=768px) -->
         <div class="hidden md:block">
@@ -440,11 +440,11 @@ const swalWithBootstrapButtons = $swal.mixin({
             <img
               :src="article.photo"
               :alt="article.title"
-              class="w-full h-64 object-cover rounded-lg mb-4"
+              class="object-cover w-full h-64 mb-4 rounded-lg"
             />
             <div class="space-y-4">
               <h2 class="text-2xl font-bold">{{ article.title }}</h2>
-              <div class="flex items-center text-gray-600 space-x-4">
+              <div class="flex items-center space-x-4 text-gray-600">
                 <span>{{ formatDate(article.createdAt) }}</span>
                 <span>{{ article.location }}</span>
                 <span>{{ article.price }}</span>
@@ -462,7 +462,7 @@ const swalWithBootstrapButtons = $swal.mixin({
                   <span>{{ article.likesCount }}</span>
                 </button>
               </div>
-              <p class="text-gray-700 leading-relaxed">{{ article.content }}</p>
+              <p class="leading-relaxed text-gray-700">{{ article.content }}</p>
             </div>
           </div>
         </div>
@@ -473,17 +473,17 @@ const swalWithBootstrapButtons = $swal.mixin({
             <img
               :src="article.photo"
               :alt="article.title"
-              class="w-full h-48 object-cover"
+              class="object-cover w-full h-48"
             />
             <div
-              class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-4"
+              class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black to-transparent"
             >
               <h2 class="text-xl font-bold text-white">{{ article.title }}</h2>
             </div>
           </div>
           <div class="p-4 space-y-3">
             <div
-              class="flex justify-between items-center text-sm text-gray-600"
+              class="flex items-center justify-between text-sm text-gray-600"
             >
               <span>{{ formatDate(article.createdAt) }}</span>
               <button
@@ -503,14 +503,14 @@ const swalWithBootstrapButtons = $swal.mixin({
             </div>
             <div class="relative">
               <p
-                class="text-gray-700 text-sm line-clamp-3"
+                class="text-sm text-gray-700 line-clamp-3"
                 :class="{ 'line-clamp-none': !article.showFullContent }"
               >
                 {{ article.content }}
               </p>
               <button
                 @click="toggleContent(article)"
-                class="text-blue-500 text-sm mt-2"
+                class="mt-2 text-sm text-blue-500"
               >
                 {{ article.showFullContent ? "繼續閱讀" : "收起" }}
               </button>
@@ -519,47 +519,47 @@ const swalWithBootstrapButtons = $swal.mixin({
         </div>
 
         <!-- 評論區域 -->
-        <div class="bg-gray-50 p-4 md:p-6">
-          <h3 class="text-lg md:text-xl font-bold mb-4">評論</h3>
+        <div class="p-4 bg-gray-50 md:p-6">
+          <h3 class="mb-4 text-lg font-bold md:text-xl">評論</h3>
           <!-- 評論列表 -->
-          <div class="space-y-4 mb-6">
+          <div class="mb-6 space-y-4">
             <div
               v-for="comment in article.comments"
               :key="comment._id"
-              class="bg-white p-3 md:p-4 rounded-lg shadow"
+              class="p-3 bg-white rounded-lg shadow md:p-4"
             >
               <div class="flex items-center gap-3 mb-2">
                 <div v-if="auth.userData" class="w-8 h-8">
                   <img
                     :src="comment.userPhoto"
                     :alt="comment.user"
-                    class="w-full h-full rounded-full object-cover"
+                    class="object-cover w-full h-full rounded-full"
                   />
                 </div>
                 <div
                   v-else
-                  class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center"
+                  class="flex items-center justify-center w-8 h-8 bg-gray-200 rounded-full"
                 >
                   <font-awesome-icon
                     :icon="['fas', 'user']"
-                    class="text-gray-400 text-lg"
+                    class="text-lg text-gray-400"
                   />
                 </div>
                 <div class="flex flex-col">
-                  <span class="font-medium text-sm md:text-base">{{
+                  <span class="text-sm font-medium md:text-base">{{
                     comment.user
                   }}</span>
-                  <span class="text-xs md:text-sm text-gray-500">{{
+                  <span class="text-xs text-gray-500 md:text-sm">{{
                     formatDate(comment.createdAt)
                   }}</span>
                 </div>
               </div>
-              <p class="text-sm md:text-base text-gray-700 ml-11">
+              <p class="text-sm text-gray-700 md:text-base ml-11">
                 {{ comment.content }}
               </p>
 
               <div class="flex items-center justify-between mt-2">
-                <div class="flex gap-4 items-center w-full ml-11">
+                <div class="flex items-center w-full gap-4 ml-11">
                   <button
                     @click="toggleLike('comment', comment._id)"
                     class="flex items-center space-x-1 text-blue-500 hover:text-blue-600"
@@ -573,7 +573,7 @@ const swalWithBootstrapButtons = $swal.mixin({
                   <div class="flex items-center gap-2">
                     <button
                       @click="toggleReplyForm(comment._id)"
-                      class="text-blue-500 text-sm hover:text-blue-600"
+                      class="text-sm text-blue-500 hover:text-blue-600"
                     >
                       {{
                         newReply.replyingTo === comment._id
@@ -585,7 +585,7 @@ const swalWithBootstrapButtons = $swal.mixin({
                     <div class="relative group">
                       <button
                         @click.stop="toggleMenu(comment._id)"
-                        class="text-gray-500 hover:text-gray-700 px-2 font-bold menu-button"
+                        class="px-2 font-bold text-gray-500 hover:text-gray-700 menu-button"
                       >
                         <font-awesome-icon :icon="['fas', 'ellipsis']" />
                       </button>
@@ -599,7 +599,7 @@ const swalWithBootstrapButtons = $swal.mixin({
                             deleteComment(article._id, comment._id);
                             activeMenuId = null;
                           "
-                          class="w-full text-center px-4 py-2 text-sm font-bold text-red-500 hover:bg-gray-300"
+                          class="w-full px-4 py-2 text-sm font-bold text-center text-red-500 hover:bg-gray-300"
                         >
                           刪除
                         </button>
@@ -612,32 +612,32 @@ const swalWithBootstrapButtons = $swal.mixin({
               <!-- 回覆列表 -->
               <div
                 v-if="comment.replies && comment.replies.length > 0"
-                class="mt-3 ml-11 space-y-3"
+                class="mt-3 space-y-3 ml-11"
               >
                 <div
                   v-for="reply in comment.replies"
                   :key="reply._id"
-                  class="bg-gray-50 p-3 rounded"
+                  class="p-3 rounded bg-gray-50"
                 >
                   <div class="flex items-center gap-3 mb-2">
                     <div v-if="auth.userData" class="w-6 h-6">
                       <img
                         :src="reply.userPhoto"
                         :alt="reply.user"
-                        class="w-full h-full rounded-full object-cover"
+                        class="object-cover w-full h-full rounded-full"
                       />
                     </div>
                     <div
                       v-else
-                      class="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center"
+                      class="flex items-center justify-center w-6 h-6 bg-gray-200 rounded-full"
                     >
                       <font-awesome-icon
                         :icon="['fas', 'user']"
-                        class="text-gray-400 text-sm"
+                        class="text-sm text-gray-400"
                       />
                     </div>
                     <div class="flex flex-col">
-                      <span class="font-medium text-sm">{{ reply.user }}</span>
+                      <span class="text-sm font-medium">{{ reply.user }}</span>
                       <span class="text-xs text-gray-500">{{
                         formatDate(reply.createdAt)
                       }}</span>
@@ -659,7 +659,7 @@ const swalWithBootstrapButtons = $swal.mixin({
                     <div class="relative group">
                       <button
                         @click.stop="toggleMenu(reply._id)"
-                        class="text-gray-500 hover:text-gray-700 px-2 font-bold menu-button"
+                        class="px-2 font-bold text-gray-500 hover:text-gray-700 menu-button"
                       >
                         <font-awesome-icon :icon="['fas', 'ellipsis']" />
                       </button>
@@ -673,7 +673,7 @@ const swalWithBootstrapButtons = $swal.mixin({
                             deleteReply(article._id, comment._id, reply._id);
                             activeMenuId = null;
                           "
-                          class="w-full text-center px-4 py-2 text-sm font-bold text-red-500 hover:bg-gray-300"
+                          class="w-full px-4 py-2 text-sm font-bold text-center text-red-500 hover:bg-gray-300"
                         >
                           刪除
                         </button>
@@ -693,16 +693,16 @@ const swalWithBootstrapButtons = $swal.mixin({
                     <img
                       :src="auth.userData.picture"
                       :alt="auth.userData.name"
-                      class="w-full h-full rounded-full object-cover"
+                      class="object-cover w-full h-full rounded-full"
                     />
                   </div>
                   <div
                     v-else
-                    class="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center"
+                    class="flex items-center justify-center w-6 h-6 bg-gray-200 rounded-full"
                   >
                     <font-awesome-icon
                       :icon="['fas', 'user']"
-                      class="text-gray-400 text-sm"
+                      class="text-sm text-gray-400"
                     />
                   </div>
                   <div class="flex-1">
@@ -711,7 +711,7 @@ const swalWithBootstrapButtons = $swal.mixin({
                         v-model="newReply.content"
                         rows="2"
                         maxlength="200"
-                        class="w-full border rounded p-2 text-sm disabled:bg-gray-100"
+                        class="w-full p-2 text-sm border rounded disabled:bg-gray-100"
                         :class="{
                           'bg-gray-50': newReply.content.length >= 200,
                         }"
@@ -727,7 +727,7 @@ const swalWithBootstrapButtons = $swal.mixin({
                       ></textarea>
                       <p
                         v-if="newReply.content.length > 0"
-                        class="text-xs mt-1"
+                        class="mt-1 text-xs"
                         :class="
                           newReply.content.length >= 200
                             ? 'text-red-500'
@@ -743,7 +743,7 @@ const swalWithBootstrapButtons = $swal.mixin({
                     </div>
                     <button
                       @click="addReply(article._id, comment._id)"
-                      class="mt-2 bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600"
+                      class="px-3 py-1 mt-2 text-sm text-white bg-blue-500 rounded hover:bg-blue-600"
                       :disabled="!auth.userData"
                     >
                       {{ auth.userData ? "發表回覆" : "請先登入" }}
@@ -755,23 +755,23 @@ const swalWithBootstrapButtons = $swal.mixin({
           </div>
 
           <!-- 新增評論表單 -->
-          <div class="bg-white p-3 md:p-4 rounded-lg">
-            <h4 class="font-medium mb-2 text-sm md:text-base">撰寫評論</h4>
+          <div class="p-3 bg-white rounded-lg md:p-4">
+            <h4 class="mb-2 text-sm font-medium md:text-base">撰寫評論</h4>
             <div class="flex items-start gap-3">
               <div v-if="auth.userData" class="w-8 h-8">
                 <img
                   :src="auth.userData.picture"
                   :alt="auth.userData.name"
-                  class="w-full h-full rounded-full object-cover"
+                  class="object-cover w-full h-full rounded-full"
                 />
               </div>
               <div
                 v-else
-                class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center"
+                class="flex items-center justify-center w-8 h-8 bg-gray-200 rounded-full"
               >
                 <font-awesome-icon
                   :icon="['fas', 'user']"
-                  class="text-gray-400 text-lg"
+                  class="text-lg text-gray-400"
                 />
               </div>
               <div class="flex-1">
@@ -780,7 +780,7 @@ const swalWithBootstrapButtons = $swal.mixin({
                     v-model="newComment.content"
                     rows="3"
                     maxlength="200"
-                    class="w-full border rounded p-2 text-sm md:text-base disabled:bg-gray-100"
+                    class="w-full p-2 text-sm border rounded md:text-base disabled:bg-gray-100"
                     :class="{ 'bg-gray-50': newComment.content.length >= 200 }"
                     :placeholder="
                       auth.userData ? '請輸入評論' : '請先登入後再發表評論...'
@@ -792,7 +792,7 @@ const swalWithBootstrapButtons = $swal.mixin({
                   ></textarea>
                   <p
                     v-if="newComment.content.length > 0"
-                    class="text-xs mt-1"
+                    class="mt-1 text-xs"
                     :class="
                       newComment.content.length >= 200
                         ? 'text-red-500'
@@ -817,7 +817,7 @@ const swalWithBootstrapButtons = $swal.mixin({
                           confirmButtonText: '確定',
                         })
                   "
-                  class="w-full md:w-auto bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors text-sm md:text-base mt-2"
+                  class="w-full px-4 py-2 mt-2 text-sm text-white transition-colors bg-blue-500 rounded md:w-auto hover:bg-blue-600 md:text-base"
                 >
                   發表評論
                 </button>

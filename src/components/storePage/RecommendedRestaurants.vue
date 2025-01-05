@@ -1,6 +1,6 @@
 <script setup>
 import { storeToRefs } from "pinia";
-import { useStore } from "../../stores/storePage";
+import { useStore } from "@/stores/storePage";
 import { Carousel, Slide, Navigation } from "vue3-carousel";
 import "vue3-carousel/dist/carousel.css";
 
@@ -43,7 +43,7 @@ const { recommendedRestaurants } = storeToRefs(restaurantStore);
               <a
                 :href="restaurant.googleMapsUri"
                 target="_blank"
-                class="cursor-pointer block"
+                class="block cursor-pointer"
               >
                 <div class="overflow-hidden">
                   <img
@@ -55,7 +55,7 @@ const { recommendedRestaurants } = storeToRefs(restaurantStore);
                 </div>
                 <div class="p-4">
                   <h4
-                    class="text-lg font-bold truncate md:text-left text-center"
+                    class="text-lg font-bold text-center truncate md:text-left"
                   >
                     {{ restaurant?.name }}
                   </h4>
@@ -98,7 +98,7 @@ const { recommendedRestaurants } = storeToRefs(restaurantStore);
             <Navigation>
               <template #next>
                 <button
-                  class="bg-amber-500 opacity-80 rounded-full p-3 shadow-lg hover:bg-gray-300"
+                  class="p-3 rounded-full shadow-lg bg-amber-500 opacity-80 hover:bg-gray-300"
                 >
                   <svg
                     width="24"
@@ -119,7 +119,7 @@ const { recommendedRestaurants } = storeToRefs(restaurantStore);
               </template>
               <template #prev>
                 <button
-                  class="bg-amber-500 opacity-80 rounded-full p-3 shadow-lg hover:bg-gray-300"
+                  class="p-3 rounded-full shadow-lg bg-amber-500 opacity-80 hover:bg-gray-300"
                 >
                   <svg
                     width="24"
