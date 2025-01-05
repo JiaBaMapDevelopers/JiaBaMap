@@ -1,12 +1,12 @@
 <template>
-  <div class="p-6">
+  <div class="p-6 mt-10">
     <!-- 標題 -->
     <h1 class="text-2xl font-bold mb-4">菜單管理</h1>
 
     <!-- 新增按鈕 -->
     <button 
       @click="openAddModal"
-      class="px-4 py-2 mb-4 bg-blue-500 text-white rounded hover:bg-blue-600"
+      class="px-4 py-2 mb-4 bg-amber-400 text-white rounded hover:bg-amber-500 transition"
     >
       新增菜單
     </button>
@@ -37,7 +37,7 @@
       <!-- 搜尋按鈕 -->
       <button 
         @click="fetchMenus(1)" 
-        class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+        class="px-4 py-2 bg-amber-400 hover:bg-amber-500 text-white rounded transition"
       >
         搜尋
       </button>
@@ -61,7 +61,7 @@
         @click="fetchMenus(page)" 
         :class="[
           'px-4 py-2 rounded', 
-          page === currentPage ? 'bg-blue-500 text-white' : 'bg-gray-300 hover:bg-gray-400'
+          page === currentPage ? 'bg-amber-400 text-white' : 'bg-amber-300 hover:bg-amber-400 text-white',
         ]"
       >
         {{ page }}
@@ -84,6 +84,7 @@
         <tr class="bg-gray-100">
           <th class="border border-gray-300 px-4 py-2">圖片</th> <!-- 新增圖片欄 -->
           <th class="border border-gray-300 px-4 py-2">名稱</th>
+          <th class="border border-gray-300 px-4 py-2">描述</th> <!-- 標題 -->
           <th class="border border-gray-300 px-4 py-2">價格</th>
           <th class="border border-gray-300 px-4 py-2">分類</th>
           <th class="border border-gray-300 px-4 py-2">操作</th>
@@ -91,22 +92,25 @@
       </thead>
       <tbody>
         <tr v-for="menu in menus" :key="menu._id">
-          <td class="border border-gray-300 px-4 py-2">
-            <img v-if="menu.imageUrl" :src="menu.imageUrl" alt="圖片" class="w-16 h-16 object-cover rounded">
+          <td class="border border-gray-300 px-4 py-2 text-center">
+            <div class="flex justify-center items-center">
+              <img v-if="menu.imageUrl" :src="menu.imageUrl" alt="圖片" class="w-16 h-16 object-cover rounded">
+            </div>
           </td>
           <td class="border border-gray-300 px-4 py-2">{{ menu.name }}</td>
+          <td class="border border-gray-300 px-4 py-2">{{ menu.description }}</td>
           <td class="border border-gray-300 px-4 py-2">${{ menu.price }}</td>
           <td class="border border-gray-300 px-4 py-2">{{ menu.category }}</td>
           <td class="border border-gray-300 px-4 py-2">
             <button 
               @click="openEditModal(menu)"
-              class="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600 mr-2"
+              class="px-3 py-1 bg-amber-400 text-white rounded hover:bg-amber-500 mr-2 transition"
             >
               編輯
             </button>
             <button 
               @click="deleteMenu(menu._id)"
-              class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+              class="px-3 py-1 bg-gray-400 text-white rounded hover:bg-gray-500 transition"
             >
               刪除
             </button>
@@ -134,6 +138,15 @@
             <input v-model="menuForm.name" class="w-full p-2 border rounded" required />
           </div>
           <div class="mb-4">
+            <label class="block mb-1">描述</label>
+            <textarea 
+              v-model="menuForm.description" 
+              rows="3"
+              placeholder="請輸入描述"
+              class="w-full p-2 border rounded"
+            ></textarea>
+          </div>
+          <div class="mb-4">
             <label class="block mb-1">價格</label>
             <input v-model.number="menuForm.price" type="number" class="w-full p-2 border rounded" required />
           </div>
@@ -148,10 +161,10 @@
             </select>
           </div>
           <div class="flex justify-end">
-            <button type="button" @click="closeModal" class="px-4 py-2 bg-gray-500 text-white rounded mr-2">
+            <button type="button" @click="closeModal" class="px-4 py-2 bg-gray-400 hover:bg-gray-500 text-white rounded mr-2 transition">
               取消
             </button>
-            <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded">
+            <button type="submit" class="px-4 py-2 bg-amber-400 hover:bg-amber-500 text-white rounded transition">
               {{ isEditing ? '更新' : '新增' }}
             </button>
           </div>
@@ -166,7 +179,7 @@ import { ref, onMounted } from 'vue';
 import axios from 'axios';
 
 const imageFile = ref(null); // 儲存上傳的檔案
-const restaurantPlaceId = '67720e635123faace157e5b3'; 
+const storeId = '67720e635123faace157e5b3'; 
 const menus = ref([]);
 const showModal = ref(false);
 const isEditing = ref(false);
@@ -225,7 +238,7 @@ const fetchMenus = async (page = 1) => {
         category: selectedCategory.value,
         minPrice: minPrice.value || undefined, 
         maxPrice: maxPrice.value || undefined, 
-        restaurantPlaceId 
+        storeId: '67720e635123faace157e5b3', // 確保這裡傳的是正確的 ObjectId
       }
     });
 
@@ -242,19 +255,29 @@ const fetchMenus = async (page = 1) => {
 };
 
 const addMenu = async () => {
-  if (!validateForm()) return; // 驗證失敗直接退出
+  if (!validateForm()) return;
 
   try {
-    const response = await axios.post('http://localhost:3000/menu', {
-      name: menuForm.value.name,
-      price: menuForm.value.price,
-      category: menuForm.value.category,
-      imageUrl: menuForm.value.imageUrl || '', 
-      restaurantPlaceId 
+    const formData = new FormData();
+    formData.append('name', menuForm.value.name);
+    formData.append('description', menuForm.value.description); // 新增描述
+    formData.append('price', menuForm.value.price);
+    formData.append('category', menuForm.value.category);
+    formData.append('storeId', storeId);
+
+    // 檢查圖片並加入
+    if (menuForm.value.image) {
+      formData.append('image', menuForm.value.image); // 圖片檔案
+    }
+
+    const response = await axios.post('http://localhost:3000/menu', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
     });
 
     if (response.status === 200 && response.data._id) {
-      menus.value.push(response.data);
+      menus.value.push(response.data); // 更新畫面
       closeModal();
       alert("新增成功！");
     }
@@ -274,16 +297,30 @@ const openEditModal = (menu) => {
 
 const updateMenu = async () => {
   try {
-    const response = await axios.put(`http://localhost:3000/menu/${editingId.value}`, {
-      name: menuForm.value.name,
-      price: menuForm.value.price,
-      category: menuForm.value.category,
-      imageUrl: menuForm.value.imageUrl || '' 
-    });
+    const formData = new FormData();
+    formData.append('name', menuForm.value.name);
+    formData.append('description', menuForm.value.description); // 新增描述
+    formData.append('price', menuForm.value.price);
+    formData.append('category', menuForm.value.category);
+
+    // 檢查是否有新的圖片需要更新
+    if (menuForm.value.image) {
+      formData.append('image', menuForm.value.image); // 圖片檔案
+    }
+
+    const response = await axios.put(
+      `http://localhost:3000/menu/${editingId.value}`,
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      }
+    );
 
     if (response.status === 200) {
       const index = menus.value.findIndex(menu => menu._id === editingId.value);
-      menus.value[index] = response.data;
+      menus.value[index] = response.data; // 更新畫面
       closeModal();
       alert("更新成功！");
     }
@@ -308,7 +345,7 @@ const deleteMenu = async (id) => {
 const closeModal = () => {
   showModal.value = false;
   isEditing.value = false;
-  menuForm.value = { name: '', price: '', category: '' };
+  menuForm.value = { name: '', description: '', price: '', category: '' };
 };
 
 onMounted(fetchMenus);
