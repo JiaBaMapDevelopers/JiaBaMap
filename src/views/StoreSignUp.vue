@@ -1,7 +1,7 @@
 <script setup>
-import { ref, onMounted } from 'vue';
-import { Loader } from '@googlemaps/js-api-loader';
-import Swal from 'sweetalert2'
+import { ref, onMounted, shallowRef } from 'vue';
+import googleMapsLoader from '../components/googleMapsLoader.js';
+import Swal from 'sweetalert2';
 
 const username = ref("");
 const password = ref("");
@@ -13,28 +13,38 @@ const contactName = ref("");
 const contactEmail = ref("");
 const contactPhone = ref("");
 const autocomplete = ref(null);
+const predictions = shallowRef([]);
+const placeId = ref("");
 
-function handlePlaceChanged() {
-      const place = autocomplete.value.getPlace();
-      storeAddress.value = place?.formatted_address || "";
+let AutocompleteSessionToken;
+let AutocompleteSuggestion;
+let request = {
+    input: "",
+    includedPrimaryTypes: ["establishment"],
+    region: "tw",
+    language: "zh-TW",
+    includedRegionCodes: ["tw"],
+};
+
+async function initGoogleAutocomplete(){
+    ({AutocompleteSessionToken, AutocompleteSuggestion} = await googleMapsLoader.importLibrary("places"));
+    request.sessionToken = new AutocompleteSessionToken();
+}
+
+async function fetchSuggestions(){
+    if(storeAddress.value){
+        request.input = storeAddress.value;
+        const {suggestions} = await AutocompleteSuggestion.fetchAutocompleteSuggestions(request);
+        predictions.value = suggestions.map((ele) => ele.placePrediction);
     }
+}
 
-async function initAutocomplete() {
-  try {
-    const loader = new Loader({
-      apiKey: "import.meta.env.VITE_GOOGLE_MAPS_API_KEY",
-      version: "weekly",
-      libraries: ["places"]
-    });
-    const { Autocomplete } = await loader.importLibrary("places");
-    const autocompleteInput = document.getElementById("storeAddress");
-    autocomplete.value = new Autocomplete(autocompleteInput, {
-      types: ['geocode'],
-    });
-    autocomplete.value.addListener('place_changed', handlePlaceChanged);
-  } catch (err) {
-    console.error("Google Maps API 加載失敗: ", err);
-  }
+function clickPrediction(predict) {
+    storeAddress.value = `${predict.mainText.text}: ${predict.secondaryText.text}`;
+    placeId.value = predict.placeId;
+    predictions.value = [];
+    request.sessionToken = new AutocompleteSessionToken();
+}
 }
 
 function handleSubmit() {
@@ -71,7 +81,9 @@ onMounted(() => {
     initAutocomplete();
 });
 
-
+onMounted(
+    initGoogleAutocomplete
+)
 
 </script>
 
@@ -97,7 +109,14 @@ onMounted(() => {
             </div>
             <div class="mb-4">
                 <label class="block text-gray-700 text-sm font-bold mb-2" for="storeAddress">✨ 店家地址:</label>
-                <input ref="autocomplete" v-model="storeAddress" id="storeAddress" type="text" placeholder="請輸入店家地址" class="appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight hover:shadow-md focus:outline-orange-300">
+                <div class="relative w-full border rounded hover:shadow-md">
+                    <input v-model="storeAddress" @input="fetchSuggestions" id="storeAddress" type="text" placeholder="請輸入店家地址" class="appearance-none py-2 px-3 text-gray-700 leading-tight w-full pr-10 focus:outline-orange-300">
+                </div>
+                <div v-if="predictions.length !== 0" class=" mt-1">
+                    <ul class=" border w-full rounded">
+                        <li @click="clickPrediction(predict)" v-for="predict in predictions" :key="predict.placeId" class="border w-full px-3 text-gray-700 leading-tight cursor-pointer hover:bg-gray-200">{{ `${predict.mainText.text}: ${predict.secondaryText.text}` }}</li>
+                    </ul>
+                </div>
             </div>
             <div class="mb-4">
                 <label class="block text-gray-700 text-sm font-bold mb-2" for="storePhone">✨ 店家電話:</label>
