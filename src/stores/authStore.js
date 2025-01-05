@@ -20,7 +20,7 @@ export const useAuth = defineStore("auth", () => {
         localStorage.removeItem("userData"); // 清除資料
       }
     },
-    { deep: true }
+    { deep: true },
   );
 
   // 新增更新大頭貼的方法
@@ -58,7 +58,7 @@ export const useAuth = defineStore("auth", () => {
   const handleCredentialResponse = async (response) => {
     const resToken = await axios.post(
       `${import.meta.env.VITE_BACKEND_BASE_URL}/auth/user/login/google`,
-      response
+      response,
     );
     localStorage.setItem("userToken", resToken.data.token);
     if (resToken) {
@@ -75,10 +75,12 @@ export const useAuth = defineStore("auth", () => {
     // router.push({ name: "user" });
   };
 
-  const getUserdata = async() => {
-    const response = await axios.get(`${import.meta.env.VITE_BACKEND_BASE_URL}/user/${userId.value}`)
-    userData.value = response.data
-  }
+  const getUserdata = async () => {
+    const response = await axios.get(
+      `${import.meta.env.VITE_BACKEND_BASE_URL}/user/${userData.value._id}`,
+    );
+    userData.value = response.data;
+  };
 
   const logout = () => {
     userData.value = null;
