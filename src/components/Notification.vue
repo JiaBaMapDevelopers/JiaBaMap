@@ -1,6 +1,6 @@
 <script setup>
 import { useRouter } from "vue-router";
-import { ref, onMounted } from "vue";
+import { ref, onMounted, onUnmounted, watchEffect } from "vue";
 import { useAuth } from "@/stores/authStore";
 import axios from "axios";
 import { io } from "socket.io-client";
@@ -8,7 +8,6 @@ import { io } from "socket.io-client";
 const router = useRouter();
 const isDropdownOption = ref(false);
 const user = useAuth();
-const socket = ref(null);
 const notifications = ref([]);
 
 // 切換通知欄顯示
@@ -18,12 +17,34 @@ const toggleDropdown = () => {
 
 // 根據通知類型獲取對應的消息文本
 const getNotificationMessage = (notification) => {
-  const actionMessages = {
-    'comment': '評論了你的貼文',
-    'like': '對你的貼文按讚',
-    'reply': '回覆了你的評論'
+  const messages = {
+    // 餐廳相關通知
+    restaurant_comment: {
+      comment: '評論了你的餐廳'
+    },
+    restaurant_comment_like: {
+      like: '對你的餐廳評論按讚'
+    },
+    // 文章相關通知
+    article_comment: {
+      comment: '評論了你的文章'
+    },
+    article_like: {
+      like: '對你的文章按讚'
+    },
+    article_comment_like: {
+      like: '對你的文章評論按讚'
+    },
+    article_comment_reply: {
+      reply: '回覆了你的文章評論'
+    },
+    article_reply_like: {
+      like: '對你的回覆按讚'
+    }
   };
-  return actionMessages[notification.actionType] || '與你互動';
+
+  const typeMessages = messages[notification.relatedType];
+  return typeMessages ? typeMessages[notification.actionType] || '與你互動' : '與你互動';
 };
 
 // 處理通知點擊
@@ -39,11 +60,20 @@ const handleNotificationClick = async (notification) => {
     }
 
     // 根據通知類型決定跳轉邏輯
-    if (notification.storeId) {
+    if (notification.relatedType.startsWith('restaurant_')) {
       router.push({
         name: "Store",
         params: { id: notification.storeId },
         query: notification.commentId ? { commentId: notification.commentId } : {}
+      });
+    } else if (notification.relatedType.startsWith('article_')) {
+      router.push({
+        name: "Article",
+        params: { id: notification.metadata?.articleId },
+        query: {
+          ...(notification.commentId && { commentId: notification.commentId }),
+          ...(notification.metadata?.replyId && { replyId: notification.metadata.replyId })
+        }
       });
     }
   } catch (error) {
@@ -55,7 +85,12 @@ const handleNotificationClick = async (notification) => {
 const fetchNotifications = async () => {
   if (user.userData) {
     try {
-      const response = await axios.get(`/api/notifications/${user.userData.id}`);
+      const response = await axios.get(`/api/notifications/${user.userData.id}`, {
+        params: {
+          page: 1,
+          limit: 5
+        }
+      });
       notifications.value = response.data;
     } catch (error) {
       console.error("獲取通知失敗:", error);
@@ -63,42 +98,60 @@ const fetchNotifications = async () => {
   }
 };
 
+const socket = ref(null);
 // 初始化 WebSocket 連接
 const initializeWebSocket = () => {
-  if (!user.userData) return;
+  if (!user.userData || !user.userData.id) {
+    console.log("No user data available, skipping socket connection");
+    return;
+  }
 
-  socket.value = io(import.meta.env.VITE_BACKEND_BASE_URL);
-
-  socket.value.on("connect", () => {
-    socket.value.emit("join", user.userData.id);
+  socket.value = io(import.meta.env.VITE_BACKEND_SERVER_URL, {
+    withCredentials: true,
   });
 
-  socket.value.on("newNotification", ({ notification, message }) => {
-    notifications.value.unshift(notification);
+  socket.value.on("connect", () => {
+    console.log("已連接，用戶ID:", user.userData.id);
+    socket.value.emit("join", user.userData.id);
+    
+  });
+
+  socket.value.on("connect_error", (error) => {
+    console.error("Connection error:", error);
+  });
+
+  socket.value.on("newNotification", ({ notification }) => {
+    if (notification) {
+      notifications.value.unshift(notification);
+    }
   });
 
   socket.value.on("readNotification", ({ notificationId }) => {
-    const index = notifications.value.findIndex(n => n._id === notificationId);
-    if (index !== -1) {
-      notifications.value[index].read = true;
+    if (notificationId) {
+      const index = notifications.value.findIndex(n => n._id === notificationId);
+      if (index !== -1) {
+        notifications.value[index].read = true;
+      }
     }
   });
 
   socket.value.on("disconnect", () => {
-    console.log("WebSocket 連接已斷開");
+    console.log("WebSocket disconnected");
   });
 };
 
 // 組件卸載時清理
-const onUnmounted = () => {
+onUnmounted(() => {
   if (socket.value) {
     socket.value.disconnect();
   }
-};
+});
 
 onMounted(() => {
-  fetchNotifications();
-  initializeWebSocket();
+  if (user.userData && user.userData.id) {
+    fetchNotifications();
+    initializeWebSocket();
+  }
 });
 </script>
 
