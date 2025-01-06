@@ -26,6 +26,13 @@ import {
   faCamera,
   faRightFromBracket,
   faBell,
+  faFileInvoiceDollar,
+  faPhoneFlip,
+  faCircleExclamation,
+  faXmark,
+  faPen,
+  faTrash,
+  faSpinner,
 } from "@fortawesome/free-solid-svg-icons";
 import { faInstagram } from "@fortawesome/free-brands-svg-icons";
 import { createPinia } from "pinia";
@@ -65,6 +72,13 @@ library.add(
   faCamera,
   faRightFromBracket,
   faBell,
+  faFileInvoiceDollar,
+  faPhoneFlip,
+  faCircleExclamation,
+  faXmark,
+  faPen,
+  faTrash,
+  faSpinner,
 );
 
 const app = createApp(App);

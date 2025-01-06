@@ -14,6 +14,8 @@ import PreviewNoteView from "@/views/PreviewNoteView.vue";
 import Dashboard from "@/views/DashboardView.vue";
 import StoreCart from "@/views/StoreCartView.vue";
 import StoreSignUp from "@/views/StoreSignUp.vue";
+import CheckoutPage from "@/views/Checkout/CheckoutPage.vue";
+import CheckoutDetail from "@/views/Checkout/CheckoutDetail.vue";
 
 const routes = [
   {
@@ -87,6 +89,16 @@ const routes = [
     path: "/menu-management",
     name: "MenuManagement",
     component: () => import("../views/MenuManagement.vue"),
+  },
+  {
+    path: "/checkout",
+    name: "CheckoutPage",
+    component: CheckoutPage,
+  },
+  {
+    path: "/checkout-detail",
+    name: "CheckoutDetail",
+    component: CheckoutDetail,
   },
 ];
 
