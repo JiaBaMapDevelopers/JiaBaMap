@@ -384,6 +384,9 @@ const handleResize = () => {
   isMobile.value = window.innerWidth < 768;
 };
 
+console.log(articles.content);
+
+
 // 在 onMounted 中調用
 onMounted(async () => {
   await fetchArticles();
@@ -443,7 +446,7 @@ const toggleComments = (articleId) => {
     article.showComments = !article.showComments;
   }
 };
-
+const  contentHtml = `${articles.value.content}`
 
 
 </script>
@@ -494,10 +497,11 @@ const toggleComments = (articleId) => {
               <span>{{ formatDate(article.createdAt) }}</span>
             </div>
             <div class="relative">
-              <p class="text-gray-700 leading-relaxed whitespace-pre-wrap break-words line-clamp-3" 
+              <!-- <p class="text-gray-700 leading-relaxed whitespace-pre-wrap break-words line-clamp-3" 
                  :class="{ 'line-clamp-none': article.showFullContent }">
                 {{ article.content }}
-              </p>
+              </p> -->
+              <div v-html="article.content"></div>
               <button 
                 @click="toggleContent(article)"
                 class="text-blue-500 text-sm mt-2"
@@ -573,7 +577,7 @@ const toggleComments = (articleId) => {
             <span>{{ formatDate(article.createdAt) }}</span>
           </div>
           <div class="relative">
-            <p class="text-gray-700 text-sm line-clamp-3" :class="{ 'line-clamp-none': !article.showFullContent }">
+            <p  class="text-gray-700 text-sm line-clamp-3" :class="{ 'line-clamp-none': !article.showFullContent }">
               {{ article.content }}
             </p>
             <button 

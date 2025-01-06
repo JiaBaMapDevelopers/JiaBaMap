@@ -282,14 +282,14 @@ const onImageSelect = async (event) => {
 
   try {
     // 顯示上傳中提示
-    const loadingToast = await swalWithBootstrapButtons.fire({
-      title: '上傳中...',
-      allowOutsideClick: false,
-      showConfirmButton: false,
-      didOpen: () => {
-        swalWithBootstrapButtons.showLoading();
-      }
-    });
+    // const loadingToast = await swalWithBootstrapButtons.fire({
+    //   title: '上傳中...',
+    //   allowOutsideClick: false,
+    //   showConfirmButton: false,
+    //   didOpen: () => {
+    //     swalWithBootstrapButtons.showLoading();
+    //   }
+    // });
 
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -311,8 +311,9 @@ const onImageSelect = async (event) => {
 
       updateContent();
       
+      
       // 關閉上傳提示
-      loadingToast.close();
+      // loadingToast.close();
 
       // 顯示成功提示
       swalWithBootstrapButtons.fire({

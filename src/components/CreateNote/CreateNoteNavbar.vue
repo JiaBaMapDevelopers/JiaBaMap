@@ -9,7 +9,7 @@ const auth = useAuth();
 const router = useRouter();
 const route = useRoute();
 const $swal = inject('$swal');
-const { userData } = storeToRefs(user); 
+const { userData } = storeToRefs(auth); 
 
 // 修改 emit 宣告，加入 validationErrors
 const emit = defineEmits(['save', 'preview', 'checkContent', 'validationErrors']);
@@ -218,7 +218,7 @@ const submitArticle = async () => {
 
     // 準備文章資料
     const articleData = {
-      userId: auth.userData.sub,
+      userId: auth.userData._id,
       user: auth.userData.name,
       userPhoto: auth.userData.picture || '',
       restaurantName: formData.restaurantName,
@@ -227,6 +227,37 @@ const submitArticle = async () => {
       photo: formData.fileList?.[0]?.data || 'default-image.jpg',
       eatdate: formData.date 
     };
+    const subData = new FormData();
+    subData.append("userId", auth.userData._id)
+    subData.append("user", auth.userData.name,)
+    subData.append("restaurantName", formData.restaurantName,)
+    subData.append("title", formData.title,)
+    subData.append("content", formData.content,)
+    subData.append("eatdate", formData.date )
+    subData.append("userPhoto", auth.userData.profilePicture || '',)
+    
+    const base64Data = formData.fileList?.[0].data;
+    // 如果 Base64 資料存在，將其轉為 File
+    if (base64Data) {
+      // 提取 Base64 的資料部分
+      const [meta, base64Content] = base64Data.split(",");
+      
+      // 獲取 MIME 類型（例如 "image/jpeg"）
+      const mimeType = meta.match(/:(.*?);/)[1];
+      
+      // 將 Base64 解碼為二進位數據
+      const binaryData = atob(base64Content);
+      
+      // 將二進位數據轉換為 Uint8Array
+      const byteNumbers = new Array(binaryData.length).fill(0).map((_, i) => binaryData.charCodeAt(i));
+      const byteArray = new Uint8Array(byteNumbers);
+      
+      // 建立 File 物件
+      const uniqueName = `photo_${Date.now()}.jpg`;
+      const file = new File([byteArray], uniqueName, { type: mimeType });
+      subData.append("photo", file)
+  
+}
 
     // 檢查必要欄位
     if (!articleData.userId || !articleData.restaurantName || !articleData.title || 
@@ -236,11 +267,11 @@ const submitArticle = async () => {
 
     // 發送到後端 API
     const response = await axios.post(
-      `${import.meta.env.VITE_BACKEND_BASE_URL}/articles`,
-      articleData,
+      `${import.meta.env.VITE_BACKEND_BASE_URL}/articles/`,
+      subData,
       {
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "multipart/form-data",
           'Authorization': `Bearer ${auth.token}`
         }
       }
@@ -253,6 +284,7 @@ const submitArticle = async () => {
       localStorage.removeItem('storeData');
       localStorage.removeItem('editingDraft');
       localStorage.removeItem('previewNoteData');
+
 
       // 顯示成功訊息
       await swalWithBootstrapButtons.fire({
