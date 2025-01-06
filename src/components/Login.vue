@@ -1,28 +1,32 @@
 <template>
-<div  v-if="visible && !user.userData" class="fixed top-0 left-0 z-50 flex items-center justify-center w-full h-screen ml-0 modal-overlay bg-black/50" @click.self="closeModal">
-        <div class="flex-col w-1/5 min-w-[260px] h-1/2 justify-items-center bg-white rounded-lg p-3 leading-10">
-            <h1>登入 「 JiaBaMap 」</h1>
-            <div class="">
-                <img src="@/assets/logo.jpg" alt="">
-            </div>
-            <p class="m-3 mb-12">按下登入以使用更多功能！！</p>
-            <div id="googleButton"></div>
-            <div v-if="userData" class="user-info">
-                <h3>登錄成功！</h3>
-                <p>名稱：{{ userData.name }}</p>
-                <p>Email：{{ userData.email }}</p>
-                <img :src="userData.profilePicture" alt="用戶頭像" />
-                <button @click="logout">登出</button>
-              </div>
-        </div>
+  <div
+    v-if="visible && !user.userData"
+    class="fixed top-0 left-0 z-50 flex items-center justify-center w-full h-screen ml-0 modal-overlay bg-black/50"
+    @click.self="closeModal"
+  >
+    <div
+      class="flex-col w-1/5 min-w-[260px] h-1/2 justify-items-center bg-white rounded-lg p-3 leading-10"
+    >
+      <h1>登入 「 JiaBaMap 」</h1>
+      <div class="">
+        <img src="@/assets/logo.jpg" alt="" />
+      </div>
+      <p class="m-3 mb-12">按下登入以使用更多功能！！</p>
+      <div id="googleButton"></div>
+      <div v-if="userData" class="user-info">
+        <h3>登錄成功！</h3>
+        <p>名稱：{{ userData.name }}</p>
+        <p>Email：{{ userData.email }}</p>
+        <img :src="userData.profilePicture" alt="用戶頭像" />
+        <button @click="logout">登出</button>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, watch, nextTick} from "vue";
-import { useAuth } from '@/stores/authStore';
-
+import { ref, onMounted, watch, nextTick } from "vue";
+import { useAuth } from "@/stores/authStore";
 
 const user = useAuth();
 

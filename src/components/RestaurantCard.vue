@@ -220,10 +220,6 @@ const restaurantStore = useRestaurantStore();
 const Search = useKeywordStore();
 const Store = useStore();
 
-const restaurantStore = useRestaurantStore();
-const Search = useKeywordStore();
-const Store = useStore();
-
 const handleMouseEnter = (placeId) => {
   restaurantStore.setHoveredPlace(placeId);
 };
