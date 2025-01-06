@@ -103,12 +103,13 @@ export const useStore = defineStore("store", () => {
   // 獲取類似餐廳
   const fetchSimilarRestaurants = async () => {
     similarRestaurants.value = [];
-    // 先獲取當前餐廳的詳細資訊
-    const detailRes = await fetch(
-      `${import.meta.env.VITE_BACKEND_BASE_URL}/restaurants/${placesId.value}`
-    );
+    
+      // 先獲取當前餐廳的詳細資訊
+      const detailRes = await fetch(
+        `${import.meta.env.VITE_BACKEND_BASE_URL}/restaurants/${placesId.value}`
+      );
 
-    const detailData = await detailRes.json();
+      const detailData = await detailRes.json();
 
     // 使用當前餐廳的位置搜尋附近餐廳
     const searchRes = await fetch(
@@ -120,81 +121,110 @@ export const useStore = defineStore("store", () => {
     // 使用 Set 來儲存已經添加的餐廳 ID
     const addedIds = new Set();
 
-    // 過濾掉當前餐廳和重複的餐廳
-    similarRestaurants.value = resJson
-      .filter((restaurant) => {
-        // 如果是當前餐廳或已經添加過，則跳過
-        if (restaurant.id === placesId.value || addedIds.has(restaurant.id)) {
-          return false;
-        }
-        // 將餐廳 ID 加入已添加集合
-        addedIds.add(restaurant.id);
-        return true;
-      })
-      .map((restaurant) => ({
-        name: restaurant.name,
-        rating: restaurant.rating || "N/A",
-        userRatingCount: restaurant.userRatingCount || 0,
-        address: restaurant.address || "未知地址",
-        isOpen: restaurant.openNow || false,
-        photoUrl: restaurant.photoId
-          ? `${import.meta.env.VITE_BACKEND_BASE_URL}/restaurants/photos/${
-              restaurant.photoId
-            }`
-          : null,
-        place_id: restaurant.id,
-        googleMapsUri: restaurant.googleMapsUri
-      }));
+      // 過濾掉當前餐廳和重複的餐廳
+      const filteredRestaurants = resJson
+        .filter((restaurant) => {
+          // 如果是當前餐廳或已經添加過，則跳過
+          if (restaurant.id === placesId.value || addedIds.has(restaurant.id)) {
+            return false;
+          }
+          // 將餐廳 ID 加入已添加集合
+          addedIds.add(restaurant.id);
+          return true;
+        });
+
+      // 為每個餐廳獲取詳細資訊
+      const detailedRestaurants = await Promise.all(
+        filteredRestaurants.map(async (restaurant) => {
+          const detailResponse = await fetch(
+            `${import.meta.env.VITE_BACKEND_BASE_URL}/restaurants/${restaurant.id}`
+          );
+          const detailData = await detailResponse.json();
+          return {
+            name: restaurant.name,
+            rating: restaurant.rating || "N/A",
+            userRatingCount: restaurant.userRatingCount || 0,
+            address: restaurant.address || "未知地址",
+            isOpen: restaurant.openNow || false,
+            photoUrl: restaurant.photoId
+              ? `${import.meta.env.VITE_BACKEND_BASE_URL}/restaurants/photos/${
+                  restaurant.photoId
+                }`
+              : null,
+            place_id: restaurant.id,
+            googleMapsUri: detailData.googleMapsUri
+          };
+        })
+      );
+
+      similarRestaurants.value = detailedRestaurants;
   };
 
   // 獲取推薦餐廳
   const fetchRecommendedRestaurants = async () => {
-    // 先獲取當前餐廳的詳細資訊
-    const detailRes = await fetch(
-      `${import.meta.env.VITE_BACKEND_BASE_URL}/restaurants/${placesId.value}`
-    );
-
-    const detailData = await detailRes.json();
-
-    // 使用當前餐廳的位置搜尋附近餐廳
-    const searchRes = await fetch(
-      `${import.meta.env.VITE_BACKEND_BASE_URL}/restaurants/search?keyword=餐廳&lat=${detailData.lat}&lng=${detailData.lng}`
-    );
-
-    const resJson = await searchRes.json();
-
-    // 獲取相似餐廳的 ID 列表
-    const similarRestaurantIds = similarRestaurants.value.map(r => r.place_id);
     
-    // 使用 Set 來儲存已經添加的餐廳 ID
-    const addedIds = new Set();
-    
-    // 過濾掉當前餐廳、相似餐廳和重複的餐廳
-    recommendedRestaurants.value = resJson
-    .filter(restaurant => {
-      // 如果是當前餐廳、相似餐廳或已經添加過，則跳過
-      if (
-        restaurant.id === placesId.value ||
-        similarRestaurantIds.includes(restaurant.id) ||
-        addedIds.has(restaurant.id)
-      ) {
-        return false;
-      }
-      // 將餐廳 ID 加入已添加集合
-      addedIds.add(restaurant.id);
-      return true;
-    })
-    .map(restaurant => ({
-      name: restaurant.name,
-      rating: restaurant.rating || "N/A",
-      userRatingCount: restaurant.userRatingCount || 0,
-      photoUrl: restaurant.photoId
-      ? `${import.meta.env.VITE_BACKEND_BASE_URL}/restaurants/photos/${restaurant.photoId}`
-      : null,
-      place_id: restaurant.id,
-      googleMapsUri: restaurant.googleMapsUri
-    }));
-    recommendedRestaurants.value = [];
+      // 先獲取當前餐廳的詳細資訊
+      const detailRes = await fetch(
+        `${import.meta.env.VITE_BACKEND_BASE_URL}/restaurants/${placesId.value}`
+      );
+
+      const detailData = await detailRes.json();
+      
+      // 定義搜尋關鍵字陣列
+      const keywords = ['餐廳', '火鍋', '燒烤', '日式料理', '韓式料理', '中式料理', '義式料理', '早午餐', '甜點', '咖啡廳'];
+      // 隨機選擇 1 個關鍵字
+      const selectedKeyword = keywords[Math.floor(Math.random() * keywords.length)];
+      
+      // 使用當前餐廳的位置搜尋附近餐廳
+      const searchRes = await fetch(
+        `${import.meta.env.VITE_BACKEND_BASE_URL}/restaurants/search?keyword=${selectedKeyword}&lat=${detailData.lat}&lng=${detailData.lng}`
+      );
+
+      const resJson = await searchRes.json();
+
+      // 獲取相似餐廳的 ID 列表
+      const similarRestaurantIds = similarRestaurants.value.map(r => r.place_id);
+      
+      // 使用 Set 來儲存已經添加的餐廳 ID
+      const addedIds = new Set();
+      
+      // 過濾掉當前餐廳、相似餐廳和重複的餐廳
+      const filteredRestaurants = resJson
+        .filter(restaurant => {
+          // 如果是當前餐廳、相似餐廳或已經添加過，則跳過
+          if (
+            restaurant.id === placesId.value ||
+            similarRestaurantIds.includes(restaurant.id) ||
+            addedIds.has(restaurant.id)
+          ) {
+            return false;
+          }
+          // 將餐廳 ID 加入已添加集合
+          addedIds.add(restaurant.id);
+          return true;
+        });
+
+      // 為每個餐廳獲取詳細資訊
+      const detailedRestaurants = await Promise.all(
+        filteredRestaurants.map(async (restaurant) => {
+          const detailResponse = await fetch(
+            `${import.meta.env.VITE_BACKEND_BASE_URL}/restaurants/${restaurant.id}`
+          );
+          const detailData = await detailResponse.json();
+          return {
+            name: restaurant.name,
+            rating: restaurant.rating || "N/A",
+            userRatingCount: restaurant.userRatingCount || 0,
+            photoUrl: restaurant.photoId
+              ? `${import.meta.env.VITE_BACKEND_BASE_URL}/restaurants/photos/${restaurant.photoId}`
+              : null,
+            place_id: restaurant.id,
+            googleMapsUri: detailData.googleMapsUri
+          };
+        })
+      );
+
+      recommendedRestaurants.value = detailedRestaurants;
   };
 
   // 儲存餐廳資料到本地

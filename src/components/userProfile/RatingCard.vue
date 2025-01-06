@@ -22,6 +22,7 @@ if(navigator.geolocation) {
     })
   }
 
+
   const fetchLocationData = debounce(async (lat, lng) => {
     if (lastLatLng.value === `${lat},${lng}`) return;
 
@@ -40,6 +41,7 @@ if(navigator.geolocation) {
           fetchImgs(imageIds),
           fetchUrls(restaurantIds),
         ]);
+
 
         restaurantImg.value = images;
         restaurantUrl.value = urls;
@@ -82,6 +84,7 @@ if(navigator.geolocation) {
 async function fetchImgs(imageId) {
   try {
     const promises = imageId.map(async (id) => {
+
       const response = await axios.get(
         `${import.meta.env.VITE_BACKEND_BASE_URL}/restaurants/photos/${id}`, {
         responseType: 'blob'
