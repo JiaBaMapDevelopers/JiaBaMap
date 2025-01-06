@@ -1,0 +1,59 @@
+[
+    {
+      "id": 1,
+      "name": "緋烏龍奶茶",
+      "category": "新品上市",
+      "price": 50,
+      "image": "https://cdn-order-v3.nidin.shop/product/images/1879/b1879_676a0228_h3yMqLYd.jpg"
+    },
+    {
+      "id": 2,
+      "name": "緋烏龍鮮奶",
+      "category": "新品上市",
+      "price": 60,
+      "image": "https://cdn-order-v3.nidin.shop/product/images/1879/b1879_676a024c_71fD9zLe.jpg"
+    },
+    {
+      "id": 3,
+      "name": "芝士奶蓋緋烏龍",
+      "category": "新品上市",
+      "price": 55,
+      "image": "https://cdn-order-v3.nidin.shop/product/images/1879/b1879_676a025d_5ewJbAzZ.jpg"
+    },
+    {
+      "id": 4,
+      "name": "雙柚金烏龍",
+      "category": "雙柚新品",
+      "price": 55,
+      "image": "https://cdn-order-v3.nidin.shop/product/images/1879/b1879_6705d241_I8UVd0ZE.jpg"
+    },
+    {
+      "id": 5,
+      "name": "檸檬春烏龍",
+      "category": "Double FRUIT",
+      "price": 45,
+      "image": "https://cdn-order-v3.nidin.shop/product/images/1879/b1879_650bbccc_jlyIkQ8X.jpg"
+    },
+    {
+      "id": 6,
+      "name": "紅茶",
+      "category": "Original TEA",
+      "price": 25,
+      "image": "https://cdn-order-v3.nidin.shop/product/images/1879/b1879_650bba8c_WS4ORaz0.jpg"
+    },
+    {
+      "id": 7,
+      "name": "芝士奶蓋春烏龍",
+      "category": "Cheese MILK FOAM",
+      "price": 50,
+      "image": "https://cdn-order-v3.nidin.shop/product/images/1879/b1879_650bbd7b_jIF4sBtf.jpg"
+    },
+    {
+      "id": 8,
+      "name": "奶茶",
+      "category": "Classic MILK TEA",
+      "price": 40,
+      "image": "https://cdn-order-v3.nidin.shop/product/images/1879/b1879_650bbdda_n2woy6UY.jpg"
+    }
+  ]
+  

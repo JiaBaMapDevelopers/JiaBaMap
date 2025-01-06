@@ -1,233 +1,357 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import Swal from 'sweetalert2';
+import menuData from '../../data/menu.json';
 
-const menus = ref([
-  { 
-    id: 1,
-    name: '甘蔗春烏龍',
-    imgUrl: 'https://cdn-order-v3.nidin.shop/product/images/1879/b1879_650bbcf9_cfX7tDFL.jpg',
-    price: 55,
+const categoryRefs = ref([]);
+const selectedCategory = ref(0);
+const cartItems = ref([]);
+
+const categorizedMenu = [
+  {
+    name: '新品上市 - 緋烏龍系列',
+    items: menuData.filter(item => item.category === '新品上市')
+  },
+  {
+    name: '雙柚新品',
+    items: menuData.filter(item => item.category === '雙柚新品')
+  },
+  {
+    name: 'Double FRUIT',
+    items: menuData.filter(item => item.category === 'Double FRUIT')
+  },
+  {
+    name: 'Original TEA',
+    items: menuData.filter(item => item.category === 'Original TEA')
+  },
+  {
+    name: 'Cheese MILK FOAM',
+    items: menuData.filter(item => item.category === 'Cheese MILK FOAM')
+  },
+  {
+    name: 'Classic MILK TEA',
+    items: menuData.filter(item => item.category === 'Classic MILK TEA')
   }
-])
+];
 
-function showSwal(index) {
-  if(window.innerWidth >= 768){
-    Swal.fire({
-      title: menus.value[index].name,
-      imageUrl: menus.value[index].imgUrl,
-      imageWidth: 400,
-      imageHeight: 320,
-      imageAlt: `${menus.value[index].name}`,
-      html: `<div>價格: ${menus.value[index].price} </div>`,
-      confirmButtonText: '加入購物車',
+const scrollToCategory = (index) => {
+  selectedCategory.value = index;
+  categoryRefs.value[index]?.scrollIntoView({ behavior: 'smooth' });
+};
+
+// Intersection Observer for active category
+onMounted(() => {
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const index = categoryRefs.value.findIndex(ref => ref === entry.target);
+          if (index !== -1) {
+            selectedCategory.value = index;
+          }
+        }
+      });
+    },
+    { threshold: 0.5 }
+  );
+
+  categoryRefs.value.forEach(ref => {
+    if (ref) observer.observe(ref);
+  });
+});
+
+const openItemModal = async (item) => {
+  const { value: formValues } = await Swal.fire({
+    title: item.name,
+    html: `
+      <div class='flex flex-col items-center'>
+        <div class='mb-4'>
+          <img src='${item.image}' alt='商品圖片' class='w-24 h-24 object-cover'>
+        </div>
+        <div class='text-sm text-gray-600'>
+          價格: <span class='text-red-500'>\$${item.price}</span>
+        </div>
+        <div class='mt-4'>
+          <h3 class='text-lg font-semibold'>杯型選擇 <span class="text-red-500">*</span></h3>
+          <div class="cup-size-group" data-required="true">
+            <button class='option-btn cup-size bg-gray-100 hover: px-3 py-2 rounded m-1' data-value="中杯">中杯</button>
+            <button class='option-btn cup-size bg-gray-100 hover: px-3 py-2 rounded m-1' data-value="大杯">大杯 +10元</button>
+          </div>
+        </div>
+        <div class='mt-4'>
+          <h3 class='text-lg font-semibold'>加料選擇</h3>
+          <div class="toppings-group">
+            <button class='option-btn topping bg-gray-100 hover: px-3 py-2 rounded m-1' data-value="珍珠">珍珠 +10元</button>
+            <button class='option-btn topping bg-gray-100 hover: px-3 py-2 rounded m-1' data-value="椰果">椰果 +10元</button>
+          </div>
+        </div>
+        <div class='mt-4'>
+          <h3 class='text-lg font-semibold'>甜度選擇 <span class="text-red-500">*</span></h3>
+          <div class="sweetness-group" data-required="true">
+            <button class='option-btn sweetness bg-gray-100 hover: px-3 py-2 rounded m-1' data-value="正常糖">正常糖</button>
+            <button class='option-btn sweetness bg-gray-100 hover: px-3 py-2 rounded m-1' data-value="半糖">半糖</button>
+            <button class='option-btn sweetness bg-gray-100 hover: px-3 py-2 rounded m-1' data-value="微糖">微糖</button>
+          </div>
+        </div>
+      </div>
+    `,
+    confirmButtonText: '加入購物車',
+    showCancelButton: true,
+    cancelButtonText: '取消',
+    customClass: {
+      confirmButton: 'bg-amber-500 text-white',
+      cancelButton: 'bg-gray-300 text-gray-800',
+    },
+    didOpen: () => {
+      const groups = document.querySelectorAll('[data-required="true"]');
+      groups.forEach(group => {
+        const buttons = group.querySelectorAll('.option-btn');
+        buttons.forEach(button => {
+          button.addEventListener('click', () => {
+            buttons.forEach(btn => btn.classList.remove('bg-amber-500', 'text-white'));
+            button.classList.add('bg-amber-500', 'text-white');
+          });
+        });
+      });
+
+      const toppingButtons = document.querySelectorAll('.topping');
+      toppingButtons.forEach(button => {
+        button.addEventListener('click', () => {
+          button.classList.toggle('bg-amber-500');
+          button.classList.toggle('text-white');
+        });
+      });
+    },
+    preConfirm: () => {
+      const cupSize = document.querySelector('.cup-size.bg-amber-500')?.dataset.value;
+      const sweetness = document.querySelector('.sweetness.bg-amber-500')?.dataset.value;
+      const toppings = Array.from(document.querySelectorAll('.topping.bg-amber-500'))
+        .map(el => el.dataset.value);
+
+      if (!cupSize || !sweetness) {
+        Swal.showValidationMessage('請選擇必填項目');
+        return false;
+      }
+
+      return {
+        cupSize,
+        sweetness,
+        toppings
+      };
+    }
+  });
+
+  if (formValues) {
+    const cartItem = {
+      id: Date.now(),
+      item,
+      options: formValues,
+      quantity: 1
+    };
+    cartItems.value.push(cartItem);
+    
+    await Swal.fire({
+      title: '成功',
+      text: '已加入購物車',
+      icon: 'success',
+      timer: 1500
     });
   }
-}
+};
 
+const openCart = async () => {
+  if (cartItems.value.length === 0) {
+    await Swal.fire({
+      title: '購物車是空的',
+      icon: 'info'
+    });
+    return;
+  }
+
+  const totalAmount = cartItems.value.reduce(
+    (sum, cartItem) => sum + cartItem.item.price * cartItem.quantity,
+    0
+  );
+
+  const cartHtml = cartItems.value.map((cartItem, index) => `
+    <div class="flex items-center justify-between border-b py-2">
+      <div>
+        <h3 class="font-semibold">${cartItem.item.name}</h3>
+        <p class="text-sm text-gray-600">
+          ${cartItem.options.cupSize} | 
+          ${cartItem.options.sweetness}
+          ${cartItem.options.toppings.length ? ` | ${cartItem.options.toppings.join(', ')}` : ''}
+        </p>
+      </div>
+      <div class="flex items-center space-x-2">
+        <button class="quantity-btn px-2" data-action="decrease" data-index="${index}">-</button>
+        <span class="quantity-display" data-index="${index}">${cartItem.quantity}</span>
+        <button class="quantity-btn px-2" data-action="increase" data-index="${index}">+</button>
+        <button class="delete-btn text-red-500 ml-2" data-index="${index}">×</button>
+      </div>
+    </div>
+  `).join('');
+
+  await Swal.fire({
+    title: '購物車',
+    html: `
+      <div class="max-h-96 overflow-y-auto">
+        ${cartHtml}
+      </div>
+      <div class="mt-4 text-right font-semibold text-lg">
+        總金額: <span class="total-amount text-red-500">\$${totalAmount.toFixed(2)}</span>
+      </div>
+    `,
+    showCancelButton: true,
+    confirmButtonText: '結帳',
+    cancelButtonText: '繼續購物',
+    didOpen: () => {
+      // 更新數量的按鈕事件
+      document.querySelectorAll('.quantity-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const index = parseInt(btn.dataset.index);
+          const action = btn.dataset.action;
+
+          if (action === 'increase') {
+            cartItems.value[index].quantity++;
+          } else if (action === 'decrease' && cartItems.value[index].quantity > 1) {
+            cartItems.value[index].quantity--;
+          }
+
+          // 更新 DOM 的數量顯示
+          document.querySelector(`.quantity-display[data-index="${index}"]`).textContent = cartItems.value[index].quantity;
+
+          // 更新總金額顯示
+          const newTotal = cartItems.value.reduce(
+            (sum, cartItem) => sum + cartItem.item.price * cartItem.quantity,
+            0
+          );
+          document.querySelector('.total-amount').textContent = `\$${newTotal.toFixed(2)}`;
+        });
+      });
+
+      // 刪除項目的按鈕事件
+      document.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const index = parseInt(btn.dataset.index);
+          cartItems.value.splice(index, 1);
+
+          // 重新開啟購物車（或手動刪除該行）
+          if (cartItems.value.length > 0) {
+            openCart();
+          } else {
+            Swal.close();
+          }
+        });
+      });
+    }
+  });
+};
 
 </script>
 
 <template>
-<div class="box-border w-full my-4 flex flex-col sm:mx-16 relative">
-  <div class="flex flex-nowrap relative">
-
-    <div class="absolute w-12 h-12 top-0 left-4 shadow-md rounded-md sm:relative sm:w-28 sm:h-28 ">
-    <img class="w-full h-full rounded-md object-cover" src="https://ap-south-1.linodeobjects.com/nidin-production-v3/store/icons/s_15961_icon_20230725_145324_87a73.jpg" alt="店家品牌">
-    </div>
-
-    <div class="mt-16 mx-4 flex item-center flex-col space-y-2 ">
-      <div class="flex items-center space-x-2">
-        <h2 class="text-base sm:text-xl">得正 台北東湖計劃</h2>
-        <font-awesome-icon :icon="['fas', 'heart']" 
-        class="text-sm text-gray-400"
-        />
-      </div>
-    
-      <div class="flex items-center space-x-2">
-        <font-awesome-icon :icon="['fas', 'star']" 
-        class="text-sm text-yellow-400"
-        />
-        <p class="text-sm text-gray-500">3.6</p>
-        <p class="text-sm text-gray-500">(6)</p>
-        <font-awesome-icon :icon="['fas', 'clock']" 
-        class="text-sm text-gray-500"
-        />
-        <p class="text-sm text-gray-500">11:00 ~ 20:00</p>
-      </div>
-
-      <div class="flex items-center space-x-2">
-        <font-awesome-icon :icon="['fas', 'location-dot']" 
-        class="text-sm text-gray-500"
-        />
-        <p class="text-sm text-gray-500">3.1公里</p>
-        <a href="#" class="text-sm text-amber-500">台北市內湖區東湖路133號</a>
-        <font-awesome-icon :icon="['fas', 'phone']" 
-        class="text-sm text-gray-500"
-        />
-        <p class="text-sm text-amber-500">02-2345-6789</p>
-      </div>
-      <div class="flex items-center space-x-2">
-        <font-awesome-icon :icon="['fas', 'circle-question']" class="text-sm text-gray-500"/>
-        <a href="#" class="text-sm text-gray-400">訂購資訊</a>
-      </div>
-    </div>
-  </div>
-  <div class="sticky my-4 py-2 flex flex-row items-center justify-start overflow-x-auto scrollbar-hide bg-amber-500 text-white w-full">
-    <div class="flex-shrink-0 mx-4 text-md"><a href="#clickedOnce">曾經點過</a></div>
-    <div class="flex-shrink-0 mx-4 text-md"><a href="#new">雙柚新品</a></div>
-    <div class="flex-shrink-0 mx-4 text-md"><a href="#tea">Original Tea</a></div>
-    <div class="flex-shrink-0 mx-4 text-md"><a href="#fruit">Double Fruit</a></div>
-    <div class="flex-shrink-0 mx-4 text-md"><a href="#cheese">Cheese Milk Foam</a></div>
-    <div class="flex-shrink-0 mx-4 text-md"><a href="#milkTea">Classic Milk Tea</a></div>
-    <div class="flex-shrink-0 mx-4 text-md"><a href="#freshMilk">Fresh Milk</a></div>
-    <div class="flex-shrink-0 mx-4 text-md"><a href="#bag">購物袋</a></div>
-  </div>
-
-  <div class="mb-8 border-amber-500" v-for="(menu, index) in menus" :key="id" @click="showSwal(index)">
-    <div id="clickedOnce" class="mx-4 mb-4 text-amber-500 text-md">曾經點過</div>
-    <div class="flex flex-row justify-between items-center mx-4">
-      <div class="flex flex-row items-center justify-center">
-        <div class="w-8 h-8">
-          <img class="object-cover h-full w-full" :src=menu.imgUrl  alt="甘蔗春烏龍">
+  <div class="container mx-auto mt-8 sm:mt-16">
+    <!-- Header Section -->
+    <header class="mb-8 px-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-4">
+          <img 
+            src="https://ap-south-1.linodeobjects.com/nidin-production-v3/store/icons/s_15961_icon_20230725_145324_87a73.jpg" 
+            alt="Logo" 
+            class="h-12"
+          >
+          <div>
+            <h1 class="text-2xl font-bold text-gray-600">得正 台北東湖計劃</h1>
+            <div class="text-sm text-gray-600">
+              <span class="flex items-center mr-2">
+                <span class="text-yellow-400">★</span>3.4 (7)
+              </span>
+              <span>11:00 ~ 20:00</span>
+            </div>
+            <div class="text-sm text-gray-600">
+              <i class="fas fa-map-marker-alt"></i>
+              台北市內湖區東湖路133號 &nbsp;
+              <i class="fas fa-phone-alt"></i> 02-2633533
+            </div>
+          </div>
         </div>
-        <div class="mx-4 text-sm text-gray-500">{{ menu.name }}</div>
+        <button 
+          @click="openCart"
+          class="px-4 py-2 bg-amber-500 text-white rounded hover:bg-amber-400"
+        >
+          購物車 ({{ cartItems.length }})
+        </button>
       </div>
-      <div class="text-sm font-thin">
-        <font-awesome-icon :icon="['fas', 'dollar-sign']" 
-        class="text-sm text-gray-500"
-        /> 
-        {{ menu.price }}
+    </header>
+
+    <!-- Mobile Navigation -->
+    <nav class="md:hidden sticky top-0 z-10 bg-white rounded-md shadow overflow-x-auto no-scrollbar">
+      <div class="flex whitespace-nowrap">
+        <button 
+          v-for="(category, index) in categorizedMenu" 
+          :key="index"
+          :class="[
+            'px-4 py-2 text-sm font-semibold',
+            selectedCategory === index ? 'text-amber-500 border-b-2 border-amber-500' : 'text-gray-600'
+          ]"
+          @click="scrollToCategory(index)"
+        >
+          {{ category.name }}
+        </button>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 px-4 mt-8">
+      <div 
+        v-for="(category, index) in categorizedMenu" 
+        :key="index" 
+        :ref="el => categoryRefs[index] = el"
+        class="scroll-mt-16"
+      >
+        <h2 class="text-amber-500 font-bold text-lg mb-4">{{ category.name }}</h2>
+        <ul class="space-y-4">
+          <li 
+            v-for="item in category.items" 
+            :key="item.id" 
+            class="flex items-center justify-between cursor-pointer hover:bg-amber-100 p-2 rounded"
+            @click="openItemModal(item)"
+          >
+            <div class="flex items-center space-x-4">
+              <img :src="item.image" alt="商品圖片" class="w-16 h-16 object-cover rounded">
+              <span class="text-gray-800">{{ item.name }}</span>
+            </div>
+            <span class="text-gray-800">${{ item.price }}</span>
+          </li>
+        </ul>
       </div>
     </div>
   </div>
-
-  <div class="mb-8">
-    <div id="new" class="mx-4 mb-4 text-amber-500 text-md">雙柚新品</div>
-    <div class="flex flex-row justify-between items-center mx-4">
-      <div class="flex flex-row items-center justify-center">
-        <div class="w-8 h-8">
-          <img class="object-cover h-full w-full" src="https://cdn-order-v3.nidin.shop/product/images/1879/b1879_650bbcf9_cfX7tDFL.jpg" alt="甘蔗春烏龍">
-        </div>
-        <div class="mx-4 text-sm text-gray-500">甘蔗春烏龍</div>
-      </div>
-      <div class="text-sm font-thin">
-        <font-awesome-icon :icon="['fas', 'dollar-sign']" 
-        class="text-sm text-gray-500"
-        /> 
-        55
-      </div>
-    </div>
-  </div>
-  
-  <div class="mb-8">
-    <div id="tea" class="mx-4 mb-4 text-amber-500 text-md">Original Tea</div>
-    <div class="flex flex-row justify-between items-center mx-4">
-      <div class="flex flex-row items-center justify-center">
-        <div class="w-8 h-8">
-          <img class="object-cover h-full w-full" src="https://cdn-order-v3.nidin.shop/product/images/1879/b1879_650bbcf9_cfX7tDFL.jpg" alt="甘蔗春烏龍">
-        </div>
-        <div class="mx-4 text-sm text-gray-500">甘蔗春烏龍</div>
-      </div>
-      <div class="text-sm font-thin">
-        <font-awesome-icon :icon="['fas', 'dollar-sign']" 
-        class="text-sm text-gray-500"
-        /> 
-        55
-      </div>
-    </div>
-  </div>
-
-  <div class="mb-8">
-    <div id="fruit" class="mx-4 mb-4 text-amber-500 text-md">Double Fruit</div>
-    <div class="flex flex-row justify-between items-center mx-4">
-      <div class="flex flex-row items-center justify-center">
-        <div class="w-8 h-8">
-          <img class="object-cover h-full w-full" src="https://cdn-order-v3.nidin.shop/product/images/1879/b1879_650bbcf9_cfX7tDFL.jpg" alt="甘蔗春烏龍">
-        </div>
-        <div class="mx-4 text-sm text-gray-500">甘蔗春烏龍</div>
-      </div>
-      <div class="text-sm font-thin">
-        <font-awesome-icon :icon="['fas', 'dollar-sign']" 
-        class="text-sm text-gray-500"
-        /> 
-        55
-      </div>
-    </div>
-  </div>
-
-  <div class="mb-8">
-    <div id="cheese" class="mx-4 mb-4 text-amber-500 text-md">Cheese Milk Foam</div>
-    <div class="flex flex-row justify-between items-center mx-4">
-      <div class="flex flex-row items-center justify-center">
-        <div class="w-8 h-8">
-          <img class="object-cover h-full w-full" src="https://cdn-order-v3.nidin.shop/product/images/1879/b1879_650bbcf9_cfX7tDFL.jpg" alt="甘蔗春烏龍">
-        </div>
-        <div class="mx-4 text-sm text-gray-500">甘蔗春烏龍</div>
-      </div>
-      <div class="text-sm font-thin">
-        <font-awesome-icon :icon="['fas', 'dollar-sign']" 
-        class="text-sm text-gray-500"
-        /> 
-        55
-      </div>
-    </div>
-  </div>
-
-  <div class="mb-8">
-    <div id="milkTea" class="mx-4 mb-4 text-amber-500 text-md">Classic Milk Tea</div>
-    <div class="flex flex-row justify-between items-center mx-4">
-      <div class="flex flex-row items-center justify-center">
-        <div class="w-8 h-8">
-          <img class="object-cover h-full w-full" src="https://cdn-order-v3.nidin.shop/product/images/1879/b1879_650bbcf9_cfX7tDFL.jpg" alt="甘蔗春烏龍">
-        </div>
-        <div class="mx-4 text-sm text-gray-500">甘蔗春烏龍</div>
-      </div>
-      <div class="text-sm font-thin">
-        <font-awesome-icon :icon="['fas', 'dollar-sign']" 
-        class="text-sm text-gray-500"
-        /> 
-        55
-      </div>
-    </div>
-  </div>
-
-  <div class="mb-8">
-    <div id="freshMilk" class="mx-4 mb-4 text-amber-500 text-md">Fresh Milk</div>
-    <div class="flex flex-row justify-between items-center mx-4">
-      <div class="flex flex-row items-center justify-center">
-        <div class="w-8 h-8">
-          <img class="object-cover h-full w-full" src="https://cdn-order-v3.nidin.shop/product/images/1879/b1879_650bbcf9_cfX7tDFL.jpg" alt="甘蔗春烏龍">
-        </div>
-        <div class="mx-4 text-sm text-gray-500">甘蔗春烏龍</div>
-      </div>
-      <div class="text-sm font-thin">
-        <font-awesome-icon :icon="['fas', 'dollar-sign']" 
-        class="text-sm text-gray-500"
-        /> 
-        55
-      </div>
-    </div>
-  </div>
-
-  <div class="mb-8">
-    <div id="bag" class="mx-4 mb-4 text-amber-500 text-md">購物袋</div>
-    <div class="flex flex-row justify-between items-center mx-4">
-      <div class="flex flex-row items-center justify-center">
-        <div class="w-8 h-8">
-          <img class="object-cover h-full w-full" src="https://cdn-order-v3.nidin.shop/product/images/1879/b1879_650bbcf9_cfX7tDFL.jpg" alt="甘蔗春烏龍">
-        </div>
-        <div class="mx-4 text-sm text-gray-500">甘蔗春烏龍</div>
-      </div>
-      <div class="text-sm font-thin">
-        <font-awesome-icon :icon="['fas', 'dollar-sign']" 
-        class="text-sm text-gray-500"
-        /> 
-        55
-      </div>
-    </div>
-  </div>
-
-</div>
-
 </template>
+
+<style scoped>
+.option-btn {
+  transition: all 0.3s ease;
+}
+
+.quantity-btn {
+  @apply bg-gray-100 rounded;
+}
+
+.quantity-btn:hover {
+  @apply bg-amber-200;
+}
+
+.delete-btn:hover {
+  @apply text-red-700;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+</style>
