@@ -4,8 +4,10 @@ import axios from 'axios';
 import dayjs from 'dayjs'
 import Header from "../components/Header.vue";
 import { useAuth } from '../stores/authStore';
+import { storeToRefs } from 'pinia';
 
 const auth = useAuth();
+const { userData } = storeToRefs(auth);
 
 const $swal = inject('$swal');  // 注入 $swal
 
@@ -35,7 +37,7 @@ const api = axios.create({
 // 獲取所有文章
 const fetchArticles = async () => {
   try {
-    const userId = auth.userData?.sub;
+    const userId = userData.value?.sub;
     const { data } = await api.get('/articles', {
       params: { userId }
     });
@@ -61,9 +63,65 @@ const fetchArticles = async () => {
 
 
 
-// 按讚功能
+// 獲取文章按讚端點
+const getArticleLikeEndpoint = (id) => {
+  return `/articles/${id}/like`;
+};
+
+// 獲取評論按讚端點
+const getCommentLikeEndpoint = (id) => {
+  const article = articles.value.find(a => a.comments.some(c => c._id === id));
+  if (article) {
+    return `/articles/${article._id}/comments/${id}/like`;
+  }
+  return '';
+};
+
+// 獲取回覆按讚端點
+const getReplyLikeEndpoint = (id) => {
+  const article = articles.value.find(a => 
+    a.comments.some(c => c.replies.some(r => r._id === id))
+  );
+  if (article) {
+    const comment = article.comments.find(c => 
+      c.replies.some(r => r._id === id)
+    );
+    if (comment) {
+      return `/articles/${article._id}/comments/${comment._id}/replies/${id}/like`;
+    }
+  }
+  return '';
+};
+
+// 更新按讚狀態
+const updateLikeStatus = (type, id, responseData) => {
+  let target;
+  
+  switch (type) {
+    case 'article':
+      target = articles.value.find(item => item._id === id);
+      break;
+    case 'comment':
+      target = articles.value.flatMap(a => a.comments).find(item => item._id === id);
+      break;
+    case 'reply':
+      target = articles.value.flatMap(a => a.comments).flatMap(c => c.replies).find(item => item._id === id);
+      break;
+  }
+
+  if (target) {
+    target.isLiked = responseData.isLiked;
+    target.likesCount = responseData.likesCount;
+    if (responseData.likedBy) {
+      target.likedBy = responseData.likedBy;
+    }
+  }
+};
+
+// 按讚功能主函數
 const toggleLike = async (type, id) => {
-  if (!auth.userData) {
+  // 檢查登入狀態
+  if (!userData.value) {
     await swalWithBootstrapButtons.fire({
       title: '提醒',
       text: '請先登入後再按讚',
@@ -73,56 +131,45 @@ const toggleLike = async (type, id) => {
     return;
   }
 
-  const userId = auth.userData.sub;
-  let endpoint = '';
-  
-  // 根據類型設置不同的 API 端點
-  if (type === 'article') {
-    endpoint = `/articles/${id}/like`;
-  } else if (type === 'comment') {
-    const article = articles.value.find(a => a.comments.some(c => c._id === id));
-    if (article) {
-      endpoint = `/articles/${article._id}/comments/${id}/like`;
-    }
-  } else if (type === 'reply') {
-    const article = articles.value.find(a => 
-      a.comments.some(c => c.replies.some(r => r._id === id))
-    );
-    if (article) {
-      const comment = article.comments.find(c => 
-        c.replies.some(r => r._id === id)
-      );
-      if (comment) {
-        endpoint = `/articles/${article._id}/comments/${comment._id}/replies/${id}/like`;
-      }
-    }
-  }
-
-  try {
-    const response = await api.post(endpoint, { userId });
-      
-    // 根據類型找到對應的項目
-    let target;
-    if (type === 'article') {
-      target = articles.value.find(item => item._id === id);
-    } else if (type === 'comment') {
-      target = articles.value.flatMap(a => a.comments).find(item => item._id === id);
-    } else if (type === 'reply') {
-      target = articles.value.flatMap(a => a.comments).flatMap(c => c.replies).find(item => item._id === id);
-    }
-
-    // 更新按讚狀態
-    if (target && response.status === 200) {
-      target.isLiked = !target.isLiked;
-      target.likesCount = response.data.likesCount;
-    }
-  } catch (error) {
+  // 檢查用戶 ID
+  const userId = userData.value._id;
+  if (!userId) {
+    console.error('No userId found in userData:', userData.value);
     await swalWithBootstrapButtons.fire({
-      title: '錯誤！',
-      text: '按讚失敗，請稍後再試',
-      icon: 'error'
+      title: '錯誤',
+      text: '無法獲取用戶資訊，請重新登入',
+      icon: 'error',
+      confirmButtonText: '確定'
     });
+    return;
   }
+
+  // 獲取對應的端點
+  let endpoint = '';
+  switch (type) {
+    case 'article':
+      endpoint = getArticleLikeEndpoint(id);
+      break;
+    case 'comment':
+      endpoint = getCommentLikeEndpoint(id);
+      break;
+    case 'reply':
+      endpoint = getReplyLikeEndpoint(id);
+      break;
+  }
+
+    const response = await api.post(endpoint, 
+      { userId }, 
+      {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+    
+    if (response.status === 200) {
+      updateLikeStatus(type, id, response.data);
+    }
 };
 
 
@@ -130,7 +177,7 @@ const toggleLike = async (type, id) => {
 
 // 添加評論
 const addComment = async (articleId) => {
-  if (!auth.userData) {
+  if (!userData.value) {
     await swalWithBootstrapButtons.fire({
       title: '提醒',
       text: '請先登入後再發表評論',
@@ -151,14 +198,14 @@ const addComment = async (articleId) => {
   }
 
   try {
-    const newCommentData = {
+    const commentData = {
       content: newComment.value.content.trim(),
-      userId: auth.userData.sub,
-      user: auth.userData.name,
-      userPhoto: auth.userData.picture
+      userId: userData.value._id,
+      user: userData.value.name,
+      userPhoto: userData.value.profilePicture
     };
 
-    const { data } = await api.post(`/articles/${articleId}/comments`, newCommentData);
+    const { data } = await api.post(`/articles/${articleId}/comments`, commentData);
     
     const article = articles.value.find(a => a._id === articleId);
     if (article) {
@@ -168,9 +215,9 @@ const addComment = async (articleId) => {
       article.comments.push({
         _id: data._id,
         content: data.content,
-        userId: auth.userData.sub,
-        user: auth.userData.name,
-        userPhoto: auth.userData.picture,
+        userId: userData.value._id,
+        user: userData.value.name,
+        userPhoto: userData.value.profilePicture,
         createdAt: data.createdAt,
         likesCount: 0,
         isLiked: false,
@@ -229,7 +276,7 @@ const deleteComment = async (articleId, commentId) => {
 
 // 新增回覆
 const addReply = async (articleId, commentId) => {
-  if (!auth.userData) {
+  if (!userData.value) {
     await swalWithBootstrapButtons.fire({
       title: '提醒',
       text: '請先登入後再發表回覆',
@@ -252,9 +299,9 @@ const addReply = async (articleId, commentId) => {
   try {
     const newReplyData = {
       content: newReply.value.content.trim(),
-      userId: auth.userData.sub,
-      user: auth.userData.name,
-      userPhoto: auth.userData.picture
+      userId: userData.value._id,
+      user: userData.value.name,
+      userPhoto: userData.value.profilePicture
     };
 
     const { data } = await api.post(`/articles/${articleId}/comments/${commentId}/replies`, newReplyData);
@@ -268,9 +315,9 @@ const addReply = async (articleId, commentId) => {
         comment.replies.push({
           _id: data._id,
           content: data.content,
-          userId: auth.userData.sub,
-          user: auth.userData.name,
-          userPhoto: auth.userData.picture,
+          userId: userData.value._id,
+          user: userData.value.name,
+          userPhoto: userData.value.profilePicture,
           createdAt: data.createdAt,
           likesCount: 0,
           isLiked: false
@@ -338,7 +385,7 @@ const toggleContent = (article) => {
 };
 
 const toggleReplyForm = async (commentId) => {
-  if (!auth.userData) {
+  if (!userData.value) {
     await swalWithBootstrapButtons.fire({
       title: '提醒',
       text: '請先登入後再發表回覆',
@@ -383,6 +430,9 @@ const handleSearchToggle = (isOpen) => {
 const handleResize = () => {
   isMobile.value = window.innerWidth < 768;
 };
+
+console.log(articles.content);
+
 
 // 在 onMounted 中調用
 onMounted(async () => {
@@ -443,7 +493,7 @@ const toggleComments = (articleId) => {
     article.showComments = !article.showComments;
   }
 };
-
+const  contentHtml = `${articles.value.content}`
 
 
 </script>
@@ -466,7 +516,7 @@ const toggleComments = (articleId) => {
               class="w-full h-64 object-cover rounded-lg"
             />
             <!-- 三點選單 -->
-            <div v-if="auth.userData && auth.userData.sub === article.userId" class="relative group ml-2">
+            <div v-if="userData && userData._id === article.userId" class="relative group ml-2">
               <button 
                 @click.stop="toggleMenu(article._id)"
                 class="text-gray-500 hover:text-gray-700 px-2 font-bold menu-button"
@@ -494,10 +544,11 @@ const toggleComments = (articleId) => {
               <span>{{ formatDate(article.createdAt) }}</span>
             </div>
             <div class="relative">
-              <p class="text-gray-700 leading-relaxed whitespace-pre-wrap break-words line-clamp-3" 
+              <!-- <p class="text-gray-700 leading-relaxed whitespace-pre-wrap break-words line-clamp-3" 
                  :class="{ 'line-clamp-none': article.showFullContent }">
                 {{ article.content }}
-              </p>
+              </p> -->
+              <div v-html="article.content"></div>
               <button 
                 @click="toggleContent(article)"
                 class="text-blue-500 text-sm mt-2"
@@ -545,7 +596,7 @@ const toggleComments = (articleId) => {
             <div class="flex justify-between items-center">
               <h2 class="text-xl font-bold text-white">{{ article.title }}</h2>
               <!-- 三點選單 -->
-              <div v-if="auth.userData && auth.userData.sub === article.userId" class="relative group">
+              <div v-if="userData && userData._id === article.userId" class="relative group">
                 <button 
                   @click.stop="toggleMenu(article._id)"
                   class="text-white hover:text-gray-200 px-2 font-bold menu-button"
@@ -573,7 +624,7 @@ const toggleComments = (articleId) => {
             <span>{{ formatDate(article.createdAt) }}</span>
           </div>
           <div class="relative">
-            <p class="text-gray-700 text-sm line-clamp-3" :class="{ 'line-clamp-none': !article.showFullContent }">
+            <p  class="text-gray-700 text-sm line-clamp-3" :class="{ 'line-clamp-none': !article.showFullContent }">
               {{ article.content }}
             </p>
             <button 
@@ -741,9 +792,9 @@ const toggleComments = (articleId) => {
               class="mt-3 ml-11"
             >
               <div class="flex items-start gap-3">
-                <div v-if="auth.userData" class="w-6 h-6">
+                <div v-if="userData" class="w-6 h-6">
                   <img 
-                    :src="auth.userData.picture"
+                    :src="userData.profilePicture"
                     class="w-full h-full rounded-full object-cover"
                   />
                 </div>
@@ -758,8 +809,8 @@ const toggleComments = (articleId) => {
                       maxlength="200"
                       class="w-full border rounded p-2 text-sm disabled:bg-gray-100"
                       :class="{ 'bg-gray-50': newReply.content.length >= 200 }"
-                      :placeholder="auth.userData ? '請發表回覆...' : '請先登入後再發表回覆...'"
-                      :disabled="!auth.userData"
+                      :placeholder="userData ? '請發表回覆...' : '請先登入後再發表回覆...'"
+                      :disabled="!userData"
                       @input="newReply.content = $event.target.value.slice(0, 200)"
                     ></textarea>
                     <p v-if="newReply.content.length > 0" 
@@ -772,9 +823,9 @@ const toggleComments = (articleId) => {
                   <button
                     @click="addReply(article._id, comment._id)"
                     class="mt-1 bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600"
-                    :disabled="!auth.userData"
+                    :disabled="!userData"
                   >
-                    {{ auth.userData ? '發表回覆' : '請先登入' }}
+                    {{ userData ? '發表回覆' : '請先登入' }}
                   </button>
                 </div>
               </div>

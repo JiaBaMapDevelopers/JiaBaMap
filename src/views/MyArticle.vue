@@ -36,7 +36,7 @@ const loadDrafts = () => {
 // 從資料庫讀取已發布文章
 const loadPublishedArticles = async () => {
   try {
-    if (!auth.userData?.sub) {
+    if (!auth.userData?._id) {
       await swalWithBootstrapButtons.fire({
         title: '提醒',
         text: '請先登入後再查看已發佈文章',
@@ -46,7 +46,7 @@ const loadPublishedArticles = async () => {
       return;
     }
 
-    const response = await axios.get(`${import.meta.env.VITE_BACKEND_BASE_URL}/articles/published/${auth.userData.sub}`);
+    const response = await axios.get(`${import.meta.env.VITE_BACKEND_BASE_URL}/articles/published/${auth.userData._id}`);
     articles.value = response.data;
     
   } catch (error) {
@@ -60,42 +60,7 @@ const loadPublishedArticles = async () => {
   }
 };
 
-// 刪除草稿
-const deleteDraft = async () => {
-  if (!isComponentMounted.value) return;
-  
-  try {
-    const result = await swalWithBootstrapButtons.fire({
-      title: '確定要刪除嗎？',
-      text: '刪除後將無法恢復！',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonText: '確定刪除',
-      cancelButtonText: '取消',
-      reverseButtons: true
-    });
 
-    if (result.isConfirmed && isComponentMounted.value) {
-      localStorage.removeItem('formData');
-      articles.value = [];
-      
-      if (isComponentMounted.value) {
-        await swalWithBootstrapButtons.fire({
-          title: '已刪除！',
-          text: '草稿已成功刪除',
-          icon: 'success',
-          confirmButtonText: '確定'
-        });
-      }
-    }
-  } catch (error) {
-    console.error('刪除草稿失敗:', error);
-  }
-};
-
-const formatDate = (dateString) => {
-  return new Date(dateString).toLocaleString('zh-TW');
-};
 
 // 編輯草稿
 const editDraft = (article) => {
@@ -218,6 +183,10 @@ const handleDelete = (articleId = null) => {
   deleteArticle(articleId);
 };
 
+
+
+
+
 </script>
 <template>
   <div v-if="isComponentMounted" class="container mx-auto px-4 py-8">
@@ -286,7 +255,7 @@ const handleDelete = (articleId = null) => {
 
     <!-- 無文章時顯示 -->
     <div v-if="articles.length === 0" class="text-center py-8 text-gray-500">
-      目前沒有{{ route.query.status === 'published' ? '已發布的文章' : '草稿' }}
+      目前沒有{{ route.query.status === 'published' ? '已發佈的文章' : '草稿' }}
     </div>
   </div>
 </template>
