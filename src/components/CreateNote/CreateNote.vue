@@ -205,7 +205,7 @@ const goToPreview = () => {
 
   // 直接從編輯器元素獲取內容
   const editorContent = editor.value.querySelector('.ProseMirror').innerHTML;
-  console.log('編輯器原始內容:', editorContent);
+  
 
   // 檢查內容是否為空
   if (!editorContent.trim()) {
@@ -230,20 +230,13 @@ const goToPreview = () => {
     isPublished: route.query.type === 'published'
   };
   
-  console.log('預覽數據:', previewData);
+  
   
   // 根據文章類型使用不同的 localStorage key
   const storageKey = route.query.type === 'published' 
     ? "publishedPreviewData" 
     : "previewNoteData";
   
-  // 在存儲前再次檢查內容
-  if (!previewData.content) {
-    console.error('內容為空，使用備用方法獲取');
-    previewData.content = editor.value.innerHTML || content.value;
-  }
-  
-  console.log('最終存儲的預覽數據:', previewData);
   
   localStorage.setItem(storageKey, JSON.stringify(previewData));
   
@@ -381,7 +374,6 @@ const insertHtmlAtCursor = (html) => {
 
 // 檢查內容並返回是否有效
 const checkContent = () => {
-  console.log('執行 checkContent');
   
   // 重置所有錯誤
   errors.value = {
@@ -402,7 +394,6 @@ const checkContent = () => {
 
   // 檢查是否所有欄位都有效
   const isValid = !Object.values(errors.value).some(error => error);
-  console.log('表單驗證結果：', isValid);
   
   return isValid; // 返回驗證結果
 };
