@@ -12,6 +12,7 @@ const username = ref("");
 const password = ref("");
 
 const storeId = ref("");
+const placeId = ref("");
 
 const handleLogin = async () => {
   if (username.value && password.value) {
@@ -30,6 +31,7 @@ const handleLogin = async () => {
       });
       //token解碼後可取得店家id
       storeId.value = jose.decodeJwt(resToken.data.token).id;
+      placeId.value = jose.decodeJwt(resToken.data.token).placeId;
     }
 
     Swal.fire({
