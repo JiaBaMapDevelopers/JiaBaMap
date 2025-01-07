@@ -188,7 +188,7 @@ document.addEventListener("click", handleDocumentClick);
               @click="updateFavorite"
               class="absolute right-[-25px] top-3 flex items-center"
             >
-              <font-awesome-icon :icon="[iconClassic, 'bookmark']" size="lg" />
+              <font-awesome-icon :icon="[iconClassic, 'bookmark']" size="xl" style="color: orange;" />
             </button>
           </div>
           <div
