@@ -14,6 +14,7 @@ import PreviewNoteView from "@/views/PreviewNoteView.vue";
 import Dashboard from "@/views/DashboardView.vue";
 import StoreCart from "@/views/StoreCartView.vue";
 import StoreSignUp from "@/views/StoreSignUp.vue";
+import StoreSignIn from "../views/StoreSignIn.vue";
 
 const routes = [
   {
@@ -84,12 +85,16 @@ const routes = [
     component: StoreSignUp,
   },
   {
-    path: '/menu-management',
-    name: 'MenuManagement',
-    component: () => import('../views/MenuManagement.vue')
-  }
-]
-
+    path: "/storesignin",
+    name: "storesignin",
+    component: StoreSignIn,
+  },
+  {
+    path: "/menu-management",
+    name: "MenuManagement",
+    component: () => import("../views/MenuManagement.vue"),
+  },
+];
 
 const router = createRouter({
   history: createWebHistory(),
