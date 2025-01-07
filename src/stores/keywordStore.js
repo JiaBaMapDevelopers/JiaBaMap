@@ -175,19 +175,44 @@ export const useKeywordStore = defineStore('keyword', () => {
     keyword.value = value;
   };
 
+  // const handleSearch = async () => {
+  //   if (!keyword.value || keyword.value === '') {
+  //     alert('請輸入有效關鍵字!!!');
+  //     return;
+  //   }
+  //   try {
+  //     const response = await axios.get(
+  //       `${import.meta.env.VITE_BACKEND_BASE_URL}/restaurants/search?keyword=${keyword.value}&lat=${coordinate.value.lat}&lng=${coordinate.value.lng}`
+  //     );
+  //     if (response.status === 200) {
+  //       result.value = response.data;
+  //     }
+  //   } catch (error) {
+  //     if (error.response) {
+  //       result.value = [];
+  //     }
+  //   }
+  // };
+
   const handleSearch = async () => {
     if (!keyword.value || keyword.value === '') {
       alert('請輸入有效關鍵字!!!');
       return;
     }
     try {
-      const response = await axios.get(
-        `${import.meta.env.VITE_BACKEND_BASE_URL}/restaurants/search?keyword=${keyword.value}&lat=${coordinate.value.lat}&lng=${coordinate.value.lng}`
-      );
+      const baseUrl = import.meta.env.VITE_BACKEND_BASE_URL.replace(/\/+$/, '');
+      const response = await axios.get(`${baseUrl}/restaurants/search`, {
+        params: {
+          keyword: keyword.value,
+          lat: coordinate.value.lat,
+          lng: coordinate.value.lng
+        }
+      });
       if (response.status === 200) {
         result.value = response.data;
       }
     } catch (error) {
+      console.error('Search error:', error);
       if (error.response) {
         result.value = [];
       }

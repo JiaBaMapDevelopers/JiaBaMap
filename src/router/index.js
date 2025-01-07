@@ -15,6 +15,7 @@ import Dashboard from "@/views/DashboardView.vue";
 import StoreCart from "@/views/StoreCartView.vue";
 import StoreSignUp from "@/views/StoreSignUp.vue";
 import StoreSignIn from "../views/StoreSignIn.vue";
+import Cart from "@/views/Cart.vue";
 
 const routes = [
   {
@@ -92,13 +93,22 @@ const routes = [
   {
     path: "/menu-management",
     name: "MenuManagement",
-    component: () => import("../views/MenuManagement.vue"),
+    component: () => import("@/views/MenuManagement.vue"),
+  },
+  {
+    path: "/Cart",
+    name: "Cart",
+    component: Cart,
   },
 ];
 
 const router = createRouter({
   history: createWebHistory(),
   routes,
+  scrollBehavior(to, from, savedPosition) {
+    // 滾動到頂部
+    return { top: 0 };
+  },
 });
 router.beforeEach((to, from, next) => {
   const user = useAuth();
