@@ -7,7 +7,7 @@ import swal from "sweetalert2";
 
 const router = useRouter();
 const route = useRoute();
-const $swal = inject('$swal');
+const $swal = inject("$swal");
 
 // 定義響應式變數
 const date = ref("");
@@ -28,28 +28,28 @@ const contentWordCount = ref(0);
 // 添加錯誤提示的響應式變數
 const errors = ref({
   date: false,
-  restaurantName: '',
-  title: '',
-  content: false
+  restaurantName: "",
+  title: "",
+  content: false,
 });
 
 const props = defineProps({
   initialData: {
     type: Object,
     default: () => ({
-      title: '',
-      content: '',
-      restaurantName: '',
-      placeId: '',
-      photo: ''
-    })
-  }
+      title: "",
+      content: "",
+      restaurantName: "",
+      placeId: "",
+      photo: "",
+    }),
+  },
 });
 
 // 清除所有數據的函數
 const clearAllData = () => {
   // 只有從文章列表來的時候才清除所有數據
-  if (route.query.from === 'articleList') {
+  if (route.query.from === "articleList") {
     date.value = "";
     title.value = "";
     content.value = "";
@@ -58,15 +58,15 @@ const clearAllData = () => {
     if (editor.value) {
       editor.value.innerHTML = "";
     }
-    localStorage.removeItem('formData');
-    localStorage.removeItem('previewNoteData');
+    localStorage.removeItem("formData");
+    localStorage.removeItem("previewNoteData");
   }
 };
 
 // 在組件掛載前檢查路由
 onBeforeMount(() => {
   // 如果是從文章列表來的，清除所有數據
-  if (route.query.from === 'articleList') {
+  if (route.query.from === "articleList") {
     clearAllData();
   }
 });
@@ -76,18 +76,20 @@ onMounted(async () => {
   try {
     // 初始化預設值
     const defaultFormData = {
-      date: new Date().toISOString().split('T')[0],
-      title: '',
-      content: '',
-      restaurantName: '',
-      fileList: []
+      date: new Date().toISOString().split("T")[0],
+      title: "",
+      content: "",
+      restaurantName: "",
+      fileList: [],
     };
 
     // 如果是編輯已發佈文章
-    if (route.query.type === 'published' && route.query.id) {
+    if (route.query.type === "published" && route.query.id) {
       try {
         // 從後端獲取文章數據
-        const response = await axios.get(`${import.meta.env.VITE_BACKEND_BASE_URL}/articles/${route.query.id}`);
+        const response = await axios.get(
+          `${import.meta.env.VITE_BACKEND_BASE_URL}/articles/${route.query.id}`,
+        );
         const articleData = response.data;
 
         // 填充表單數據
@@ -96,7 +98,9 @@ onMounted(async () => {
         restaurantName.value = articleData.restaurantName;
         placeId.value = articleData.placeId;
         photo.value = articleData.photo;
-        date.value = new Date(articleData.eatdateAt).toISOString().split('T')[0];
+        date.value = new Date(articleData.eatdateAt)
+          .toISOString()
+          .split("T")[0];
 
         // 等待 DOM 更新後設置編輯器內容
         await nextTick(() => {
@@ -111,15 +115,15 @@ onMounted(async () => {
     } else {
       // 如果是新建文章或編輯草稿
       // 檢查是否有預覽後返回的數據
-      const previewData = localStorage.getItem('previewNoteData');
+      const previewData = localStorage.getItem("previewNoteData");
       // 檢查是否有一般的表單數據
-      const storedData = localStorage.getItem('formData');
-      
+      const storedData = localStorage.getItem("formData");
+
       let formData;
       // 優先使用預覽數據
       if (previewData) {
         formData = JSON.parse(previewData);
-      } 
+      }
       // 其次使用表單數據
       else if (storedData) {
         formData = JSON.parse(storedData);
@@ -130,9 +134,9 @@ onMounted(async () => {
       }
 
       // 設置表單數據
-      title.value = formData.title || '';
-      content.value = formData.content || '';
-      restaurantName.value = formData.restaurantName || '';
+      title.value = formData.title || "";
+      content.value = formData.content || "";
+      restaurantName.value = formData.restaurantName || "";
       date.value = formData.date || defaultFormData.date;
       if (formData.fileList) {
         fileList.value = formData.fileList;
@@ -141,23 +145,23 @@ onMounted(async () => {
       // 等待 DOM 更新後設置編輯器內容
       await nextTick(() => {
         if (editor.value) {
-          editor.value.innerHTML = formData.content || '';
+          editor.value.innerHTML = formData.content || "";
           updateContent();
         }
       });
 
       // 如果是從預覽返回，將預覽數據保存到 formData
       if (previewData) {
-        localStorage.setItem('formData', previewData);
-        localStorage.removeItem('previewNoteData');
+        localStorage.setItem("formData", previewData);
+        localStorage.removeItem("previewNoteData");
       }
     }
   } catch (error) {
     // 使用預設值
-    date.value = new Date().toISOString().split('T')[0];
-    title.value = '';
-    content.value = '';
-    restaurantName.value = '';
+    date.value = new Date().toISOString().split("T")[0];
+    title.value = "";
+    content.value = "";
+    restaurantName.value = "";
     fileList.value = [];
   }
 });
@@ -171,12 +175,12 @@ const updateContent = () => {
     fileList.value = fileList.value.filter((file) =>
       existingImages.includes(file.data),
     );
-    hasContent.value = editor.value.textContent.trim() !== '';
+    hasContent.value = editor.value.textContent.trim() !== "";
 
     // 計算純文字字數
-    const pureText = editor.value.innerHTML.replace(/<[^>]+>/g, '').trim();
+    const pureText = editor.value.innerHTML.replace(/<[^>]+>/g, "").trim();
     contentWordCount.value = pureText.length;
-    
+
     // 更新內容錯誤狀態
     errors.value.content = contentWordCount.value < 300;
   }
@@ -185,18 +189,20 @@ const updateContent = () => {
 // 在 setup 中添加 swal 配置
 const swalWithBootstrapButtons = $swal.mixin({
   customClass: {
-    confirmButton: 'bg-red-500 text-white px-6 py-2 rounded mx-2 hover:bg-red-600',
-    cancelButton: 'bg-gray-500 text-white px-6 py-2 rounded mx-2 hover:bg-gray-600',
-    actions: 'flex justify-center gap-4'
+    confirmButton:
+      "bg-red-500 text-white px-6 py-2 rounded mx-2 hover:bg-red-600",
+    cancelButton:
+      "bg-gray-500 text-white px-6 py-2 rounded mx-2 hover:bg-gray-600",
+    actions: "flex justify-center gap-4",
   },
-  buttonsStyling: false
+  buttonsStyling: false,
 });
 
 // 預覽筆記
 const goToPreview = () => {
   // 檢查編輯器是否存在
   if (!editor.value) {
-    console.error('編輯器不存在');
+    console.error("編輯器不存在");
     return;
   }
 
@@ -204,16 +210,15 @@ const goToPreview = () => {
   updateContent();
 
   // 直接從編輯器元素獲取內容
-  const editorContent = editor.value.querySelector('.ProseMirror').innerHTML;
-  
+  const editorContent = editor.value.querySelector(".ProseMirror").innerHTML;
 
   // 檢查內容是否為空
   if (!editorContent.trim()) {
     swalWithBootstrapButtons.fire({
-      title: '提醒',
-      text: '請填寫內容後再預覽！',
-      icon: 'warning',
-      confirmButtonText: '確定'
+      title: "提醒",
+      text: "請填寫內容後再預覽！",
+      icon: "warning",
+      confirmButtonText: "確定",
     });
     return;
   }
@@ -227,25 +232,23 @@ const goToPreview = () => {
     restaurantName: restaurantName.value,
     placeId: placeId.value,
     photo: photo.value,
-    isPublished: route.query.type === 'published'
+    isPublished: route.query.type === "published",
   };
-  
-  
-  
+
   // 根據文章類型使用不同的 localStorage key
-  const storageKey = route.query.type === 'published' 
-    ? "publishedPreviewData" 
-    : "previewNoteData";
-  
-  
+  const storageKey =
+    route.query.type === "published"
+      ? "publishedPreviewData"
+      : "previewNoteData";
+
   localStorage.setItem(storageKey, JSON.stringify(previewData));
-  
+
   // 導航到預覽頁面
   router.push({
     path: "/previewnote",
     query: {
-      type: route.query.type === 'published' ? 'published' : 'draft'
-    }
+      type: route.query.type === "published" ? "published" : "draft",
+    },
   });
 };
 
@@ -254,21 +257,21 @@ const onImageSelect = async (event) => {
   const file = event.target.files[0];
   if (!file) {
     await swalWithBootstrapButtons.fire({
-      title: '錯誤',
-      text: '請選擇要上傳的圖片',
-      icon: 'error',
-      confirmButtonText: '確定'
+      title: "錯誤",
+      text: "請選擇要上傳的圖片",
+      icon: "error",
+      confirmButtonText: "確定",
     });
     return;
   }
 
   // 檢查檔案類型
-  if (!file.type.startsWith('image/')) {
+  if (!file.type.startsWith("image/")) {
     await swalWithBootstrapButtons.fire({
-      title: '錯誤',
-      text: '請選擇圖片檔案',
-      icon: 'error',
-      confirmButtonText: '確定'
+      title: "錯誤",
+      text: "請選擇圖片檔案",
+      icon: "error",
+      confirmButtonText: "確定",
     });
     return;
   }
@@ -303,39 +306,37 @@ const onImageSelect = async (event) => {
       });
 
       updateContent();
-      
-      
+
       // 關閉上傳提示
       // loadingToast.close();
 
       // 顯示成功提示
       swalWithBootstrapButtons.fire({
-        title: '上傳成功',
-        icon: 'success',
+        title: "上傳成功",
+        icon: "success",
         timer: 1500,
         showConfirmButton: false,
-        position: 'top-end',
-        toast: true
+        position: "top-end",
+        toast: true,
       });
     };
 
     reader.onerror = async () => {
       await swalWithBootstrapButtons.fire({
-        title: '錯誤',
-        text: '讀取圖片失敗，請稍後再試',
-        icon: 'error',
-        confirmButtonText: '確定'
+        title: "錯誤",
+        text: "讀取圖片失敗，請稍後再試",
+        icon: "error",
+        confirmButtonText: "確定",
       });
     };
 
     reader.readAsDataURL(file);
-
   } catch (error) {
     await swalWithBootstrapButtons.fire({
-      title: '錯誤',
-      text: '上傳圖片失敗，請稍後再試',
-      icon: 'error',
-      confirmButtonText: '確定'
+      title: "錯誤",
+      text: "上傳圖片失敗，請稍後再試",
+      icon: "error",
+      confirmButtonText: "確定",
     });
   }
 };
@@ -374,27 +375,28 @@ const insertHtmlAtCursor = (html) => {
 
 // 檢查內容並返回是否有效
 const checkContent = () => {
-  
   // 重置所有錯誤
   errors.value = {
     date: !date.value,
     restaurantName: !restaurantName.value,
     title: !title.value,
-    content: !content.value || (content.value.replace(/<[^>]+>/g, '').trim().length < 300)
+    content:
+      !content.value ||
+      content.value.replace(/<[^>]+>/g, "").trim().length < 300,
   };
 
   // 更新編輯器的錯誤狀態
   if (editor.value) {
     if (errors.value.content) {
-      editor.value.classList.add('border-red-500');
+      editor.value.classList.add("border-red-500");
     } else {
-      editor.value.classList.remove('border-red-500');
+      editor.value.classList.remove("border-red-500");
     }
   }
 
   // 檢查是否所有欄位都有效
-  const isValid = !Object.values(errors.value).some(error => error);
-  
+  const isValid = !Object.values(errors.value).some((error) => error);
+
   return isValid; // 返回驗證結果
 };
 
@@ -405,10 +407,10 @@ const saveNote = async () => {
     restaurantName: restaurantName.value,
     title: title.value,
     content: content.value,
-    fileList: fileList.value
+    fileList: fileList.value,
   };
-  
-  localStorage.setItem('formData', JSON.stringify(formData));
+
+  localStorage.setItem("formData", JSON.stringify(formData));
   return true;
 };
 
@@ -417,8 +419,8 @@ const handleValidationErrors = (validationErrors) => {
   // 直接設置新的錯誤訊息
   errors.value = {
     ...errors.value,
-    restaurantName: validationErrors.restaurantName || '',
-    title: validationErrors.title || ''
+    restaurantName: validationErrors.restaurantName || "",
+    title: validationErrors.title || "",
   };
 };
 
@@ -426,7 +428,7 @@ const handleValidationErrors = (validationErrors) => {
 const saveArticle = async () => {
   try {
     // 檢查是否為已發佈文章的編輯
-    if (route.query.type === 'published' && route.query.id) {
+    if (route.query.type === "published" && route.query.id) {
       // 準備更新的數據
       const updateData = {
         title: title.value,
@@ -434,26 +436,25 @@ const saveArticle = async () => {
         restaurantName: restaurantName.value,
         placeId: placeId.value,
         photo: photo.value,
-        eatdate: date.value
+        eatdate: date.value,
       };
 
       // 發送 PATCH 請求更新文章
       await axios.patch(
         `${import.meta.env.VITE_BACKEND_BASE_URL}/articles/${route.query.id}`,
-        updateData
+        updateData,
       );
 
       // 顯示成功訊息
       await swal.fire({
-        title: '成功',
-        text: '文章已更新',
-        icon: 'success',
-        confirmButtonText: '確定'
+        title: "成功",
+        text: "文章已更新",
+        icon: "success",
+        confirmButtonText: "確定",
       });
 
       // 導航回文章列表
-      router.push('/myarticle?status=published');
-      
+      router.push("/myarticle?status=published");
     } else {
       // 原有的草稿儲存邏輯保持不變
       const formData = {
@@ -462,16 +463,16 @@ const saveArticle = async () => {
         restaurantName: restaurantName.value,
         placeId: placeId.value,
         photo: photo.value,
-        date: date.value
+        date: date.value,
       };
-      localStorage.setItem('formData', JSON.stringify(formData));
+      localStorage.setItem("formData", JSON.stringify(formData));
     }
   } catch (error) {
     await swal.fire({
-      title: '錯誤',
-      text: error.response?.data?.message || '儲存文章失敗，請稍後再試',
-      icon: 'error',
-      confirmButtonText: '確定'
+      title: "錯誤",
+      text: error.response?.data?.message || "儲存文章失敗，請稍後再試",
+      icon: "error",
+      confirmButtonText: "確定",
     });
   }
 };
@@ -482,16 +483,14 @@ const getCurrentContent = () => {
   if (editor.value) {
     return editor.value.innerHTML;
   }
-  return '';
+  return "";
 };
 </script>
 
-
-
 <template>
   <div class="w-full min-h-screen bg-white">
-    <CreateNoteNavbar 
-      @save="saveNote" 
+    <CreateNoteNavbar
+      @save="saveNote"
       @preview="goToPreview"
       @validationErrors="handleValidationErrors"
       :checkContent="checkContent"
@@ -499,78 +498,112 @@ const getCurrentContent = () => {
       :currentRestaurantName="restaurantName"
       :getCurrentContent="getCurrentContent"
     />
-    <div class="max-w-4xl p-4 mx-auto mt-6 bg-white rounded-lg shadow-lg m-11 md:p-4 ">
+    <div
+      class="max-w-4xl p-4 mx-auto mt-6 bg-white rounded-lg shadow-lg m-11 md:p-4"
+    >
       <div class="flex items-center mb-4">
-        <label for="date" class="block mr-2 text-sm font-medium text-gray-700">用餐日期：</label>
+        <label for="date" class="block mr-2 text-sm font-medium text-gray-700"
+          >用餐日期：</label
+        >
         <div class="relative flex-grow">
           <input
             type="date"
             id="date"
             v-model="date"
-            :class="{'border-red-500': errors.date}"
+            :class="{ 'border-red-500': errors.date }"
             class="px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
             @input="errors.date = false"
           />
-          <span v-if="errors.date" class="absolute left-0 text-sm text-red-500 top-full">
+          <span
+            v-if="errors.date"
+            class="absolute left-0 text-sm text-red-500 top-full"
+          >
             請選擇用餐日期
           </span>
         </div>
       </div>
       <div class="mb-4">
-        <label for="restaurant" class="block mb-1 text-sm font-medium text-gray-700">餐廳名稱</label>
+        <label
+          for="restaurant"
+          class="block mb-1 text-sm font-medium text-gray-700"
+          >餐廳名稱</label
+        >
         <div class="relative">
           <input
             id="restaurant"
             type="text"
             v-model="restaurantName"
             placeholder="輸入餐廳名稱"
-            :class="{'border-red-500': errors.restaurantName}"
+            :class="{ 'border-red-500': errors.restaurantName }"
             class="w-full px-3 py-2 text-xl border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
           />
-          <span v-if="errors.restaurantName" class="absolute left-0 text-sm text-red-500 top-full">
+          <span
+            v-if="errors.restaurantName"
+            class="absolute left-0 text-sm text-red-500 top-full"
+          >
             {{ errors.restaurantName }}
           </span>
         </div>
       </div>
       <div class="mb-4">
-        <label for="title" class="block mb-1 text-sm font-medium text-gray-700">文章標題</label>
+        <label for="title" class="block mb-1 text-sm font-medium text-gray-700"
+          >文章標題</label
+        >
         <div class="relative">
           <input
             id="title"
             type="text"
             v-model="title"
             placeholder="輸入文章標題"
-            :class="{'border-red-500': errors.title}"
+            :class="{ 'border-red-500': errors.title }"
             class="w-full px-3 py-2 text-xl border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
           />
-          <span v-if="errors.title" class="absolute left-0 text-sm text-red-500 top-full">
+          <span
+            v-if="errors.title"
+            class="absolute left-0 text-sm text-red-500 top-full"
+          >
             {{ errors.title }}
           </span>
         </div>
       </div>
       <div class="mb-4">
-        <label class="block mb-1 text-sm font-medium text-gray-700">文章內容</label>
+        <label class="block mb-1 text-sm font-medium text-gray-700"
+          >文章內容</label
+        >
         <div class="relative">
           <div
             contenteditable="true"
             ref="editor"
-            :class="{'border-red-500': errors.content}"
+            :class="{ 'border-red-500': errors.content }"
             class="w-full px-3 py-2 overflow-y-auto text-base border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-500 h-100"
             @input="updateContent"
           ></div>
-          <span v-if="errors.content" class="absolute left-0 text-sm text-red-500 top-full">
+          <span
+            v-if="errors.content"
+            class="absolute left-0 text-sm text-red-500 top-full"
+          >
             文章內容至少需要300字（目前 {{ contentWordCount }} 字）
           </span>
           <!-- 字數計數器 -->
-          <div class="mt-2 text-sm" :class="{'text-red-500': contentWordCount < 300, 'text-green-500': contentWordCount >= 300}">
+          <div
+            class="mt-2 text-sm"
+            :class="{
+              'text-red-500': contentWordCount < 300,
+              'text-green-500': contentWordCount >= 300,
+            }"
+          >
             目前字數：{{ contentWordCount }} / 300
-            <span v-if="contentWordCount < 300">（還需要 {{ 300 - contentWordCount }} 字）</span>
+            <span v-if="contentWordCount < 300"
+              >（還需要 {{ 300 - contentWordCount }} 字）</span
+            >
             <span v-else>（已達到最低字數要求）</span>
           </div>
         </div>
       </div>
       <div class="mb-4">
-        <label class="block mb-1 text-sm font-medium text-gray-700">插入圖片</label>
+        <label class="block mb-1 text-sm font-medium text-gray-700"
+          >插入圖片</label
+        >
         <input
           type="file"
           @change="onImageSelect"
@@ -583,64 +616,13 @@ const getCurrentContent = () => {
             :key="file.name"
             class="text-sm text-gray-600"
           >
-          <input
-            type="date"
-            id="date"
-            v-model="date"
-            class="px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
-          />
-        </div>
-        <div class="mb-4">
-          <label
-            for="title"
-            class="block mb-1 text-sm font-medium text-gray-700"
-            >文章標題</label
-          >
-          <input
-            id="title"
-            type="text"
-            v-model="title"
-            placeholder="輸入文章標題"
-            class="w-full px-3 py-2 text-xl border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
-          />
-        </div>
-        <div class="mb-4">
-          <label class="block mb-1 text-sm font-medium text-gray-700"
-            >文章內容</label
-          >
-          <div
-            contenteditable="true"
-            ref="editor"
-            class="w-full px-3 py-2 overflow-y-auto text-base border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-500 h-100"
-            @input="updateContent"
-          ></div>
-        </div>
-        <div class="mb-4">
-          <label class="block mb-1 text-sm font-medium text-gray-700"
-            >插入圖片</label
-          >
-          <input
-            type="file"
-            @change="onImageSelect"
-            class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:bg-amber-400 file:text-white hover:file:bg-amber-500 file:transition file:cursor-pointer"
-          />
-          <!-- 顯示已插入的檔案名稱 -->
-          <ul class="mt-2">
-            <li
-              v-for="file in fileList"
-              :key="file.name"
-              class="text-sm text-gray-600"
-            >
-              已插入檔案：{{ file.name }}
-            </li>
-          </ul>
-        </div>
+            已插入檔案：{{ file.name }}
+          </li>
+        </ul>
       </div>
     </div>
   </div>
 </template>
-
-
 
 <style scoped>
 img {
@@ -658,7 +640,7 @@ input[type="file"]::-webkit-file-upload-button {
 .mb-4 {
   margin-bottom: 2rem;
 }
- /* 全局選擇器，避免作用範圍問題 */
+/* 全局選擇器，避免作用範圍問題 */
 div.overflow-x-auto.hide-scrollbar {
   padding-top: 0 !important;
 }
