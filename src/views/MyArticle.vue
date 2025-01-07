@@ -183,7 +183,23 @@ const handleDelete = (articleId = null) => {
   deleteArticle(articleId);
 };
 
+const windowWidth = ref(window.innerWidth);
 
+// 監聽視窗大小變化
+const handleResize = () => {
+  windowWidth.value = window.innerWidth;
+};
+
+// 在組件掛載時添加監聽器
+onMounted(() => {
+  window.addEventListener('resize', handleResize);
+  handleResize(); // 初始化寬度
+});
+
+// 在組件卸載時移除監聽器
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', handleResize);
+});
 
 
 
@@ -191,7 +207,11 @@ const handleDelete = (articleId = null) => {
 <template>
   <div v-if="isComponentMounted" class="container mx-auto px-4 py-8">
     <!-- 頁面標題 -->
-    <div class="flex justify-between items-center mb-8">
+    <div class="flex justify-between items-center mb-8"
+    :class="['flex', { 
+        'mt-24': windowWidth < 768,
+        'mt-20': windowWidth >= 768 && windowWidth < 1167,
+        }]">
       <h1 class="text-2xl font-bold">我的食記</h1>
       <button
         @click="router.push({ path: '/createnote', query: { from: 'articleList' }})"
