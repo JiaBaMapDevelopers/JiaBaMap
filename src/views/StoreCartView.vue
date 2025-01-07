@@ -9,6 +9,38 @@ const selectedCategory = ref(0);
 const cartItems = ref([]);
 const menus = ref([]);
 
+
+// 店家資訊狀態
+const storeInfo = ref({
+  name: '',
+  address: '',
+  phone: '',
+  description: '',
+  businessHours: ''
+});
+
+// 獲取店家資訊
+const fetchStoreInfo = async () => {
+  try {
+    const response = await axios.get(`${import.meta.env.VITE_BACKEND_BASE_URL}/get:${placeId}/${storeId}`);
+    if (response.data) {
+      // 更新店家資訊
+      storeInfo.value = {
+        ...storeInfo.value,
+        ...response.data
+      };
+    }
+  } catch (error) {
+    console.error('獲取店家資訊失敗：', error);
+    Swal.fire({
+      title: '錯誤',
+      text: '無法獲取店家資訊',
+      icon: 'error'
+    });
+  }
+};
+
+
 // 將菜單按分類整理的計算屬性
 const categorizedMenu = computed(() => {
   // 獲取所有有效的分類（根據後端定義）
@@ -23,7 +55,7 @@ const categorizedMenu = computed(() => {
 // 獲取菜單數據
 const fetchMenus = async () => {
   try {
-    const response = await axios.get('http://localhost:3000/menu', {
+    const response = await axios.get(`${import.meta.env.VITE_BACKEND_BASE_URL}/menu`, {
       params: {
         storeId,
         limit: 50  // 設定較大的限制以確保獲取所有菜單項目
@@ -52,9 +84,9 @@ const scrollToCategory = (index) => {
 };
 
 // Intersection Observer for active category
-onMounted(() => {
-  fetchMenus();
-
+onMounted( async () => {
+  await fetchMenus();
+  await fetchStoreInfo();
   const observer = new IntersectionObserver(
     (entries) => {
       entries.forEach(entry => {
@@ -78,13 +110,6 @@ onMounted(() => {
 
 const calculateItemPrice = (item, options) => {
   let totalPrice = item.price;
-  
-  if (options.cupSize === '大杯') {
-    totalPrice += 10;
-  }
-  
-  totalPrice += options.toppings.length * 10;
-  
   return totalPrice;
 };
 
@@ -109,28 +134,6 @@ const openItemModal = async (item) => {
           價格: <span class='text-red-500'>\$${item.price}</span>
         </div>
         ${item.description ? `<div class='mt-2 text-sm text-gray-600'>${item.description}</div>` : ''}
-        <div class='mt-4'>
-          <h3 class='text-lg font-semibold'>杯型選擇 <span class="text-red-500">*</span></h3>
-          <div class="cup-size-group" data-required="true">
-            <button class='option-btn cup-size bg-gray-100 hover: px-3 py-2 rounded m-1' data-value="中杯">中杯</button>
-            <button class='option-btn cup-size bg-gray-100 hover: px-3 py-2 rounded m-1' data-value="大杯">大杯 +10元</button>
-          </div>
-        </div>
-        <div class='mt-4'>
-          <h3 class='text-lg font-semibold'>加料選擇</h3>
-          <div class="toppings-group">
-            <button class='option-btn topping bg-gray-100 hover: px-3 py-2 rounded m-1' data-value="珍珠">珍珠 +10元</button>
-            <button class='option-btn topping bg-gray-100 hover: px-3 py-2 rounded m-1' data-value="椰果">椰果 +10元</button>
-          </div>
-        </div>
-        <div class='mt-4'>
-          <h3 class='text-lg font-semibold'>甜度選擇 <span class="text-red-500">*</span></h3>
-          <div class="sweetness-group" data-required="true">
-            <button class='option-btn sweetness bg-gray-100 hover: px-3 py-2 rounded m-1' data-value="正常糖">正常糖</button>
-            <button class='option-btn sweetness bg-gray-100 hover: px-3 py-2 rounded m-1' data-value="半糖">半糖</button>
-            <button class='option-btn sweetness bg-gray-100 hover: px-3 py-2 rounded m-1' data-value="微糖">微糖</button>
-          </div>
-        </div>
       </div>
     `,
     confirmButtonText: '加入購物車',
@@ -151,41 +154,15 @@ const openItemModal = async (item) => {
           });
         });
       });
-
-      const toppingButtons = document.querySelectorAll('.topping');
-      toppingButtons.forEach(button => {
-        button.addEventListener('click', () => {
-          button.classList.toggle('bg-amber-500');
-          button.classList.toggle('text-white');
-        });
-      });
-    },
-    preConfirm: () => {
-      const cupSize = document.querySelector('.cup-size.bg-amber-500')?.dataset.value;
-      const sweetness = document.querySelector('.sweetness.bg-amber-500')?.dataset.value;
-      const toppings = Array.from(document.querySelectorAll('.topping.bg-amber-500'))
-        .map(el => el.dataset.value);
-
-      if (!cupSize || !sweetness) {
-        Swal.showValidationMessage('請選擇必填項目');
-        return false;
-      }
-
-      return {
-        cupSize,
-        sweetness,
-        toppings
-      };
     }
   });
 
-  if (formValues) {
+  if (formValues === true) {
     const cartItem = {
       id: Date.now(),
       item,
-      options: formValues,
       quantity: 1,
-      itemPrice: calculateItemPrice(item, formValues)
+      itemPrice: calculateItemPrice(item)
     };
     cartItems.value.push(cartItem);
     
@@ -217,9 +194,6 @@ const openCart = async () => {
       <div>
         <h3 class="font-semibold">${cartItem.item.name}</h3>
         <p class="text-sm text-gray-600">
-          ${cartItem.options.cupSize} | 
-          ${cartItem.options.sweetness}
-          ${cartItem.options.toppings.length ? ` | ${cartItem.options.toppings.join(', ')}` : ''}
         </p>
         <p class="text-sm text-gray-600">
           單價: $${cartItem.itemPrice}
@@ -294,23 +268,19 @@ const openCart = async () => {
     <header class="mb-8 px-4">
       <div class="flex items-center justify-between">
         <div class="flex items-center space-x-4">
-          <img 
-            src=""
-            alt="Logo" 
-            class="h-12"
-          >
           <div>
-            <h1 class="text-2xl font-bold text-gray-600">得正 台北東湖計劃</h1>
+            <h1 class="text-2xl font-bold text-gray-600">{{ storeInfo.name }}</h1>
             <div class="text-sm text-gray-600">
-              <span class="flex items-center mr-2">
-                <span class="text-yellow-400">★</span>3.4 (7)
-              </span>
-              <span>11:00 ~ 20:00</span>
+              
+              <span>{{ storeInfo.businessHours }}</span>
             </div>
             <div class="text-sm text-gray-600">
               <i class="fas fa-map-marker-alt"></i>
-              台北市內湖區東湖路133號 &nbsp;
-              <i class="fas fa-phone-alt"></i> 02-2633533
+              {{ storeInfo.address }} &nbsp;
+              <i class="fas fa-phone-alt"></i> {{ storeInfo.phone }}
+            </div>
+            <div v-if="storeInfo.description" class="text-sm text-gray-600 mt-2">
+              {{ storeInfo.description }}
             </div>
           </div>
         </div>

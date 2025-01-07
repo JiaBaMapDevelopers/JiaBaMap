@@ -3,10 +3,9 @@ import { ref } from 'vue';
 
 const navigation = ref([
   { name: "首頁", link: "/dashboard" },
-  { name: "餐廳資訊", link: "/restaurant-info" },
+  { name: "餐廳資訊", link: "/storesignup" },
   { name: "菜單管理", link: "/menu-management" },
-  { name: "訂單管理", link: "/order-management" },
-  { name: "評論管理", link: "/review-management" },
+  { name: "訂單管理", link: "/" },
 ]);
 
 const overviewCards = ref([
@@ -46,6 +45,21 @@ const currency = (value) => {
     currency: "TWD",
   }).format(value);
 };
+
+const logout = () => localStorage.removeItem("storeToken");
+
+// localStorage.setItem("storeToken", resToken.data.token);
+//     if (resToken) {
+//       Swal.fire({
+//         title: "登入成功",
+//         icon: "success",
+//         timer: 2000,
+//         timerProgressBar: true,
+//       });
+//       //token解碼後可取得店家id
+//       storeId.value = jose.decodeJwt(resToken.data.token).id;
+//     }
+
 </script>
 
 
@@ -67,6 +81,10 @@ const currency = (value) => {
           </li>
         </ul>
       </nav>
+      <button 
+      class="px-4 mt-24 text-center text-lg font-semibold text-gray-800 hover:bg-amber-400 rounded"
+      @click="logout"
+      >登出</button>
     </aside>
 
     <!-- Main Content -->

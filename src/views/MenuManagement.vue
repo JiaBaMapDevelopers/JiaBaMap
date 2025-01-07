@@ -54,7 +54,7 @@ const handleFileUpload = (event) => {
 // 更新 fetchMenus 支援搜尋與分頁
 const fetchMenus = async (page = 1) => {
   try {
-    const response = await axios.get('http://localhost:3000/menu', {
+    const response = await axios.get(`${import.meta.env.VITE_BACKEND_BASE_URL}/menu`, {
       params: {
         page, 
         limit: 10, // 每頁 10 筆資料
@@ -94,7 +94,7 @@ const addMenu = async () => {
       formData.append('image', menuForm.value.image); // 圖片檔案
     }
 
-    const response = await axios.post('http://localhost:3000/menu', formData, {
+    const response = await axios.post(`${import.meta.env.VITE_BACKEND_BASE_URL}/menu`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
       }
@@ -133,7 +133,7 @@ const updateMenu = async () => {
     }
 
     const response = await axios.put(
-      `http://localhost:3000/menu/${editingId.value}`,
+      `${import.meta.env.VITE_BACKEND_BASE_URL}/menu/${editingId.value}`,
       formData,
       {
         headers: {
@@ -157,7 +157,7 @@ const updateMenu = async () => {
 const deleteMenu = async (id) => {
   if (confirm("確定要刪除嗎？")) {
     try {
-      await axios.delete(`http://localhost:3000/menu/${id}`);
+      await axios.delete(`${import.meta.env.VITE_BACKEND_BASE_URL}/menu/${id}`);
       menus.value = menus.value.filter(menu => menu._id !== id);
     } catch (error) {
       console.error("刪除失敗：", error);
