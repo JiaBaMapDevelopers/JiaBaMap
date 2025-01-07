@@ -1,38 +1,50 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import Swal from 'sweetalert2';
-import menuData from '../../data/menu.json';
+import axios from 'axios';
 
+const storeId = '67720e635123faace157e5b3';
 const categoryRefs = ref([]);
 const selectedCategory = ref(0);
 const cartItems = ref([]);
+const menus = ref([]);
 
-const categorizedMenu = [
-  {
-    name: '新品上市 - 緋烏龍系列',
-    items: menuData.filter(item => item.category === '新品上市')
-  },
-  {
-    name: '雙柚新品',
-    items: menuData.filter(item => item.category === '雙柚新品')
-  },
-  {
-    name: 'Double FRUIT',
-    items: menuData.filter(item => item.category === 'Double FRUIT')
-  },
-  {
-    name: 'Original TEA',
-    items: menuData.filter(item => item.category === 'Original TEA')
-  },
-  {
-    name: 'Cheese MILK FOAM',
-    items: menuData.filter(item => item.category === 'Cheese MILK FOAM')
-  },
-  {
-    name: 'Classic MILK TEA',
-    items: menuData.filter(item => item.category === 'Classic MILK TEA')
+// 將菜單按分類整理的計算屬性
+const categorizedMenu = computed(() => {
+  // 獲取所有有效的分類（根據後端定義）
+  const validCategories = ['飲料', '主食', '甜點', '湯品'];
+  return validCategories.map(category => ({
+    name: category,
+    // 只顯示該分類下可用的商品
+    items: menus.value.filter(item => item.category === category && item.isAvailable !== false)
+  })).filter(category => category.items.length > 0); // 只顯示有商品的分類
+});
+
+// 獲取菜單數據
+const fetchMenus = async () => {
+  try {
+    const response = await axios.get('http://localhost:3000/menu', {
+      params: {
+        storeId,
+        limit: 50  // 設定較大的限制以確保獲取所有菜單項目
+      }
+    });
+    
+    if (response.data && Array.isArray(response.data.menus)) {
+      menus.value = response.data.menus;
+    } else {
+      console.error('菜單數據格式錯誤');
+      menus.value = [];
+    }
+  } catch (error) {
+    console.error('獲取菜單失敗：', error);
+    Swal.fire({
+      title: '錯誤',
+      text: '無法獲取菜單數據',
+      icon: 'error'
+    });
   }
-];
+};
 
 const scrollToCategory = (index) => {
   selectedCategory.value = index;
@@ -41,6 +53,8 @@ const scrollToCategory = (index) => {
 
 // Intersection Observer for active category
 onMounted(() => {
+  fetchMenus();
+
   const observer = new IntersectionObserver(
     (entries) => {
       entries.forEach(entry => {
@@ -55,22 +69,46 @@ onMounted(() => {
     { threshold: 0.5 }
   );
 
-  categoryRefs.value.forEach(ref => {
-    if (ref) observer.observe(ref);
-  });
+  setTimeout(() => {
+    categoryRefs.value.forEach(ref => {
+      if (ref) observer.observe(ref);
+    });
+  }, 100);
 });
 
+const calculateItemPrice = (item, options) => {
+  let totalPrice = item.price;
+  
+  if (options.cupSize === '大杯') {
+    totalPrice += 10;
+  }
+  
+  totalPrice += options.toppings.length * 10;
+  
+  return totalPrice;
+};
+
 const openItemModal = async (item) => {
+  if (!item.isAvailable) {
+    Swal.fire({
+      title: '商品未上架',
+      text: '此商品目前無法購買',
+      icon: 'info'
+    });
+    return;
+  }
+
   const { value: formValues } = await Swal.fire({
     title: item.name,
     html: `
       <div class='flex flex-col items-center'>
         <div class='mb-4'>
-          <img src='${item.image}' alt='商品圖片' class='w-24 h-24 object-cover'>
+          <img src='${item.imageUrl }' alt='商品圖片' class='w-24 h-24 object-cover'>
         </div>
         <div class='text-sm text-gray-600'>
           價格: <span class='text-red-500'>\$${item.price}</span>
         </div>
+        ${item.description ? `<div class='mt-2 text-sm text-gray-600'>${item.description}</div>` : ''}
         <div class='mt-4'>
           <h3 class='text-lg font-semibold'>杯型選擇 <span class="text-red-500">*</span></h3>
           <div class="cup-size-group" data-required="true">
@@ -146,7 +184,8 @@ const openItemModal = async (item) => {
       id: Date.now(),
       item,
       options: formValues,
-      quantity: 1
+      quantity: 1,
+      itemPrice: calculateItemPrice(item, formValues)
     };
     cartItems.value.push(cartItem);
     
@@ -169,7 +208,7 @@ const openCart = async () => {
   }
 
   const totalAmount = cartItems.value.reduce(
-    (sum, cartItem) => sum + cartItem.item.price * cartItem.quantity,
+    (sum, cartItem) => sum + cartItem.itemPrice * cartItem.quantity,
     0
   );
 
@@ -181,6 +220,9 @@ const openCart = async () => {
           ${cartItem.options.cupSize} | 
           ${cartItem.options.sweetness}
           ${cartItem.options.toppings.length ? ` | ${cartItem.options.toppings.join(', ')}` : ''}
+        </p>
+        <p class="text-sm text-gray-600">
+          單價: $${cartItem.itemPrice}
         </p>
       </div>
       <div class="flex items-center space-x-2">
@@ -206,7 +248,6 @@ const openCart = async () => {
     confirmButtonText: '結帳',
     cancelButtonText: '繼續購物',
     didOpen: () => {
-      // 更新數量的按鈕事件
       document.querySelectorAll('.quantity-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
           const index = parseInt(btn.dataset.index);
@@ -218,25 +259,22 @@ const openCart = async () => {
             cartItems.value[index].quantity--;
           }
 
-          // 更新 DOM 的數量顯示
-          document.querySelector(`.quantity-display[data-index="${index}"]`).textContent = cartItems.value[index].quantity;
+          document.querySelector(`.quantity-display[data-index="${index}"]`).textContent = 
+            cartItems.value[index].quantity;
 
-          // 更新總金額顯示
           const newTotal = cartItems.value.reduce(
-            (sum, cartItem) => sum + cartItem.item.price * cartItem.quantity,
+            (sum, cartItem) => sum + cartItem.itemPrice * cartItem.quantity,
             0
           );
           document.querySelector('.total-amount').textContent = `\$${newTotal.toFixed(2)}`;
         });
       });
 
-      // 刪除項目的按鈕事件
       document.querySelectorAll('.delete-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
           const index = parseInt(btn.dataset.index);
           cartItems.value.splice(index, 1);
 
-          // 重新開啟購物車（或手動刪除該行）
           if (cartItems.value.length > 0) {
             openCart();
           } else {
@@ -257,7 +295,7 @@ const openCart = async () => {
       <div class="flex items-center justify-between">
         <div class="flex items-center space-x-4">
           <img 
-            src="https://ap-south-1.linodeobjects.com/nidin-production-v3/store/icons/s_15961_icon_20230725_145324_87a73.jpg" 
+            src=""
             alt="Logo" 
             class="h-12"
           >
@@ -302,6 +340,7 @@ const openCart = async () => {
       </div>
     </nav>
 
+
     <!-- Main Content -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-8 px-4 mt-8">
       <div 
@@ -314,13 +353,18 @@ const openCart = async () => {
         <ul class="space-y-4">
           <li 
             v-for="item in category.items" 
-            :key="item.id" 
+            :key="item._id" 
             class="flex items-center justify-between cursor-pointer hover:bg-amber-100 p-2 rounded"
             @click="openItemModal(item)"
           >
             <div class="flex items-center space-x-4">
-              <img :src="item.image" alt="商品圖片" class="w-16 h-16 object-cover rounded">
-              <span class="text-gray-800">{{ item.name }}</span>
+              <img :src="item.imageUrl" 
+                   alt="商品圖片" 
+                   class="w-16 h-16 object-cover rounded">
+              <div>
+                <span class="text-gray-800">{{ item.name }}</span>
+                <p class="text-sm text-gray-600">{{ item.description }}</p>
+              </div>
             </div>
             <span class="text-gray-800">${{ item.price }}</span>
           </li>
