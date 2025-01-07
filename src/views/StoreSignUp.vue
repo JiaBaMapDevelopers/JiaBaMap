@@ -1,7 +1,7 @@
 <script setup>
-import { ref, onMounted, shallowRef } from 'vue';
-import googleMapsLoader from '../components/googleMapsLoader.js';
-import Swal from 'sweetalert2';
+import { ref, onMounted, shallowRef } from "vue";
+import googleMapsLoader from "../components/googleMapsLoader.js";
+import Swal from "sweetalert2";
 import { z } from "zod";
 
 const username = ref("");
@@ -59,7 +59,7 @@ function clear(){
     storeAddress.value = "";
 }
 
-function handleSubmit() {
+async function handleSubmit() {
     const form = {
         username: username.value,
         password: password.value,
@@ -71,7 +71,6 @@ function handleSubmit() {
         contactName: contactName.value,
         contactEmail: contactEmail.value,
         contactPhone: contactPhone.value,
-        autoComplete: autocomplete.value,
         placeId,
     }
     const registerSchema = z.object({
@@ -112,7 +111,7 @@ onMounted(
 </script>
 
 <template>
-<div class="min-h-screen bg-gray-100 flex items-center justify-center">
+<div class="min-h-screen flex items-center justify-center animated-gradient">
     <div class="contentBox bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4 max-w-2xl mt-20">
         <div class="titleBox flex w-full justify-center mb-4">
             <h2 class="font-bold text-2xl">成為我們的合作夥伴，</h2>
@@ -120,19 +119,19 @@ onMounted(
         </div>
         <form @submit.prevent="handleSubmit" @keydown.enter="handleEnter">
             <div class="mb-4">
-                <label class="block text-gray-700 text-sm font-bold mb-2" for="username">✨ 帳號名稱:</label>
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="username">✨ 帳號名稱: <span class=" text-red-600 font-normal text-xs">*至少需5個字元</span></label>
                 <input v-model="username" id="username" type="text" placeholder="請輸入帳號" class="appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight hover:shadow-md focus:outline-orange-300">
             </div>
             <div class="mb-4">
-                <label class="block text-gray-700 text-sm font-bold mb-2" for="password">✨ 密碼:</label>
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="password">✨ 密碼: <span class=" text-red-600 font-normal text-xs">*至少需8個字元</span></label>
                 <input v-model="password" id="password" type="text" placeholder="請輸入密碼" class="appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight hover:shadow-md focus:outline-orange-300">
             </div>
             <div class="mb-4">
-                <label class="block text-gray-700 text-sm font-bold mb-2" for="storeName">✨ 店家名稱:</label>
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="storeName">✨ 店家名稱: <span class=" text-red-600 font-normal text-xs">*</span></label>
                 <input v-model="storeName" id="storeName" type="text" placeholder="請輸入店家名稱" class="appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight hover:shadow-md focus:outline-orange-300">
             </div>
             <div class="mb-4">
-                <label class="block text-gray-700 text-sm font-bold mb-2" for="storeAddress">✨ 店家地址:</label>
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="storeAddress">✨ 店家地址: <span class=" text-red-600 font-normal text-xs">*地址輸入後需自選單中選取</span></label>
                 <div class="relative w-full border rounded hover:shadow-md">
                     <input v-model="storeAddress" @input="fetchSuggestions" id="storeAddress" type="text" placeholder="請輸入店家地址" class="appearance-none py-2 px-3 text-gray-700 leading-tight w-full pr-10 focus:outline-orange-300">
                     <font-awesome-icon :icon="['fa', 'circle-xmark']" @click="clear" class="absolute top-1/2 right-3 transform -translate-y-1/2 text-gray-400 cursor-pointer w-5 h-5"/>
@@ -144,27 +143,27 @@ onMounted(
                 </div>
             </div>
             <div class="mb-4">
-                <label class="block text-gray-700 text-sm font-bold mb-2" for="storePhone">✨ 店家電話:</label>
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="storePhone">✨ 店家電話: <span class=" text-red-600 font-normal text-xs">*</span></label>
                 <input v-model="storePhone" id="storePhone" type="tel" placeholder="請輸入店家電話" class="appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight hover:shadow-md focus:outline-orange-300">
             </div>
             <div class="mb-4">
-                <label class="block text-gray-700 text-sm font-bold mb-2" for="storeIntro">✨ 店家簡介:</label>
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="storeIntro">✨ 店家簡介: <span class=" text-red-600 font-normal text-xs">*最多50個字元</span></label>
                 <textarea v-model="storeIntro" id="storeIntro" type="text" placeholder="請輸入店家簡介" class="appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight hover:shadow-md focus:outline-orange-300"></textarea>
             </div>
             <div class="mb-4">
-                <label class="block text-gray-700 text-sm font-bold mb-2" for="storeTaxId">✨ 店家統一編號:</label>
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="storeTaxId">✨ 店家統一編號: <span class=" text-red-600 font-normal text-xs">*</span></label>
                 <input v-model="storeTaxId" id="storeTaxId" type="text" placeholder="請輸入店家統一編號" class="appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight hover:shadow-md focus:outline-orange-300">
             </div>
             <div class="mb-4">
-                <label class="block text-gray-700 text-sm font-bold mb-2" for="contactName">✨ 聯絡人姓名:</label>
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="contactName">✨ 聯絡人姓名: <span class=" text-red-600 font-normal text-xs">*</span></label>
                 <input v-model="contactName" id="contactName" type="text" placeholder="請輸入聯絡人姓名" class="appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight hover:shadow-md focus:outline-orange-300">
             </div>
             <div class="mb-4">
-                <label class="block text-gray-700 text-sm font-bold mb-2" for="contactEmail">✨ 聯絡人信箱:</label>
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="contactEmail">✨ 聯絡人信箱: <span class=" text-red-600 font-normal text-xs">*</span></label>
                 <input v-model="contactEmail" id="contactEmail" type="text" placeholder="請輸入聯絡人信箱" class="appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight hover:shadow-md focus:outline-orange-300">
             </div>
             <div class="mb-8">
-                <label class="block text-gray-700 text-sm font-bold mb-2" for="contactPhone">✨ 聯絡人手機號碼:</label>
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="contactPhone">✨ 聯絡人手機號碼: <span class=" text-red-600 font-normal text-xs">*</span></label>
                 <input v-model="contactPhone" id="contactPhone" type="tel" placeholder="請輸入聯絡人手機號碼" class="appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight hover:shadow-md focus:outline-orange-300">
             </div>
             <div class="flex items-center justify-center">
@@ -178,6 +177,24 @@ onMounted(
 </template>
 
 <style scope>
+.animated-gradient {
+  background: linear-gradient(45deg, #ff9a9e, #fad0c4, #fbc2eb, #a18cd1, #efd170, #ff9a9e);
+  background-size: 300% 300%;
+  animation: gradientAnimation 15s ease infinite;
+}
+
+@keyframes gradientAnimation {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
 @media (max-width: 768px) {
     .contentBox{
         margin-right: 10px;
