@@ -2,13 +2,35 @@
 import { ref } from "vue";
 import Swal from "sweetalert2"
 import { RouterLink } from "vue-router";
+import axios from "axios";
+import * as jose from "jose";
+import { useRouter } from "vue-router";
+
+const router = useRouter();
 
 const username = ref("");
 const password = ref("");
 
-const handleLogin = () => {
-  if (username.value && password.value) {
+const storeId = ref("");
 
+const handleLogin = async () => {
+  if (username.value && password.value) {
+    const resToken = await axios.post(`${import.meta.env.VITE_BACKEND_BASE_URL}/auth/store/login`, {
+      username: username.value,
+      password: password.value,
+    })
+
+    localStorage.setItem("storeToken", resToken.data.token);
+    if (resToken) {
+      Swal.fire({
+        title: "登入成功",
+        icon: "success",
+        timer: 2000,
+        timerProgressBar: true,
+      });
+      //token解碼後可取得店家id
+      storeId.value = jose.decodeJwt(resToken.data.token).id;
+    }
 
     Swal.fire({
         title: "Success",
@@ -16,6 +38,7 @@ const handleLogin = () => {
         icon: "success",
         confirmButtonText: "OK"
         })
+    router.push({ name: "dashboard" })
   } else {
     Swal.fire({
         title: "Error",
