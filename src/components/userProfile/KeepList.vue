@@ -22,7 +22,9 @@ const getDetails = async () => {
 };
 
 const photos = (photoId) => {
-  return `${import.meta.env.VITE_BACKEND_BASE_URL}/restaurants/photos/${photoId}`;
+  return `${
+    import.meta.env.VITE_BACKEND_BASE_URL
+  }/restaurants/photos/${photoId}`;
 };
 
 const StoreId = (placeId) => {
@@ -38,7 +40,8 @@ onMounted(() => {
   <div v-if="dataReady">
     <div class="box-border w-full h-screen pt-2 mt-2 overflow-y-auto lg:mt-12">
       <div
-        v-for="restaurant in restaurants"
+        v-for="(restaurant, index) in restaurants"
+        :key="restaurant.id || index"
         class="flex items-center pb-2 mt-2 border-b"
       >
         <!-- 餐廳圖 -->
@@ -52,19 +55,15 @@ onMounted(() => {
         <div class="flex flex-col justify-between ml-3 sm:text-xl">
           <div class="ml-3 text-left">
             <h2 class="text-base font-bold text-gray-500">
-              .
-              <a
-                href="#"
-                @click="StoreId(restaurant.placeId)"
-                class="text-amber-500 hover:text-orange-300"
-                >{{ restaurant.displayName }}</a
-              >
+              <a href="#" @click="StoreId(restaurant.placeId)">{{
+                restaurant.displayName
+              }}</a>
             </h2>
           </div>
           <!-- 餐廳內容 -->
           <div class="flex mt-3 ml-3 text-xs">
             <div
-              class="items-center px-2 mr-2 text-white bg-red-600 rounded-2xl"
+              class="items-center px-2 mr-2 text-white bg-orange-600 rounded-2xl"
             >
               <p>
                 {{ restaurant.rating }}

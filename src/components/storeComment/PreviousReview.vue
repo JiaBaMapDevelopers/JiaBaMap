@@ -1,3 +1,65 @@
+<script setup>
+import axios from "axios";
+import { ref, computed, onMounted, inject } from "vue";
+import { useCommentStore } from "@/stores/commentStore";
+import { useStore } from "@/stores/storePage";
+import { useAuth } from "@/stores/authStore";
+
+const store = useStore();
+const user = useAuth();
+// 從 Store 獲取評論數據
+const commentStore = useCommentStore();
+const comments = computed(() => commentStore.comments);
+const getComment = commentStore.getComment();
+const userData = computed(() => user.userData);
+const Swal = inject("$swal");
+// 圖片popup
+const popupImage = ref(null);
+
+const showPopup = (imageUrl) => {
+  popupImage.value = imageUrl;
+};
+const closePopup = () => {
+  popupImage.value = null;
+};
+
+const toggleLike = async (commentId) => {
+  if (!userData.value) {
+    Swal.fire({
+      title: "請先登入！",
+      icon: "error",
+      timer: 2000,
+      timerProgressBar: true,
+    });
+    return;
+  }
+  const response = await axios.put(
+    `${import.meta.env.VITE_BACKEND_BASE_URL}/comments/likes/${commentId}`,
+    {
+      userId: userData.value._id,
+    },
+  );
+  console.log("Response:", response.data);
+  commentStore.getComment();
+};
+
+//分享
+const shareComment = (comment) => {
+  if (navigator.share) {
+    navigator
+      .share({
+        title: "我看到一家超讚的餐廳",
+        text: `${comment.commentText} - 評分：${comment.star} ★`,
+        url: window.location.href,
+      })
+      .then(() => console.log("分享成功"))
+      .catch((error) => console.log("分享失敗：", error));
+  } else {
+    alert("您的瀏覽器不支援分享功能");
+  }
+};
+</script>
+
 <template>
   <div class="flex flex-col gap-y-5" v-if="comments.length > 0">
     <div
@@ -17,22 +79,36 @@
         />
       </div>
       <div class="flex flex-col flex-1 w-0 text-left">
-        <router-link to="/user" class="font-bold cursor-pointer text-amber-500"
-          >{{ comment.userName }}（{{ comment.reviewNum }} 則評論）</router-link
-        >
+        <div class="font-bold cursor-pointer text-amber-500">
+          {{ comment.name }}
+        </div>
         <div class="flex gap-3">
           <span
-            v-if="comment.star"
+            v-if="comment.rating"
             class="px-2 py-1 text-sm font-bold text-white rounded-full bg-amber-500"
-            >{{ comment.star }}.0 ★</span
+            >{{ comment.rating }}.0 ★</span
           >
-          <p v-if="comment.price">均消價位：${{ comment.price }}</p>
+          <p v-if="comment.AvgPrice">均消價位：${{ comment.AvgPrice }}</p>
         </div>
-        <p class="text-slate-500">評論日期：{{ comment.commentTime }}</p>
-        <p class="my-3">{{ comment.commentText }}</p>
+        <p class="text-slate-500">
+          評論日期：{{ comment.createdAt.slice(0, 10) }}
+        </p>
+        <p class="my-3">{{ comment.content }}</p>
         <div>
-          <button @click="toggleLike(comment)" class="p-2 rounded-lg shadow">
-            {{ comment.likeHint }}
+          <div>❤ + {{ comment.likes }}</div>
+          <button
+            v-if="userData"
+            @click="toggleLike(comment._id)"
+            class="p-2 rounded-lg shadow"
+          >
+            {{ comment.likedBy.includes(userData._id) ? "收回" : "按讚" }}
+          </button>
+          <button
+            v-else
+            @click="toggleLike(comment._id)"
+            class="p-2 rounded-lg shadow"
+          >
+            按讚
           </button>
           <button
             class="p-2 ml-2 rounded-lg shadow"
@@ -46,7 +122,7 @@
           style="scroll-snap-type: x mandatory"
         >
           <div
-            v-for="(imageUrl, index) in comment.pictures"
+            v-for="(imageUrl, index) in comment.photos"
             :key="index"
             class="flex-shrink-0 w-32 h-32 overflow-hidden"
           >
@@ -76,50 +152,3 @@
     </div>
   </div>
 </template>
-
-<script setup>
-import { ref, computed } from "vue";
-import { useCommentStore } from "@/stores/commentStore";
-
-// 從 Store 獲取評論數據
-const commentStore = useCommentStore();
-const comments = computed(() => commentStore.comments);
-
-// 圖片popup
-const popupImage = ref(null);
-
-const showPopup = (imageUrl) => {
-  popupImage.value = imageUrl;
-};
-const closePopup = () => {
-  popupImage.value = null;
-};
-
-// 讚數+1
-const toggleLike = (comment) => {
-  if (comment.likeStatus) {
-    comment.likeNum--;
-    comment.likeHint = "表示讚賞";
-  } else {
-    comment.likeNum++;
-    comment.likeHint = `❤ + ${comment.likeNum}`;
-  }
-  comment.likeStatus = !comment.likeStatus;
-};
-
-//分享
-const shareComment = (comment) => {
-  if (navigator.share) {
-    navigator
-      .share({
-        title: "我看到一家超讚的餐廳",
-        text: `${comment.commentText} - 評分：${comment.star} ★`,
-        url: window.location.href,
-      })
-      .then(() => console.log("分享成功"))
-      .catch((error) => console.log("分享失敗：", error));
-  } else {
-    alert("您的瀏覽器不支援分享功能");
-  }
-};
-</script>

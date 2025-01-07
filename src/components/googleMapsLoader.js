@@ -8,11 +8,4 @@ const loader = new Loader({
   language: "zh-TW",
 });
 
-loader
-  .load()
-  .then((google) => {})
-  .catch((error) => {
-    console.error("Google Maps API 加載失敗:", error.message);
-  });
-
 export default loader;

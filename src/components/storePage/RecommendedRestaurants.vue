@@ -9,61 +9,33 @@ const { recommendedRestaurants } = storeToRefs(restaurantStore);
 </script>
 
 <template>
-  <div class="w-full">
-    <div class="mt-10 text-gray-700">
-      <h3 class="mb-2 text-2xl font-bold">推薦餐廳</h3>
-      <div
-        v-if="recommendedRestaurants && recommendedRestaurants.length"
-        class="relative"
-      >
-        <Carousel
-          :breakpoints="{
-            640: {
-              itemsToShow: 2,
-              snapAlign: 'start',
-            },
-            768: {
-              itemsToShow: 3,
-              snapAlign: 'center',
-            },
-          }"
-          :wrap-around="true"
-          :transition="500"
-          :mouseDrag="true"
-          :touchDrag="true"
-          :gap="1"
-          class="flex justify-center"
-        >
-          <Slide
-            v-for="restaurant in recommendedRestaurants"
-            :key="restaurant.place_id"
-            class="flex-shrink-0 px-1"
-          >
-            <div class="bg-white rounded-lg shadow-md mb-4 max-w-[250px]">
-              <a
-                :href="restaurant.googleMapsUri"
-                target="_blank"
-                class="block cursor-pointer"
-              >
-                <div class="overflow-hidden">
-                  <img
-                    v-if="restaurant?.photoUrl"
-                    :src="restaurant.photoUrl"
-                    :alt="restaurant.name"
-                    class="object-cover w-[250px] h-[160px] rounded-t-lg"
-                  />
-                </div>
-                <div class="p-4">
-                  <h4
-                    class="text-lg font-bold text-center truncate md:text-left"
-                  >
-                    {{ restaurant?.name }}
-                  </h4>
-                  <div
-                    class="flex flex-col items-center justify-between gap-2 mt-2 md:flex-row"
-                  >
-                    <p
-                      class="px-2 text-center text-white rounded-full bg-amber-500 w-fit"
+    <div class="w-full">
+        <div class="mt-10 text-gray-700">
+            <h3 class="mb-2 text-2xl font-bold">推薦餐廳</h3>
+            <div v-if="recommendedRestaurants && recommendedRestaurants.length" class="relative">
+                <Carousel 
+                    :items-to-show="1"
+                    :breakpoints="{
+                        640: {
+                            itemsToShow: 2,
+                            snapAlign: 'start',
+                        },
+                        768: {
+                            itemsToShow: 3,
+                            snapAlign: 'start',
+                        }
+                    }"
+                    :wrap-around="true"
+                    :transition="500"
+                    :mouseDrag="true"
+                    :touchDrag="true"
+                    :gap="1"
+                    class="flex justify-center"
+                >
+                    <Slide 
+                        v-for="restaurant in recommendedRestaurants" 
+                        :key="restaurant.place_id"
+                        class="flex-shrink-0 px-1"
                     >
                       {{ restaurant?.rating }}
                       <span>

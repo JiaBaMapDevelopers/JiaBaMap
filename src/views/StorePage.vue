@@ -1,6 +1,6 @@
 <script setup>
 import axios from "axios";
-import { onMounted, ref } from "vue";
+import { onMounted, ref, computed } from "vue";
 import { storeToRefs } from "pinia";
 import { useStore } from "@/stores/storePage";
 import StoreComment from "@/components/storeComment/StoreComment.vue";
@@ -14,6 +14,7 @@ import { useAuth } from "@/stores/authStore";
 
 const restaurantStore = useStore();
 const user = useAuth();
+const userData = computed(() => user.userData);
 const iconClassic = ref("far");
 // 從 store 中解構需要的屬性
 const {
@@ -37,7 +38,7 @@ const {
 const isDropdownVisible = ref(false);
 
 const updateFavorite = async () => {
-  if (!user.userData) {
+  if (!userData.value) {
     alert("請登入");
     return;
   }
@@ -46,7 +47,9 @@ const updateFavorite = async () => {
   if (!isFavorite) {
     // iconClassic.value = "fas"
     await axios.post(
-      `${import.meta.env.VITE_BACKEND_BASE_URL}/user/favorites/${user.userId}`,
+      `${import.meta.env.VITE_BACKEND_BASE_URL}/user/favorites/${
+        userData.value._id
+      }`,
       {
         placeId: restaurantStore.placesId,
       },
@@ -54,7 +57,9 @@ const updateFavorite = async () => {
   } else {
     // iconClassic.value = "far"
     await axios.delete(
-      `${import.meta.env.VITE_BACKEND_BASE_URL}/user/favorites/delete/${user.userId}`,
+      `${import.meta.env.VITE_BACKEND_BASE_URL}/user/favorites/delete/${
+        userData.value._id
+      }`,
       {
         data: {
           placeId: restaurantStore.placesId,
@@ -66,8 +71,8 @@ const updateFavorite = async () => {
 };
 
 const checkFavorite = () => {
-  if (user.userData) {
-    iconClassic.value = user.userData.favorites.includes(
+  if (userData.value) {
+    iconClassic.value = userData.value.favorites.includes(
       restaurantStore.placesId,
     )
       ? "fas"
@@ -183,7 +188,11 @@ document.addEventListener("click", handleDocumentClick);
               @click="updateFavorite"
               class="absolute right-[-25px] top-3 flex items-center"
             >
-              <font-awesome-icon :icon="[iconClassic, 'bookmark']" size="lg" />
+              <font-awesome-icon
+                :icon="[iconClassic, 'bookmark']"
+                size="xl"
+                style="color: orange"
+              />
             </button>
           </div>
           <div

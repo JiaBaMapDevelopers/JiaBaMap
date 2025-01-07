@@ -1,7 +1,48 @@
+<script setup>
+import { computed, ref } from "vue";
+import { usePicStore } from "@/stores/picStore";
+
+const picStore = usePicStore();
+const fileInput = ref(null);
+const pictures = computed(() => picStore.pictures);
+const isDisabled = computed(() => picStore.isDisabled);
+
+const triggerFileInput = () => {
+  fileInput.value.click();
+};
+
+const deleteImg = (index) => {
+  picStore.removePic(index);
+  picStore.removeFiles(index);
+};
+
+const handleFileChange = (e) => {
+  const files = e.target.files;
+  Array.from(files).forEach((file) => {
+    picStore.addFiles(file);
+  });
+
+  const file = e.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      picStore.addPic(event.target.result);
+    };
+    reader.readAsDataURL(file);
+  }
+};
+</script>
+
 <template>
   <div>
     <!-- 用隱藏的 input type=file 來觸發檔案選擇器 -->
-    <input type="file" ref="fileInput" @change="handleFileChange" hidden />
+    <input
+      type="file"
+      multiple
+      ref="fileInput"
+      @change="handleFileChange"
+      hidden
+    />
     <!-- 圖片預覽 -->
     <div v-if="pictures.length" class="flex flex-wrap">
       <div
@@ -32,32 +73,3 @@
     </button>
   </div>
 </template>
-
-<script setup>
-import { computed, ref } from "vue";
-import { usePicStore } from "@/stores/picStore";
-
-const picStore = usePicStore();
-const fileInput = ref(null);
-const pictures = computed(() => picStore.pictures);
-const isDisabled = computed(() => picStore.isDisabled);
-
-const triggerFileInput = () => {
-  fileInput.value.click();
-};
-
-const deleteImg = (index) => {
-  picStore.removePic(index);
-};
-
-const handleFileChange = (e) => {
-  const file = e.target.files[0];
-  if (file) {
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      picStore.addPic(event.target.result);
-    };
-    reader.readAsDataURL(file);
-  }
-};
-</script>

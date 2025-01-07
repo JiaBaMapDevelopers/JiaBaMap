@@ -1,9 +1,90 @@
+<script setup>
+import axios from "axios";
+import { ref, computed } from "vue";
+import Stars from "./Stars.vue";
+import UploadPic from "./UploadPic.vue";
+import { useStarsStore } from "@/stores/starStore";
+import { useCommentStore } from "@/stores/commentStore";
+import { usePicStore } from "@/stores/picStore";
+import { useAuth } from "@/stores/authStore";
+import { useStore } from "@/stores/storePage";
+import Login from "@/components/Login.vue";
+import PreviousReview from "@/components/storeComment/PreviousReview.vue";
+
+const user = useAuth();
+const store = useStore();
+const userData = computed(() => user.userData);
+
+const time = new Date();
+const price = ref("");
+const commentText = ref("");
+let isExpanded = ref(false);
+
+// 引入 Pinia Store
+const starsStore = useStarsStore();
+const commentStore = useCommentStore();
+const picStore = usePicStore();
+
+const submitComment = async () => {
+  if (!commentText.value.trim()) {
+    alert("請輸入評論");
+    return;
+  }
+
+  const formData = new FormData();
+
+  formData.append("userId", userData.value._id); // 用戶 ID
+  formData.append("placeId", store.placesId); // 餐廳 ID
+  formData.append("content", commentText.value.trim()); // 評論內容
+  formData.append("rating", starsStore.selectIndex); // 評分
+  formData.append("AvgPrice", price.value); // 用餐價格
+
+  if (picStore.files.length > 0) {
+    picStore.files.forEach((file) => {
+      formData.append("photos", file); // "files" 是後端字段名
+    });
+  }
+
+  await axios.post(
+    `${import.meta.env.VITE_BACKEND_BASE_URL}/comments/`,
+    formData,
+    {
+      headers: { "Content-Type": "multipart/form-data" },
+    },
+  );
+
+  // commentStore.addComment(newComment); // 使用 Pinia Store 更新評論
+  //重置輸入框
+  commentText.value = "";
+  price.value = "";
+  picStore.resetPic(); // 重置圖片
+  starsStore.resetStars(); // 重置星星狀態
+  commentStore.getComment();
+};
+
+const openComment = () => {
+  isExpanded.value = !isExpanded.value;
+};
+
+const showLoginModal = ref(false); // 是否顯示登錄小畫面
+
+// 開啟登錄小畫面
+const openLoginModal = () => {
+  showLoginModal.value = true;
+};
+
+// 關閉登錄小畫面
+const closeLoginModal = () => {
+  showLoginModal.value = false;
+};
+</script>
+
 <template>
   <Login :visible="showLoginModal" @close="closeLoginModal" />
   <div class="flex gap-5 mb-4">
     <div class="flex-shrink-0 w-16 h-16 rounded-full bg-slate-300">
       <img
-        src="@/assets/default_user.png"
+        src="../../assets/default_user.png"
         alt="avatar"
         class="w-full h-auto overflow-hidden"
       />
@@ -18,10 +99,7 @@
         </button>
         <Stars class="my-2" />
         <div class="relative flex flex-col" v-if="isExpanded">
-          <div v-if="user.userData">
-            <!-- <div v-if="!user.userData" class=" absolute top-[-5px] left-[-10px] flex justify-center items-center bg-gray-900 h-[110%] w-[110%] opacity-50" >
-                        <p class="font-black text-yellow-200">請先<a href="#" class="m-2 text-orange-600">登入</a>以使用更多功能!</p>                        
-                    </div> -->
+          <div v-if="userData">
             <textarea
               v-model="commentText"
               maxlength="200"
@@ -63,74 +141,6 @@
     </div>
   </div>
 </template>
-
-<script setup>
-import { ref } from "vue";
-import Stars from "./Stars.vue";
-import UploadPic from "./UploadPic.vue";
-import { useStarsStore } from "@/stores/starStore";
-import { useCommentStore } from "@/stores/commentStore";
-import { usePicStore } from "@/stores/picStore";
-import { useAuth } from "@/stores/authStore";
-import Login from "@/components/Login.vue";
-
-const user = useAuth();
-
-const time = new Date();
-const price = ref("");
-const commentText = ref("");
-let isExpanded = ref(false);
-
-// 引入 Pinia Store
-const starsStore = useStarsStore();
-const commentStore = useCommentStore();
-const picStore = usePicStore();
-
-const submitComment = () => {
-  if (!commentText.value.trim()) {
-    alert("請輸入評論");
-    return;
-  }
-
-  const newComment = {
-    id: crypto.randomUUID(),
-    userName: "Julie Wang",
-    avatar:
-      "https://cats.com/wp-content/uploads/2024/05/A-long-haired-orange-cat-looks-up-with-gentle-eyes-compressed.jpg",
-    reviewNum: 999,
-    commentTime: time.toLocaleDateString(),
-    star: starsStore.selectIndex,
-    price: price.value,
-    commentText: commentText.value,
-    pictures: picStore.pictures,
-    likeStatus: false,
-    likeHint: "表示讚賞",
-    likeNum: 0,
-  };
-  commentStore.addComment(newComment); // 使用 Pinia Store 更新評論
-  //重置輸入框
-  commentText.value = "";
-  price.value = "";
-  picStore.resetPic(); // 重置圖片
-  starsStore.resetStars(); // 重置星星狀態
-};
-
-const openComment = () => {
-  isExpanded.value = !isExpanded.value;
-};
-
-const showLoginModal = ref(false); // 是否顯示登錄小畫面
-
-// 開啟登錄小畫面
-const openLoginModal = () => {
-  showLoginModal.value = true;
-};
-
-// 關閉登錄小畫面
-const closeLoginModal = () => {
-  showLoginModal.value = false;
-};
-</script>
 
 <style scoped>
 /* 隱藏數字輸入框的小箭頭 */
