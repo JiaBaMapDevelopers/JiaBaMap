@@ -79,12 +79,10 @@ onMounted(() => {
 const calculateItemPrice = (item, options) => {
   let totalPrice = item.price;
   
-  // 大杯加價 10 元
   if (options.cupSize === '大杯') {
     totalPrice += 10;
   }
   
-  // 每個配料加價 10 元
   totalPrice += options.toppings.length * 10;
   
   return totalPrice;
