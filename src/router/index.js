@@ -98,6 +98,10 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(),
   routes,
+  scrollBehavior(to, from, savedPosition) {
+    // 滾動到頂部
+    return { top: 0 };
+  },
 });
 router.beforeEach((to, from, next) => {
   const user = useAuth();
