@@ -1,6 +1,4 @@
 <script>
-import { ref, onMounted, onUnmounted } from "vue";
-import loader from "@/components/googleMapsLoader";
 import StoreType from "@/components/HomePage/StoreType.vue"
 import SearchInput from "@/components/SearchInput.vue";
 import Header from '@/components/Header.vue';
