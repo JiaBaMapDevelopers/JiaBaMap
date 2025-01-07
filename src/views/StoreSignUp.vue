@@ -3,6 +3,10 @@ import { ref, onMounted, shallowRef } from "vue";
 import googleMapsLoader from "../components/googleMapsLoader.js";
 import Swal from "sweetalert2";
 import { z } from "zod";
+import axios from "axios";
+import { useRouter } from "vue-router";
+
+const router = useRouter();
 
 const username = ref("");
 const password = ref("");
@@ -14,7 +18,6 @@ const storeTaxId = ref("");
 const contactName = ref("");
 const contactEmail = ref("");
 const contactPhone = ref("");
-const autocomplete = ref(null);
 const predictions = shallowRef([]);
 const placeId = ref("");
 
@@ -71,7 +74,7 @@ async function handleSubmit() {
         contactName: contactName.value,
         contactEmail: contactEmail.value,
         contactPhone: contactPhone.value,
-        placeId,
+        placeId: placeId.value,
     }
     const registerSchema = z.object({
         username: z.string().min(5, "帳號至少需要5個字元"),
@@ -88,19 +91,38 @@ async function handleSubmit() {
 
     try{
         registerSchema.parse(form);
+
+        await axios.post(`${import.meta.env.VITE_BACKEND_BASE_URL}/store/`, {
+            form,
+        })
+
         Swal.fire({
         title: 'Success',
         text: '註冊成功',
         icon: 'success',
         confirmButtonText: 'OK'
         })
+
+        router.push({ name: "storesignin" });
+        
     }catch(err){
-        Swal.fire({
-        title: 'Error',
-        html: err.errors.map(error => error.message).join("<br>"),
-        icon: 'error',
-        confirmButtonText: 'OK'
-        })
+        if(err instanceof z.ZodError){
+            Swal.fire({
+                title: 'Error',
+                html: err.errors.map(error => error.message).join("<br>"),
+                icon: 'error',
+                confirmButtonText: 'OK'
+            })
+        }else{
+            Swal.fire({
+                title: 'Error',
+                text: "請再試一次",
+                icon: 'error',
+                confirmButtonText: 'OK'
+            })
+            console.log(err);
+        }
+        
     }
 }
 
