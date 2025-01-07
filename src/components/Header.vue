@@ -5,7 +5,6 @@ import SearchInput from "./SearchInput.vue";
 import { useRoute } from "vue-router";
 import Login from '@/components/Login.vue';
 import { useAuth } from '@/stores/authStore';
-import Notification from "./Notification.vue";
 
 
 const emit = defineEmits(['search-toggle']);
@@ -206,7 +205,6 @@ watch(route, () => {
         </div>
 
         
-        <div><Notification /></div>
         <!-- 會員頭貼 -->
         <div v-if="user.userData" class="relative inline-block text-left group">
           <div class="w-10 h-10 overflow-hidden rounded-full cursor-pointer">

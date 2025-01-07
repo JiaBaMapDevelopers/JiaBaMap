@@ -1,179 +1,3 @@
-<template>
-  <div class="p-6 mt-10">
-    <!-- 標題 -->
-    <h1 class="text-2xl font-bold mb-4">菜單管理</h1>
-
-    <!-- 新增按鈕 -->
-    <button 
-      @click="openAddModal"
-      class="px-4 py-2 mb-4 bg-amber-400 text-white rounded hover:bg-amber-500 transition"
-    >
-      新增菜單
-    </button>
-
-    <!-- 搜尋與篩選功能 -->
-    <div class="mb-4 flex items-center gap-4">
-      <!-- 名稱搜尋 -->
-      <input 
-        v-model="searchQuery" 
-        @keyup.enter="fetchMenus(1)"
-        placeholder="搜尋名稱..." 
-        class="p-2 border rounded w-60"
-      />
-
-      <!-- 分類篩選 -->
-      <select v-model="selectedCategory" class="p-2 border rounded">
-        <option value="">所有分類</option>
-        <option value="飲料">飲料</option>
-        <option value="主食">主食</option>
-        <option value="甜點">甜點</option>
-        <option value="湯品">湯品</option>
-      </select>
-
-      <!-- 價格範圍 -->
-      <input v-model.number="minPrice" placeholder="最低價格" class="p-2 border rounded w-28">
-      <input v-model.number="maxPrice" placeholder="最高價格" class="p-2 border rounded w-28">
-
-      <!-- 搜尋按鈕 -->
-      <button 
-        @click="fetchMenus(1)" 
-        class="px-4 py-2 bg-amber-400 hover:bg-amber-500 text-white rounded transition"
-      >
-        搜尋
-      </button>
-    </div>
-
-    <!-- 分頁按鈕 -->
-    <div class="my-4 flex justify-center gap-2">
-      <!-- 上一頁 -->
-      <button 
-        @click="fetchMenus(currentPage - 1)" 
-        :disabled="currentPage === 1"
-        class="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400 disabled:bg-gray-200"
-      >
-        上一頁
-      </button>
-
-      <!-- 頁碼按鈕 -->
-      <button 
-        v-for="page in totalPages" 
-        :key="page" 
-        @click="fetchMenus(page)" 
-        :class="[
-          'px-4 py-2 rounded', 
-          page === currentPage ? 'bg-amber-400 text-white' : 'bg-amber-300 hover:bg-amber-400 text-white',
-        ]"
-      >
-        {{ page }}
-      </button>
-
-      <!-- 下一頁 -->
-      <button 
-        @click="fetchMenus(currentPage + 1)" 
-        :disabled="currentPage === totalPages"
-        class="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400 disabled:bg-gray-200"
-      >
-        下一頁
-      </button>
-    </div>
-
-
-    <!-- 菜單列表 -->
-    <table class="min-w-full table-auto border-collapse border border-gray-300">
-      <thead>
-        <tr class="bg-gray-100">
-          <th class="border border-gray-300 px-4 py-2">圖片</th> <!-- 新增圖片欄 -->
-          <th class="border border-gray-300 px-4 py-2">名稱</th>
-          <th class="border border-gray-300 px-4 py-2">描述</th> <!-- 標題 -->
-          <th class="border border-gray-300 px-4 py-2">價格</th>
-          <th class="border border-gray-300 px-4 py-2">分類</th>
-          <th class="border border-gray-300 px-4 py-2">操作</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="menu in menus" :key="menu._id">
-          <td class="border border-gray-300 px-4 py-2 text-center">
-            <div class="flex justify-center items-center">
-              <img v-if="menu.imageUrl" :src="menu.imageUrl" alt="圖片" class="w-16 h-16 object-cover rounded">
-            </div>
-          </td>
-          <td class="border border-gray-300 px-4 py-2">{{ menu.name }}</td>
-          <td class="border border-gray-300 px-4 py-2">{{ menu.description }}</td>
-          <td class="border border-gray-300 px-4 py-2">${{ menu.price }}</td>
-          <td class="border border-gray-300 px-4 py-2">{{ menu.category }}</td>
-          <td class="border border-gray-300 px-4 py-2">
-            <button 
-              @click="openEditModal(menu)"
-              class="px-3 py-1 bg-amber-400 text-white rounded hover:bg-amber-500 mr-2 transition"
-            >
-              編輯
-            </button>
-            <button 
-              @click="deleteMenu(menu._id)"
-              class="px-3 py-1 bg-gray-400 text-white rounded hover:bg-gray-500 transition"
-            >
-              刪除
-            </button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-
-    <!-- 新增/編輯菜單彈窗 -->
-    <div v-if="showModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center">
-      <div class="bg-white p-6 rounded shadow-lg w-96">
-        <h2 class="text-xl font-bold mb-4">{{ isEditing ? '編輯菜單' : '新增菜單' }}</h2>
-        <form @submit.prevent="isEditing ? updateMenu() : addMenu()">
-          <div class="mb-4">
-            <label class="block mb-1">圖片</label>
-            <input 
-              type="file" 
-              accept="image/*" 
-              @change="handleFileUpload" 
-              class="w-full p-2 border rounded"
-            />
-          </div>
-          <div class="mb-4">
-            <label class="block mb-1">名稱</label>
-            <input v-model="menuForm.name" class="w-full p-2 border rounded" required />
-          </div>
-          <div class="mb-4">
-            <label class="block mb-1">描述</label>
-            <textarea 
-              v-model="menuForm.description" 
-              rows="3"
-              placeholder="請輸入描述"
-              class="w-full p-2 border rounded"
-            ></textarea>
-          </div>
-          <div class="mb-4">
-            <label class="block mb-1">價格</label>
-            <input v-model.number="menuForm.price" type="number" class="w-full p-2 border rounded" required />
-          </div>
-          <div class="mb-4">
-            <label class="block mb-1">分類</label>
-            <select v-model="menuForm.category" class="w-full p-2 border rounded" required>
-              <option value="">請選擇分類</option>
-              <option value="飲料">飲料</option>
-              <option value="主食">主食</option>
-              <option value="甜點">甜點</option>
-              <option value="湯品">湯品</option>
-            </select>
-          </div>
-          <div class="flex justify-end">
-            <button type="button" @click="closeModal" class="px-4 py-2 bg-gray-400 hover:bg-gray-500 text-white rounded mr-2 transition">
-              取消
-            </button>
-            <button type="submit" class="px-4 py-2 bg-amber-400 hover:bg-amber-500 text-white rounded transition">
-              {{ isEditing ? '更新' : '新增' }}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
-</template>
-
 <script setup>
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
@@ -350,3 +174,179 @@ const closeModal = () => {
 
 onMounted(fetchMenus);
 </script>
+
+<template>
+  <div class="p-6 mt-10">
+    <!-- 標題 -->
+    <h1 class="text-2xl font-bold mb-4">菜單管理</h1>
+
+    <!-- 新增按鈕 -->
+    <button 
+      @click="openAddModal"
+      class="px-4 py-2 mb-4 bg-amber-400 text-white rounded hover:bg-amber-500 transition"
+    >
+      新增菜單
+    </button>
+
+    <!-- 搜尋與篩選功能 -->
+    <div class="mb-4 flex items-center gap-4">
+      <!-- 名稱搜尋 -->
+      <input 
+        v-model="searchQuery" 
+        @keyup.enter="fetchMenus(1)"
+        placeholder="搜尋名稱..." 
+        class="p-2 border rounded w-60"
+      />
+
+      <!-- 分類篩選 -->
+      <select v-model="selectedCategory" class="p-2 border rounded">
+        <option value="">所有分類</option>
+        <option value="飲料">飲料</option>
+        <option value="主食">主食</option>
+        <option value="甜點">甜點</option>
+        <option value="湯品">湯品</option>
+      </select>
+
+      <!-- 價格範圍 -->
+      <input v-model.number="minPrice" placeholder="最低價格" class="p-2 border rounded w-28">
+      <input v-model.number="maxPrice" placeholder="最高價格" class="p-2 border rounded w-28">
+
+      <!-- 搜尋按鈕 -->
+      <button 
+        @click="fetchMenus(1)" 
+        class="px-4 py-2 bg-amber-400 hover:bg-amber-500 text-white rounded transition"
+      >
+        搜尋
+      </button>
+    </div>
+
+    <!-- 分頁按鈕 -->
+    <div class="my-4 flex justify-center gap-2">
+      <!-- 上一頁 -->
+      <button 
+        @click="fetchMenus(currentPage - 1)" 
+        :disabled="currentPage === 1"
+        class="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400 disabled:bg-gray-200"
+      >
+        上一頁
+      </button>
+
+      <!-- 頁碼按鈕 -->
+      <button 
+        v-for="page in totalPages" 
+        :key="page" 
+        @click="fetchMenus(page)" 
+        :class="[
+          'px-4 py-2 rounded', 
+          page === currentPage ? 'bg-amber-400 text-white' : 'bg-amber-300 hover:bg-amber-400 text-white',
+        ]"
+      >
+        {{ page }}
+      </button>
+
+      <!-- 下一頁 -->
+      <button 
+        @click="fetchMenus(currentPage + 1)" 
+        :disabled="currentPage === totalPages"
+        class="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400 disabled:bg-gray-200"
+      >
+        下一頁
+      </button>
+    </div>
+
+
+    <!-- 菜單列表 -->
+    <table class="min-w-full table-auto border-collapse border border-gray-300">
+      <thead>
+        <tr class="bg-gray-100">
+          <th class="border border-gray-300 px-4 py-2">圖片</th> <!-- 新增圖片欄 -->
+          <th class="border border-gray-300 px-4 py-2">名稱</th>
+          <th class="border border-gray-300 px-4 py-2">描述</th> <!-- 標題 -->
+          <th class="border border-gray-300 px-4 py-2">價格</th>
+          <th class="border border-gray-300 px-4 py-2">分類</th>
+          <th class="border border-gray-300 px-4 py-2">操作</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="menu in menus" :key="menu._id">
+          <td class="border border-gray-300 px-4 py-2 text-center">
+            <div class="flex justify-center items-center">
+              <img v-if="menu.imageUrl" :src="menu.imageUrl" alt="圖片" class="w-16 h-16 object-cover rounded">
+            </div>
+          </td>
+          <td class="border border-gray-300 px-4 py-2">{{ menu.name }}</td>
+          <td class="border border-gray-300 px-4 py-2">{{ menu.description }}</td>
+          <td class="border border-gray-300 px-4 py-2">${{ menu.price }}</td>
+          <td class="border border-gray-300 px-4 py-2">{{ menu.category }}</td>
+          <td class="border border-gray-300 px-4 py-2">
+            <button 
+              @click="openEditModal(menu)"
+              class="px-3 py-1 bg-amber-400 text-white rounded hover:bg-amber-500 mr-2 transition"
+            >
+              編輯
+            </button>
+            <button 
+              @click="deleteMenu(menu._id)"
+              class="px-3 py-1 bg-gray-400 text-white rounded hover:bg-gray-500 transition"
+            >
+              刪除
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- 新增/編輯菜單彈窗 -->
+    <div v-if="showModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center">
+      <div class="bg-white p-6 rounded shadow-lg w-96">
+        <h2 class="text-xl font-bold mb-4">{{ isEditing ? '編輯菜單' : '新增菜單' }}</h2>
+        <form @submit.prevent="isEditing ? updateMenu() : addMenu()">
+          <div class="mb-4">
+            <label class="block mb-1">圖片</label>
+            <input 
+              type="file" 
+              accept="image/*" 
+              @change="handleFileUpload" 
+              class="w-full p-2 border rounded"
+            />
+          </div>
+          <div class="mb-4">
+            <label class="block mb-1">名稱</label>
+            <input v-model="menuForm.name" class="w-full p-2 border rounded" required />
+          </div>
+          <div class="mb-4">
+            <label class="block mb-1">描述</label>
+            <textarea 
+              v-model="menuForm.description" 
+              rows="3"
+              placeholder="請輸入描述"
+              class="w-full p-2 border rounded"
+            ></textarea>
+          </div>
+          <div class="mb-4">
+            <label class="block mb-1">價格</label>
+            <input v-model.number="menuForm.price" type="number" class="w-full p-2 border rounded" required />
+          </div>
+          <div class="mb-4">
+            <label class="block mb-1">分類</label>
+            <select v-model="menuForm.category" class="w-full p-2 border rounded" required>
+              <option value="">請選擇分類</option>
+              <option value="飲料">飲料</option>
+              <option value="主食">主食</option>
+              <option value="甜點">甜點</option>
+              <option value="湯品">湯品</option>
+            </select>
+          </div>
+          <div class="flex justify-end">
+            <button type="button" @click="closeModal" class="px-4 py-2 bg-gray-400 hover:bg-gray-500 text-white rounded mr-2 transition">
+              取消
+            </button>
+            <button type="submit" class="px-4 py-2 bg-amber-400 hover:bg-amber-500 text-white rounded transition">
+              {{ isEditing ? '更新' : '新增' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</template>
