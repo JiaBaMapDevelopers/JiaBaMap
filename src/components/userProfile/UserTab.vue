@@ -82,20 +82,85 @@
 
         <!-- 餐廳評論 -->
         <div v-show="activeTab === 'review'">
-            <h2 class="my-8 font-bold text-left text-amber-500">Julie Wang 的 5 則評論</h2>
-            <PreviousReview/>
+            <h2 class="my-8 font-bold text-left text-amber-500">我留下的評論</h2>
+            <!-- <PreviousReview/> -->
+            <div
+      class="flex flex-row gap-x-5 py-2.5 w-full max-w-screen-lg mx-auto md:px-0"
+      v-for="(comment, index) in myComment"
+      :key="index"
+    >
+      <div
+        class="flex-shrink-0 w-16 h-16 overflow-hidden rounded-full bg-slate-300"
+      >
+        <img
+          :src="
+            userData.profilePicture
+            ? userData.profilePicture : '/src/assets/default_user.png'
+          "
+          alt="avatar"
+          class="object-cover w-full h-full"
+        />
+      </div>
+      <div class="flex flex-col flex-1 w-0 text-left">
+        <div class="font-bold cursor-pointer text-amber-500">
+          <button @click="store.StoreId(comment.placeId)">{{ userData.name }}</button>
+        </div>
+        <div class="flex gap-3">
+          <span
+            v-if="comment.rating"
+            class="px-2 py-1 text-sm font-bold text-white rounded-full bg-amber-500"
+            >{{ comment.rating }}.0 ★</span
+          >
+          <p v-if="comment.AvgPrice">均消價位：${{ comment.AvgPrice }}</p>
+        </div>
+        <p class="text-slate-500">評論日期：{{ comment.createdAt.slice(0, 10) }}</p>
+        <p class="my-3">{{ comment.content }}</p>
+        <div
+          class="flex gap-4 mt-4 overflow-x-auto scrollbar-hide"
+          style="scroll-snap-type: x mandatory"
+        >
+          <!-- <div
+            v-for="(imageUrl, index) in comment.photos"
+            :key="index"
+            class="flex-shrink-0 w-32 h-32 overflow-hidden"
+          >
+            <img
+              :src="imageUrl"
+              @click="showPopup(imageUrl)"
+              class="object-cover w-full h-full cursor-pointer"
+            />
+          </div> -->
+        </div>
+      </div>
+    </div>
         </div>
     </div>
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import axios from 'axios';
+import { computed, ref, onMounted } from 'vue';
 import KeepList from './KeepList.vue';
 import PreviousReview from '@/components/storeComment/PreviousReview.vue';
+import { useAuth } from '../../stores/authStore';
+import { useStore } from '../../stores/storePage';
 const activeTab = ref('review')
-
+const user = useAuth()
+const store = useStore()
 const clickReview = () => activeTab.value = 'review'
 const clickArticle = () => activeTab.value = 'article'
 const clickKeep = () => activeTab.value = 'keep'
+const userData = computed(() => user.userData)
+const myComment = ref([])
 
+const getMyComment = async() => {
+    const response = await axios.get(`${import.meta.env.VITE_BACKEND_BASE_URL}/comments/user/${userData.value._id}`)
+    myComment.value = response.data
+    console.log(myComment.value);
+    
+}
+
+onMounted(() => {
+    getMyComment()
+})
 </script>
