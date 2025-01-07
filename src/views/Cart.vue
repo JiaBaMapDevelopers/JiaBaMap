@@ -61,6 +61,7 @@ onMounted(() => {
               <div class="h-6 w-6 ml-4 text-red-500 hover:text-red-600"></div>
 
               <button
+                @click="goToPay(order.orderId)"
                 class="px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600"
               >
                 立刻結帳
