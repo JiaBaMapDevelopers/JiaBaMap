@@ -86,7 +86,7 @@ const routes = [
   {
     path: "/menu-management",
     name: "MenuManagement",
-    component: () => import("../views/MenuManagement.vue"),
+    component: () => import("@/views/MenuManagement.vue"),
   },
   {
     path: "/Cart",

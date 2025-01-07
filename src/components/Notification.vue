@@ -85,7 +85,7 @@ const handleNotificationClick = async (notification) => {
 const fetchNotifications = async () => {
   if (user.userData) {
     try {
-      const response = await axios.get(`/api/notifications/${user.userData.id}`, {
+      const response = await axios.get(`import.meta.env.VITE_BACKEND_BASE_URL}/notifications/${user.userData.id}`, {
         params: {
           page: 1,
           limit: 5
