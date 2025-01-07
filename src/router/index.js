@@ -14,7 +14,9 @@ import PreviewNoteView from "@/views/PreviewNoteView.vue";
 import Dashboard from "@/views/DashboardView.vue";
 import StoreCart from "@/views/StoreCartView.vue";
 import StoreSignUp from "@/views/StoreSignUp.vue";
+import StoreSignIn from "../views/StoreSignIn.vue";
 import Cart from "@/views/Cart.vue";
+
 const routes = [
   {
     path: "/",
@@ -82,6 +84,11 @@ const routes = [
     path: "/storesignup",
     name: "storesignup",
     component: StoreSignUp,
+  },
+  {
+    path: "/storesignin",
+    name: "storesignin",
+    component: StoreSignIn,
   },
   {
     path: "/menu-management",
