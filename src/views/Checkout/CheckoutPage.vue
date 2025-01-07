@@ -1,34 +1,68 @@
 <script setup>
+import { ref, onMounted, watch } from "vue";
 import axios from "axios";
 import Swal from "sweetalert2";
+import DatePicker from "@/components/DatePicker.vue";
+import { useRoute, useRouter } from "vue-router";
 
 const VITE_BACKEND_NGROK_URL = import.meta.env.VITE_BACKEND_NGROK_URL;
+const VITE_BACKEND_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
 
-const handelPayment = async () => {
+const route = useRoute();
+const router = useRouter();
+const orderDetail = ref(null);
+let shoppingCart = ref(null);
+let pickupPhone = ref(null);
+let pickupName = ref(null);
+const selectedPayment = ref("LINEPay");
+const selectedInvoice = ref("紙本發票");
+const formattedDateTime = ref("");
+
+const updateFormattedDateTime = (newFormattedDateTime) => {
+  formattedDateTime.value = newFormattedDateTime;
+};
+
+const getOrderDetails = async (orderId) => {
+  //撈訂單明細
   try {
-    const url = `${VITE_BACKEND_NGROK_URL}/payment`;
+    const res = await axios.get(`${VITE_BACKEND_BASE_URL}/order/${orderId}`);
+    orderDetail.value = res.data;
+    shoppingCart.value = {
+      id: orderDetail.value.orderId,
+      amount: orderDetail.value.totalAmount,
+      products: orderDetail.value.items,
+    };
+    console.log("取得訂單資料成功: ", orderDetail.value);
+  } catch (error) {
+    console.log("取得訂單資料錯誤: ", error);
+  }
+};
+
+onMounted(() => {
+  const orderId = route.params.orderId; //從路徑拿到訂單編號
+  if (orderId) {
+    getOrderDetails(orderId);
+  }
+});
+
+// 監聽 orderDetail 的變化
+watch(orderDetail, (newValue) => {
+  if (newValue) {
+    console.log("已更新orderDetail: ", orderDetail.value);
+    shoppingCart.value = {
+      id: orderDetail.value.orderId,
+      amount: orderDetail.value.totalAmount,
+      products: orderDetail.value.items,
+    };
+  }
+});
+
+const handelPayment = async (shoppingCart) => {
+  try {
+    const url = `${VITE_BACKEND_NGROK_URL}/payments/linepay/reserve`;
     const payload = {
-      packages: {
-        id: "1",
-        amount: 150,
-        products: [
-          {
-            id: "PEN-B-001",
-            name: "Pen Brown",
-            imageUrl: "https://reurl.cc/86D48R",
-            quantity: 2,
-            price: 50,
-          },
-          {
-            id: "PEN-B-002",
-            name: "Pen Red",
-            imageUrl: "https://reurl.cc/86D48R",
-            quantity: 1,
-            price: 50,
-          },
-        ],
-      },
-      orderId: "EXAMPLE_ORDER_20230422_1000015",
+      packages: shoppingCart,
+      orderId: "EXAMPLE_ORDER_20250107_1000028",
     };
 
     const { data } = await axios.post(url, payload);
@@ -48,6 +82,7 @@ const handelPayment = async () => {
       });
     }
   } catch (err) {
+    console.log(err);
     Swal.fire({
       title: "Error!",
       text: "建立付款請求失敗，請稍後再試",
@@ -58,10 +93,27 @@ const handelPayment = async () => {
     });
   }
 };
+
+const addProducts = () => {
+  router.push(`/storecart`);
+};
+const gotoOrderDetail = (orderId) => {
+  router.push(`/checkout-detail?transactionId=${orderId}&status=success`);
+};
+const submitOrder = (selectedPayment) => {
+  console.log("selectedPayment: ", selectedPayment);
+  if (selectedPayment === "LINEPay") {
+    handelPayment(shoppingCart);
+  } else {
+    gotoOrderDetail(route.params.orderId);
+  }
+};
 </script>
 
 <template>
-  <div class="w-[70vw] lg:w-[50vw] flex flex-col gap-6">
+  <div
+    class="w-[70vw] lg:w-[50vw] flex flex-col gap-6 mt-16 mb-10 m-auto text-center"
+  >
     <h1 class="text-2xl font-bold text-amber-500">
       <font-awesome-icon :icon="['fas', 'file-invoice-dollar']" /> 購物車結帳
     </h1>
@@ -193,21 +245,23 @@ const handelPayment = async () => {
       <!-- End Stepper Nav -->
 
       <!-- Stepper Content -->
-      <div class="mt-5 leading-relaxed sm:mt-8">
+      <div class="mt-5 leading-relaxed sm:mt-8" v-if="orderDetail">
         <!-- First Content -->
         <div data-hs-stepper-content-item='{"index": 1}'>
           <div
             class="flex flex-col justify-center gap-4 p-4 border border-gray-200 border-dashed bg-gray-50 rounded-xl"
           >
             <div class="flex flex-col text-left">
-              <h3 class="mb-1 font-bold text-amber-500">迷客夏 臺北南陽店</h3>
+              <h3 class="mb-1 font-bold text-amber-500">
+                {{ orderDetail.restaurantName }}
+              </h3>
               <div class="flex gap-2 my-2">
                 <font-awesome-icon
                   :icon="['fas', 'phone-flip']"
                   style="color: #f59e0b"
                   class="fa-lg"
                 />
-                <p>02-23119011</p>
+                <p>{{ orderDetail.phone }}</p>
               </div>
               <div class="flex gap-2 my-2 cursor-pointer">
                 <font-awesome-icon
@@ -215,7 +269,7 @@ const handelPayment = async () => {
                   class="fa-lg"
                   style="color: #f59e0b"
                 />
-                <p>門市地址</p>
+                <p>{{ orderDetail.address }}</p>
               </div>
             </div>
             <div class="text-left">
@@ -241,301 +295,22 @@ const handelPayment = async () => {
                   />
                   <span class="text-sm text-gray-500 ms-3">到店自取</span>
                 </label>
-                <label
-                  for="hs-radio-checked-in-form"
-                  class="flex w-full p-3 text-sm bg-white border border-gray-200 rounded-lg focus:border-amber-500"
-                >
-                  <input
-                    type="radio"
-                    name="hs-radio-in-form"
-                    class="shrink-0 mt-0.5 border-gray-200 rounded-full text-amber-600 disabled:opacity-50 disabled:pointer-events-none"
-                    id="hs-radio-checked-in-form"
-                  />
-                  <span class="text-sm text-gray-500 ms-3"
-                    >外送（尚未開放）</span
-                  >
-                </label>
               </div>
               <h2 class="mb-1 font-bold">預計取貨時間</h2>
-
-              <button
-                type="button"
-                data-modal-target="timepicker-modal"
-                data-modal-toggle="timepicker-modal"
-                class="text-gray-900 bg-white hover:bg-gray-100 border border-gray-200 focus:ring-4 focus:outline-none focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:focus:ring-gray-600 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:bg-gray-700"
-              >
-                <svg
-                  class="h-4 w4 me-1"
-                  aria-hidden="true"
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  fill="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    fill-rule="evenodd"
-                    d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm11-4a1 1 0 1 0-2 0v4a1 1 0 0 0 .293.707l3 3a1 1 0 0 0 1.414-1.414L13 11.586V8Z"
-                    clip-rule="evenodd"
-                  />
-                </svg>
-                選擇日期與時段
-              </button>
-              <!-- Main modal -->
-              <div
-                id="timepicker-modal"
-                tabindex="-1"
-                aria-hidden="true"
-                class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full"
-              >
-                <div class="relative p-4 w-full max-w-[23rem] max-h-full">
-                  <!-- Modal content -->
-                  <div
-                    class="relative bg-white rounded-lg shadow dark:bg-gray-800"
-                  >
-                    <!-- Modal header -->
-                    <div
-                      class="flex items-center justify-between p-4 border-b rounded-t dark:border-gray-600"
-                    >
-                      <h3
-                        class="text-lg font-semibold text-gray-900 dark:text-white"
-                      >
-                        選擇預計取貨時間
-                      </h3>
-                      <button
-                        type="button"
-                        class="inline-flex items-center justify-center w-8 h-8 text-sm text-gray-400 bg-transparent rounded-lg hover:bg-gray-200 hover:text-gray-900 ms-auto dark:hover:bg-gray-600 dark:hover:text-white"
-                        data-modal-toggle="timepicker-modal"
-                      >
-                        <font-awesome-icon :icon="['fas', 'xmark']" />
-                        <span class="sr-only">關閉</span>
-                      </button>
-                    </div>
-                    <!-- Modal body -->
-                    <div class="p-4 pt-0">
-                      <div
-                        inline-datepicker
-                        datepicker-autoselect-today
-                        class="mx-auto sm:mx-0 flex justify-center my-5 [&>div>div]:shadow-none [&>div>div]:bg-gray-50 [&_div>button]:bg-gray-50"
-                      ></div>
-                      <label
-                        class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                      >
-                        選擇時段
-                      </label>
-                      <ul
-                        id="timetable"
-                        class="grid w-full grid-cols-3 gap-2 mb-5"
-                      >
-                        <li>
-                          <input
-                            type="radio"
-                            id="10-am"
-                            value=""
-                            class="hidden peer"
-                            name="timetable"
-                          />
-                          <label
-                            for="10-am"
-                            class="inline-flex items-center justify-center w-full px-2 py-1 text-sm font-medium text-center text-gray-500 bg-white border border-gray-200 rounded-lg cursor-pointer hover:text-gray-900 dark:hover:text-white dark:bg-gray-800 dark:border-gray-700 dark:peer-checked:border-blue-500 peer-checked:border-blue-700 dark:hover:border-gray-600 dark:peer-checked:text-blue-500 peer-checked:bg-blue-50 peer-checked:text-blue-700 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-600 dark:peer-checked:bg-blue-900"
-                          >
-                            10:00 AM
-                          </label>
-                        </li>
-                        <li>
-                          <input
-                            type="radio"
-                            id="10-30-am"
-                            value=""
-                            class="hidden peer"
-                            name="timetable"
-                          />
-                          <label
-                            for="10-30-am"
-                            class="inline-flex items-center justify-center w-full px-2 py-1 text-sm font-medium text-center text-gray-500 bg-white border border-gray-200 rounded-lg cursor-pointer hover:text-gray-900 dark:hover:text-white dark:bg-gray-800 dark:border-gray-700 dark:peer-checked:border-blue-500 peer-checked:border-blue-700 dark:hover:border-gray-600 dark:peer-checked:text-blue-500 peer-checked:bg-blue-50 peer-checked:text-blue-700 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-600 dark:peer-checked:bg-blue-900"
-                          >
-                            10:30 AM
-                          </label>
-                        </li>
-                        <li>
-                          <input
-                            type="radio"
-                            id="11-am"
-                            value=""
-                            class="hidden peer"
-                            name="timetable"
-                          />
-                          <label
-                            for="11-am"
-                            class="inline-flex items-center justify-center w-full px-2 py-1 text-sm font-medium text-center text-gray-500 bg-white border border-gray-200 rounded-lg cursor-pointer hover:text-gray-900 dark:hover:text-white dark:bg-gray-800 dark:border-gray-700 dark:peer-checked:border-blue-500 peer-checked:border-blue-700 dark:hover:border-gray-600 dark:peer-checked:text-blue-500 peer-checked:bg-blue-50 peer-checked:text-blue-700 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-600 dark:peer-checked:bg-blue-900"
-                          >
-                            11:00 AM
-                          </label>
-                        </li>
-                        <li>
-                          <input
-                            type="radio"
-                            id="11-30-am"
-                            value=""
-                            class="hidden peer"
-                            name="timetable"
-                          />
-                          <label
-                            for="11-30-am"
-                            class="inline-flex items-center justify-center w-full px-2 py-1 text-sm font-medium text-center text-gray-500 bg-white border border-gray-200 rounded-lg cursor-pointer hover:text-gray-900 dark:hover:text-white dark:bg-gray-800 dark:border-gray-700 dark:peer-checked:border-blue-500 peer-checked:border-blue-700 dark:hover:border-gray-600 dark:peer-checked:text-blue-500 peer-checked:bg-blue-50 peer-checked:text-blue-700 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-600 dark:peer-checked:bg-blue-900"
-                          >
-                            11:30 AM
-                          </label>
-                        </li>
-                        <li>
-                          <input
-                            type="radio"
-                            id="12-am"
-                            value=""
-                            class="hidden peer"
-                            name="timetable"
-                            checked
-                          />
-                          <label
-                            for="12-am"
-                            class="inline-flex items-center justify-center w-full px-2 py-1 text-sm font-medium text-center text-gray-500 bg-white border border-gray-200 rounded-lg cursor-pointer hover:text-gray-900 dark:hover:text-white dark:bg-gray-800 dark:border-gray-700 dark:peer-checked:border-blue-500 peer-checked:border-blue-700 dark:hover:border-gray-600 dark:peer-checked:text-blue-500 peer-checked:bg-blue-50 peer-checked:text-blue-700 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-600 dark:peer-checked:bg-blue-900"
-                          >
-                            12:00 AM
-                          </label>
-                        </li>
-                        <li>
-                          <input
-                            type="radio"
-                            id="12-30-pm"
-                            value=""
-                            class="hidden peer"
-                            name="timetable"
-                          />
-                          <label
-                            for="12-30-pm"
-                            class="inline-flex items-center justify-center w-full px-2 py-1 text-sm font-medium text-center text-gray-500 bg-white border border-gray-200 rounded-lg cursor-pointer hover:text-gray-900 dark:hover:text-white dark:bg-gray-800 dark:border-gray-700 dark:peer-checked:border-blue-500 peer-checked:border-blue-700 dark:hover:border-gray-600 dark:peer-checked:text-blue-500 peer-checked:bg-blue-50 peer-checked:text-blue-700 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-600 dark:peer-checked:bg-blue-900"
-                          >
-                            12:30 PM
-                          </label>
-                        </li>
-                        <li>
-                          <input
-                            type="radio"
-                            id="1-pm"
-                            value=""
-                            class="hidden peer"
-                            name="timetable"
-                          />
-                          <label
-                            for="1-pm"
-                            class="inline-flex items-center justify-center w-full px-2 py-1 text-sm font-medium text-center text-gray-500 bg-white border border-gray-200 rounded-lg cursor-pointer hover:text-gray-900 dark:hover:text-white dark:bg-gray-800 dark:border-gray-700 dark:peer-checked:border-blue-500 peer-checked:border-blue-700 dark:hover:border-gray-600 dark:peer-checked:text-blue-500 peer-checked:bg-blue-50 peer-checked:text-blue-700 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-600 dark:peer-checked:bg-blue-900"
-                          >
-                            01:00 PM
-                          </label>
-                        </li>
-                        <li>
-                          <input
-                            type="radio"
-                            id="1-30-pm"
-                            value=""
-                            class="hidden peer"
-                            name="timetable"
-                          />
-                          <label
-                            for="1-30-pm"
-                            class="inline-flex items-center justify-center w-full px-2 py-1 text-sm font-medium text-center text-gray-500 bg-white border border-gray-200 rounded-lg cursor-pointer hover:text-gray-900 dark:hover:text-white dark:bg-gray-800 dark:border-gray-700 dark:peer-checked:border-blue-500 peer-checked:border-blue-700 dark:hover:border-gray-600 dark:peer-checked:text-blue-500 peer-checked:bg-blue-50 peer-checked:text-blue-700 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-600 dark:peer-checked:bg-blue-900"
-                          >
-                            01:30 PM
-                          </label>
-                        </li>
-                        <li>
-                          <input
-                            type="radio"
-                            id="2-pm"
-                            value=""
-                            class="hidden peer"
-                            name="timetable"
-                          />
-                          <label
-                            for="2-pm"
-                            class="inline-flex items-center justify-center w-full px-2 py-1 text-sm font-medium text-center text-gray-500 bg-white border border-gray-200 rounded-lg cursor-pointer hover:text-gray-900 dark:hover:text-white dark:bg-gray-800 dark:border-gray-700 dark:peer-checked:border-blue-500 peer-checked:border-blue-700 dark:hover:border-gray-600 dark:peer-checked:text-blue-500 peer-checked:bg-blue-50 peer-checked:text-blue-700 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-600 dark:peer-checked:bg-blue-900"
-                          >
-                            02:00 PM
-                          </label>
-                        </li>
-                        <li>
-                          <input
-                            type="radio"
-                            id="2-30-pm"
-                            value=""
-                            class="hidden peer"
-                            name="timetable"
-                          />
-                          <label
-                            for="2-30-pm"
-                            class="inline-flex items-center justify-center w-full px-2 py-1 text-sm font-medium text-center text-gray-500 bg-white border border-gray-200 rounded-lg cursor-pointer hover:text-gray-900 dark:hover:text-white dark:bg-gray-800 dark:border-gray-700 dark:peer-checked:border-blue-500 peer-checked:border-blue-700 dark:hover:border-gray-600 dark:peer-checked:text-blue-500 peer-checked:bg-blue-50 peer-checked:text-blue-700 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-600 dark:peer-checked:bg-blue-900"
-                          >
-                            02:30 PM
-                          </label>
-                        </li>
-                        <li>
-                          <input
-                            type="radio"
-                            id="3-pm"
-                            value=""
-                            class="hidden peer"
-                            name="timetable"
-                          />
-                          <label
-                            for="3-pm"
-                            class="inline-flex items-center justify-center w-full px-2 py-1 text-sm font-medium text-center text-gray-500 bg-white border border-gray-200 rounded-lg cursor-pointer hover:text-gray-900 dark:hover:text-white dark:bg-gray-800 dark:border-gray-700 dark:peer-checked:border-blue-500 peer-checked:border-blue-700 dark:hover:border-gray-600 dark:peer-checked:text-blue-500 peer-checked:bg-blue-50 peer-checked:text-blue-700 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-600 dark:peer-checked:bg-blue-900"
-                          >
-                            03:00 PM
-                          </label>
-                        </li>
-                        <li>
-                          <input
-                            type="radio"
-                            id="3-30-pm"
-                            value=""
-                            class="hidden peer"
-                            name="timetable"
-                          />
-                          <label
-                            for="3-30-pm"
-                            class="inline-flex items-center justify-center w-full px-2 py-1 text-sm font-medium text-center text-gray-500 bg-white border border-gray-200 rounded-lg cursor-pointer hover:text-gray-900 dark:hover:text-white dark:bg-gray-800 dark:border-gray-700 dark:peer-checked:border-blue-500 peer-checked:border-blue-700 dark:hover:border-gray-600 dark:peer-checked:text-blue-500 peer-checked:bg-blue-50 peer-checked:text-blue-700 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-600 dark:peer-checked:bg-blue-900"
-                          >
-                            03:30 PM
-                          </label>
-                        </li>
-                      </ul>
-                      <div class="grid grid-cols-2 gap-2">
-                        <button
-                          type="button"
-                          class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
-                        >
-                          確定
-                        </button>
-                        <button
-                          type="button"
-                          data-modal-hide="timepicker-modal"
-                          class="py-2.5 px-5 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700"
-                        >
-                          取消
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <DatePicker @update:formattedDateTime="updateFormattedDateTime" />
             </div>
             <div class="text-left">
               <h2 class="mb-1 font-bold">訂購內容</h2>
-              <p class="text-right">$65 / 1 份</p>
+              <p class="text-right">
+                ${{ orderDetail.totalAmount }} /
+                {{ orderDetail.items.length }} 份
+              </p>
               <div class="flex justify-between p-4 bg-white">
-                <div>
-                  <h3>柚蜜白玉</h3>
-                  <p class="text-gray-400">L / 去冰 / $65 / 1份</p>
+                <div v-for="item in orderDetail.items" :key="item.productId">
+                  <h3>{{ item.productName }}</h3>
+                  <p class="text-gray-400">
+                    {{ item.spec }} / ${{ item.price }} / {{ item.quantity }} 份
+                  </p>
                 </div>
                 <div class="flex gap-6">
                   <font-awesome-icon
@@ -548,18 +323,24 @@ const handelPayment = async () => {
                   />
                 </div>
               </div>
+              <button
+                class="items-center px-3 py-2 my-3 text-sm font-medium text-white border border-transparent rounded-lg bg-amber-500 gap-x-1"
+                @click="addProducts"
+              >
+                繼續加購
+              </button>
             </div>
             <div class="leading-loose text-left">
               <h2 class="mb-1 font-bold">結帳明細</h2>
               <hr />
               <div class="flex justify-between my-5">
-                <p>商品 x 1</p>
-                <p>$65</p>
+                <p>商品 x {{ orderDetail.items.length }}</p>
+                <p>${{ orderDetail.totalAmount }}</p>
               </div>
               <hr />
               <div class="flex justify-between my-5 font-bold text-orange-500">
                 <p>應付金額</p>
-                <p>$65</p>
+                <p>${{ orderDetail.totalAmount }}</p>
               </div>
             </div>
           </div>
@@ -580,12 +361,16 @@ const handelPayment = async () => {
               class="flex justify-between w-full p-4 font-bold text-white rounded-lg bg-amber-500"
             >
               <div class="flex gap-4">
-                <p class="px-3 py-1 bg-white rounded-lg text-amber-500">2 份</p>
+                <p class="px-3 py-1 bg-white rounded-lg text-amber-500">
+                  {{ orderDetail.items.length }} 份
+                </p>
                 <p class="flex items-center justify-center text-white">
                   應付金額
                 </p>
               </div>
-              <p class="flex items-center justify-center">$135</p>
+              <p class="flex items-center justify-center">
+                ${{ orderDetail.totalAmount }}
+              </p>
             </div>
             <div class="w-full text-left">
               <h2 class="mb-1 font-bold">取貨人資訊</h2>
@@ -598,6 +383,8 @@ const handelPayment = async () => {
                   id="input-label"
                   class="block w-full px-4 py-3 mb-2 text-sm border-gray-200 rounded-lg focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none"
                   placeholder="請輸入取貨人姓名"
+                  v-model="pickupName"
+                  required
                 />
               </div>
               <div class="max-w-sm">
@@ -609,6 +396,8 @@ const handelPayment = async () => {
                   id="input-label"
                   class="block w-full px-4 py-3 mb-2 text-sm border-gray-200 rounded-lg focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none"
                   placeholder="請輸入取貨人聯絡電話"
+                  v-model="pickupPhone"
+                  required
                 />
               </div>
             </div>
@@ -616,26 +405,30 @@ const handelPayment = async () => {
               <h2 class="mb-1 font-bold">付款方式</h2>
               <div class="grid mb-2 space-y-2">
                 <label
-                  for="payment-form"
+                  for="cash-payment"
                   class="flex w-full max-w-xs p-3 text-sm bg-white border border-gray-200 rounded-lg focus:border-blue-500 focus:ring-blue-500"
                 >
                   <input
                     type="radio"
                     name="payment-form"
                     class="shrink-0 mt-0.5 border-gray-200 rounded-full text-blue-600 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none mb-2"
-                    id="payment-form"
+                    id="cash-payment"
+                    value="現金"
+                    v-model="selectedPayment"
                   />
                   <span class="text-sm text-gray-500 ms-3">現金</span>
                 </label>
                 <label
-                  for="payment-form"
+                  for="linepay-payment"
                   class="flex w-full max-w-xs p-3 text-sm bg-white border border-gray-200 rounded-lg focus:border-blue-500 focus:ring-blue-500"
                 >
                   <input
                     type="radio"
                     name="payment-form"
                     class="shrink-0 mt-0.5 border-gray-200 rounded-full text-blue-600 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none mb-2"
-                    id="payment-form"
+                    id="linepay-payment"
+                    v-model="selectedPayment"
+                    value="LINEPay"
                     checked=""
                   />
                   <span class="text-sm text-gray-500 ms-3">
@@ -648,26 +441,30 @@ const handelPayment = async () => {
               <h3 class="mb-1 font-bold">開立發票</h3>
               <div class="grid mb-2 space-y-2">
                 <label
-                  for="hs-vertical-radio-in-form"
+                  for="paper-invoice"
                   class="flex w-full max-w-xs p-3 text-sm bg-white border border-gray-200 rounded-lg focus:border-blue-500 focus:ring-blue-500"
                 >
                   <input
                     type="radio"
-                    name="hs-vertical-radio-in-form"
+                    name="invoice-type"
                     class="shrink-0 mt-0.5 border-gray-200 rounded-full text-blue-600 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none mb-2"
-                    id="hs-vertical-radio-in-form"
+                    id="paper-invoice"
+                    value="紙本發票"
+                    v-model="selectedInvoice"
                   />
                   <span class="text-sm text-gray-500 ms-3">紙本發票</span>
                 </label>
                 <label
-                  for="hs-vertical-radio-checked-in-form"
+                  for="mobile-invoice"
                   class="flex w-full max-w-xs p-3 text-sm bg-white border border-gray-200 rounded-lg focus:border-blue-500 focus:ring-blue-500"
                 >
                   <input
                     type="radio"
-                    name="hs-vertical-radio-in-form"
+                    name="invoice-type"
                     class="shrink-0 mt-0.5 border-gray-200 rounded-full text-blue-600 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none mb-2"
-                    id="hs-vertical-radio-checked-in-form"
+                    id="mobile-invoice"
+                    value="手機載具"
+                    v-model="selectedInvoice"
                     checked=""
                   />
                   <span class="text-sm text-gray-500 ms-3">手機載具</span>
@@ -693,15 +490,15 @@ const handelPayment = async () => {
               <tbody>
                 <tr class="h-12 px-4 py-2 border-b border-gray-300">
                   <td>訂購門市</td>
-                  <td>迷客夏 臺北南陽店</td>
+                  <td>{{ orderDetail.restaurantName }}</td>
                 </tr>
                 <tr class="h-12 px-4 py-2 border-b border-gray-300">
                   <td>取貨人</td>
-                  <td>婕瑜</td>
+                  <td>{{ pickupName }}</td>
                 </tr>
                 <tr class="h-12 px-4 py-2 border-b border-gray-300">
                   <td>聯絡電話</td>
-                  <td>0912345678</td>
+                  <td>{{ pickupPhone }}</td>
                 </tr>
                 <tr class="h-12 px-4 py-2 border-b border-gray-300">
                   <td>取貨方式</td>
@@ -709,19 +506,19 @@ const handelPayment = async () => {
                 </tr>
                 <tr class="h-12 px-4 py-2 border-b border-gray-300">
                   <td>預計取貨時間</td>
-                  <td>預約 2024-12-31 09:50</td>
+                  <td>{{ formattedDateTime }}</td>
                 </tr>
                 <tr class="h-12 px-4 py-2 border-b border-gray-300">
                   <td>付款方式</td>
-                  <td>LINE PAY</td>
+                  <td>{{ selectedPayment }}</td>
                 </tr>
                 <tr class="h-12 px-4 py-2 border-b border-gray-300">
                   <td>開立發票方式</td>
-                  <td>紙本發票</td>
+                  <td>{{ selectedInvoice }}</td>
                 </tr>
                 <tr class="h-12 px-4 py-2">
                   <td>應付金額</td>
-                  <td>$135</td>
+                  <td>${{ orderDetail.totalAmount }}</td>
                 </tr>
               </tbody>
             </table>
@@ -798,9 +595,9 @@ const handelPayment = async () => {
             class="inline-flex items-center px-3 py-2 text-sm font-medium text-white border border-transparent rounded-lg bg-amber-500 gap-x-1 disabled:pointer-events-none"
             data-hs-stepper-finish-btn=""
             style="display: none"
-            @click.prevent="handelPayment"
+            @click.prevent="submitOrder(selectedPayment)"
           >
-            點我付款
+            送出訂單
           </button>
         </div>
         <!-- End Button Group -->
@@ -808,6 +605,5 @@ const handelPayment = async () => {
       <!-- End Stepper Content -->
     </div>
     <!-- End Stepper -->
-    <!-- <a href="#" @click.prevent="handelPayment">點我付款</a> -->
   </div>
 </template>

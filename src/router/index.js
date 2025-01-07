@@ -91,7 +91,7 @@ const routes = [
     component: () => import("../views/MenuManagement.vue"),
   },
   {
-    path: "/checkout",
+    path: "/checkout/:orderId",
     name: "CheckoutPage",
     component: CheckoutPage,
   },

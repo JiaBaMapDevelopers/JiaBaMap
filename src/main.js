@@ -44,6 +44,7 @@ import {
 import { faThumbsUp as fasThumbsUp } from "@fortawesome/free-solid-svg-icons";
 import VueSweetalert2 from "vue-sweetalert2";
 import "sweetalert2/dist/sweetalert2.min.css";
+import "preline/preline";
 
 library.add(
   faEllipsis,
