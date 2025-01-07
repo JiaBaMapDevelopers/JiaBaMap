@@ -19,12 +19,10 @@ export const useStore = defineStore("store", () => {
   const bannerPhoto = ref("");
   const lat = ref("");
   const lng = ref("");
-  const placesId = ref("");
-  const photoIds = ref([]);
-  const router = useRouter();
-
+  let placesId = ref("");
+  const router = useRouter()
   const StoreId = (placeId) => {
-    placesId.value = placeId;
+    placesId.value = placeId
     router.push({
       path: "/store",
       query: { id: placeId },
