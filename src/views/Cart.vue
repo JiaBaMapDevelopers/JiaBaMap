@@ -1,25 +1,51 @@
+<script setup>
+import axios from 'axios';
+import {useAuth} from "@/stores/authStore"
+import {ref, onMounted} from "vue"
+
+const user = useAuth();
+const orders = ref([])
+
+
+const getOrder = async() => {
+  const response = await axios.get(`${import.meta.env.VITE_BACKEND_BASE_URL}/order/${user.userData._id}`)
+  orders.value = response.data
+}
+
+const delOrder = async(orderId) => {
+  await axios.delete(`${import.meta.env.VITE_BACKEND_BASE_URL}/order/${orderId}`)
+  await getOrder()
+}
+console.log(orders);
+
+onMounted(() => {
+  getOrder()
+})
+</script>
+
 <template>
   <div class="p-6">
     <div class="min-h-screen bg-gray-100 py-8">
+      <div v-if="orders.length > 0">
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 px-4">
-        <div class="bg-white p-4 rounded-lg shadow-md">
-          <p class="text-gray-500 text-sm text-right">12/06 12:48</p>
+        <div v-for="order in orders" class="bg-white p-4 rounded-lg shadow-md">
+          <p class="text-gray-500 text-sm text-right">{{ order.orderTime.slice(0, 10) }}</p>
 
           <div class="flex justify-center my-4">
             <img
               class="w-16 h-16 rounded-full"
-              src="..\..\public\image\drink.jpg"
+              src=""
               alt="商品圖片"
             />
           </div>
 
-          <p class="text-center text-gray-700">{{ 2 }} 項商品</p>
-          <p class="text-center text-gray-500">{{ "店家名稱" }}</p>
+          <p class="text-center text-gray-700">{{ 0 }} 項商品</p>
+          <p class="text-center text-gray-500">{{ order.restaurantName }}</p>
 
           <div class="my-4 border-t"></div>
 
           <p class="text-center text-lg font-bold text-gray-800">
-            共 {{ 100 }} 元
+            共 {{ order.totalAmount }} 元
           </p>
 
           <div class="flex items-center justify-between mt-4">
@@ -32,7 +58,7 @@
               立刻結帳
             </button>
 
-            <button class="ml-4 text-red-500 hover:text-red-600">
+            <button @click="delOrder(order.orderId)" class="ml-4 text-red-500 hover:text-red-600">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 class="h-6 w-6"
@@ -52,5 +78,9 @@
         </div>
       </div>
     </div>
+    <div v-else>
+      <p>購物車是空的</p>
+    </div>
   </div>
+</div>
 </template>

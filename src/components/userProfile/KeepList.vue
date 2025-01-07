@@ -67,7 +67,7 @@ onMounted(() => {
           <!-- 餐廳內容 -->
           <div class="flex mt-3 ml-3 text-xs">
             <div
-              class="items-center px-2 mr-2 text-white bg-red-600 rounded-2xl"
+              class="items-center px-2 mr-2 text-white bg-orange-600 rounded-2xl"
             >
               <p>
                 {{ restaurant.rating }}
