@@ -359,6 +359,12 @@ document.addEventListener("click", handleDocumentClick);
               />google評價
             </button>
           </a>
+
+          <router-link to="/storecart">
+            <button class="p-2 mt-6 mx-4 rounded-lg shadow text-amber-500">
+              訂餐
+            </button>
+          </router-link>
         </div>
       </div>
 

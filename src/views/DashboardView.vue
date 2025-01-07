@@ -1,5 +1,6 @@
 <script setup>
 import { ref } from 'vue';
+import router from '../router';
 
 const navigation = ref([
   { name: "首頁", link: "/dashboard" },

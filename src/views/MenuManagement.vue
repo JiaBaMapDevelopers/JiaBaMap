@@ -178,8 +178,11 @@ onMounted(fetchMenus);
 <template>
   <div class="p-6 mt-10">
     <!-- 標題 -->
-    <h1 class="text-2xl font-bold mb-4">菜單管理</h1>
-
+     <div class="flex justify-between">
+      <h1 class="text-2xl font-bold mb-4">菜單管理</h1>
+      <button><router-link to="/dashboard" class="px-4 py-2 mb-4 bg-amber-400 text-white rounded hover:bg-amber-500 transition">首頁</router-link></button>
+     </div>
+   
     <!-- 新增按鈕 -->
     <button 
       @click="openAddModal"
