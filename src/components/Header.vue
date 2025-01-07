@@ -138,7 +138,7 @@ watch(route, () => {
         <ul>
           <li v-if="!user.userData">
             <button @click="openLoginModal" class="w-full p-2 text-center text-amber-500 hover:bg-amber-100">
-              登入
+              會員登入
             </button>
           </li>
           <li v-if="user.userData" class="flex cursor-pointer align-center">
@@ -153,18 +153,14 @@ watch(route, () => {
             <router-link to="/user" class="pl-4 font-bold leading-10 text-amber-500">{{ user.userData?.name || '使用者' }}</router-link>
           </li>
           <hr v-if="user.userData" class="mt-2 border-amber-200">
-          <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">月排行</a></li>
-          <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">週排行</a></li>
           <router-link to="search" class="block p-2 text-amber-500 hover:bg-amber-100">搜尋餐廳</router-link>
           <hr class="border-amber-200">
           <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">線上訂位</a></li>
-          <router-link to="/articlelist" class="block p-2 text-amber-500 hover:bg-amber-100">美食專欄</router-link>
+          <router-link to="/articlelist" class="block p-2 text-amber-500 hover:bg-amber-100">熱門食記</router-link>
           <router-link to="/myarticle" class="block p-2 text-amber-500 hover:bg-amber-100">發表食記</router-link>
           <hr class="border-amber-200">
-          <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">行銷方案</a></li>
-          <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">邀請部落客</a></li>
-          <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">店家加入</a></li>
-          <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">聯絡我們</a></li>
+          <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">店家註冊</a></li>
+          <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">店家登入</a></li>
           <hr class="border-amber-200">
           <li v-if="user.userData">
             <button @click="user.logout" class="w-full p-2 text-center text-amber-500 hover:bg-amber-100">
@@ -184,13 +180,13 @@ watch(route, () => {
         <button v-if="!user.userData" 
                 class="p-2 rounded-md text-amber-500 hover:bg-amber-100 min-w-20" 
                 @click="openLoginModal">
-          登入
+          會員登入
         </button>
         <router-link to="/myarticle" class="p-2 rounded-md text-amber-500 hover:bg-amber-100 min-w-20">
           發表食記
         </router-link>
         <router-link to="/articlelist" class="p-2 rounded-md text-amber-500 hover:bg-amber-100 min-w-20">
-          專欄文章
+          熱門食記
         </router-link>
       </div>
 
@@ -203,25 +199,13 @@ watch(route, () => {
           </button>
           <div class="absolute right-0 z-50 hidden w-32 mt-0 bg-white rounded-md shadow-lg group-hover:block">
             <ul class="py-1">
-              <li><a href="#" class="block px-4 py-2 text-amber-500 hover:bg-amber-100">店家加入</a></li>
-              <li><a href="#" class="block px-4 py-2 text-amber-500 hover:bg-amber-100">行銷方案</a></li>
-              <li><a href="#" class="block px-4 py-2 text-amber-500 hover:bg-amber-100">邀請部落客</a></li>
+              <li><a href="#" class="block px-4 py-2 text-amber-500 hover:bg-amber-100">店家註冊</a></li>
+              <li><a href="#" class="block px-4 py-2 text-amber-500 hover:bg-amber-100">店家登入</a></li>
             </ul>
           </div>
         </div>
 
-        <!-- 排行榜的下拉選單 -->
-        <div class="relative inline-block text-left group">
-          <button class="flex items-center p-2 rounded-md text-amber-500 hover:bg-amber-100 focus:outline-none min-w-20 whitespace-nowrap">
-            排行榜<span class="ml-1">&#x25BC;</span>
-          </button>
-          <div class="absolute right-0 z-50 hidden w-32 mt-0 bg-white rounded-md shadow-lg group-hover:block">
-            <ul class="py-1">
-              <li><a href="#" class="block px-4 py-2 text-amber-500 hover:bg-amber-100">週排行</a></li>
-              <li><a href="#" class="block px-4 py-2 text-amber-500 hover:bg-amber-100">月排行</a></li>
-            </ul>
-          </div>
-        </div>
+        
         <div><Notification /></div>
         <!-- 會員頭貼 -->
         <div v-if="user.userData" class="relative inline-block text-left group">
@@ -266,14 +250,14 @@ watch(route, () => {
         <button v-if="!user.userData" 
                 class="p-2 rounded-md text-amber-500 hover:bg-amber-100 min-w-20" 
                 @click="openLoginModal">
-          登入
+          會員登入
         </button>
         
         <router-link to="/myarticle" class="p-2 rounded-md text-amber-500 hover:bg-amber-100 min-w-20">
           發表食記
         </router-link>
         <router-link to="/articlelist" class="p-2 rounded-md text-amber-500 hover:bg-amber-100 min-w-20">
-          專欄文章
+          熱門食記
         </router-link>
       </div>
 
@@ -286,25 +270,13 @@ watch(route, () => {
           </button>
           <div class="absolute right-0 z-50 hidden w-32 mt-0 bg-white rounded-md shadow-lg group-hover:block">
             <ul class="py-1">
-              <li><a href="#" class="block px-4 py-2 text-amber-500 hover:bg-amber-100">店家加入</a></li>
-              <li><a href="#" class="block px-4 py-2 text-amber-500 hover:bg-amber-100">行銷方案</a></li>
-              <li><a href="#" class="block px-4 py-2 text-amber-500 hover:bg-amber-100">邀請部落客</a></li>
+              <li><a href="#" class="block px-4 py-2 text-amber-500 hover:bg-amber-100">店家註冊</a></li>
+              <li><a href="#" class="block px-4 py-2 text-amber-500 hover:bg-amber-100">店家登入</a></li>
             </ul>
           </div>
         </div>
 
-        <!-- 排行榜的下拉選單 -->
-        <div class="relative inline-block text-left group">
-          <button class="flex items-center p-2 rounded-md text-amber-500 hover:bg-amber-100 focus:outline-none min-w-20 whitespace-nowrap">
-            排行榜<span class="ml-1">&#x25BC;</span>
-          </button>
-          <div class="absolute right-0 z-50 hidden w-32 mt-0 bg-white rounded-md shadow-lg group-hover:block">
-            <ul class="py-1">
-              <li><a href="#" class="block px-4 py-2 text-amber-500 hover:bg-amber-100">週排行</a></li>
-              <li><a href="#" class="block px-4 py-2 text-amber-500 hover:bg-amber-100">月排行</a></li>
-            </ul>
-          </div>
-        </div>
+        
         
         <!-- 會員頭貼 -->
         <div v-if="user.userData" class="relative inline-block text-left group">
