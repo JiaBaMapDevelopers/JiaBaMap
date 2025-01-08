@@ -42,6 +42,7 @@ import { faGoogle } from "@fortawesome/free-brands-svg-icons";
 import {
   faThumbsUp as farThumbsUp,
   faBookmark as farBookmark,
+  faComment as farComment
 } from "@fortawesome/free-regular-svg-icons";
 import { faThumbsUp as fasThumbsUp } from "@fortawesome/free-solid-svg-icons";
 import VueSweetalert2 from "vue-sweetalert2";
@@ -83,7 +84,8 @@ library.add(
   faTrash,
   faSpinner,
   faCircleXmark,
-  faPhone
+  faPhone,
+  farComment
 );
 
 const app = createApp(App);
