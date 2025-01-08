@@ -228,10 +228,10 @@ watch(route, () => {
           <router-link to="/myarticle" class="block p-2 text-amber-500 hover:bg-amber-100">發表食記</router-link>
           <hr class="border-amber-200" />
           <li>
-            <li><router-link to="/storesignup" class="block p-2 text-amber-500 hover:bg-amber-100">店家註冊</router-link></li>
+            <router-link to="/storesignup" class="block p-2 text-amber-500 hover:bg-amber-100">店家註冊</router-link>
           </li>
           <li>
-            <li><router-link to="/storesignin" class="block p-2 text-amber-500 hover:bg-amber-100">店家登入</router-link></li>
+            <router-link to="/storesignin" class="block p-2 text-amber-500 hover:bg-amber-100">店家登入</router-link>
           </li>
           <hr class="border-amber-200" />
           <li v-if="user.userData">
@@ -292,10 +292,10 @@ watch(route, () => {
           >
             <ul class="py-1">
               <li>
-                <li><router-link to="/storesignup" class="block px-4 py-2 text-amber-500 hover:bg-amber-100">店家註冊</router-link></li>
+                <router-link to="/storesignup" class="block px-4 py-2 text-amber-500 hover:bg-amber-100">店家註冊</router-link>
               </li>
               <li>
-                <li><router-link to="/storesignin" class="block px-4 py-2 text-amber-500 hover:bg-amber-100">店家登入</router-link></li>
+                <router-link to="/storesignin" class="block px-4 py-2 text-amber-500 hover:bg-amber-100">店家登入</router-link>
               </li>
             </ul>
           </div>
@@ -390,10 +390,10 @@ watch(route, () => {
           >
             <ul class="py-1">
               <li>
-                <li><router-link to="/storesignup" class="block px-4 py-2 text-amber-500 hover:bg-amber-100">店家註冊</router-link></li>
+                <router-link to="/storesignup" class="block px-4 py-2 text-amber-500 hover:bg-amber-100">店家註冊</router-link>
               </li>
               <li>
-                <li><router-link to="/storesignin" class="block px-4 py-2 text-amber-500 hover:bg-amber-100">店家登入</router-link></li>
+                <router-link to="/storesignin" class="block px-4 py-2 text-amber-500 hover:bg-amber-100">店家登入</router-link>
               </li>
             </ul>
           </div>
