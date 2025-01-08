@@ -202,6 +202,43 @@ watch(route, () => {
               >店家登入</a
             >
           </li>
+          <hr v-if="user.userData" class="mt-2 border-amber-200" />
+          <router-link
+            to="search"
+            class="block p-2 text-amber-500 hover:bg-amber-100"
+            >搜尋餐廳</router-link
+          >
+          <hr class="border-amber-200" />
+          <li>
+            <a href="#" class="block p-2 text-amber-500 hover:bg-amber-100"
+              >線上訂位</a
+            >
+          </li>
+          <router-link
+            to="/articlelist"
+            class="block p-2 text-amber-500 hover:bg-amber-100"
+            >熱門食記</router-link
+          >
+          <router-link
+            to="/myarticle"
+            class="block p-2 text-amber-500 hover:bg-amber-100"
+            >發表食記</router-link
+          >
+          <hr class="border-amber-200" />
+          <li>
+            <router-link
+              to="/storesignup"
+              class="block p-2 text-amber-500 hover:bg-amber-100"
+              >店家註冊</router-link
+            >
+          </li>
+          <li>
+            <router-link
+              to="/storesignin"
+              class="block p-2 text-amber-500 hover:bg-amber-100"
+              >店家登入</router-link
+            >
+          </li>
           <hr class="border-amber-200" />
           <li v-if="user.userData">
             <button
@@ -261,17 +298,17 @@ watch(route, () => {
           >
             <ul class="py-1">
               <li>
-                <a
-                  href="#"
+                <router-link
+                  to="/storesignup"
                   class="block px-4 py-2 text-amber-500 hover:bg-amber-100"
-                  >店家註冊</a
+                  >店家註冊</router-link
                 >
               </li>
               <li>
-                <a
-                  href="#"
+                <router-link
+                  to="/storesignin"
                   class="block px-4 py-2 text-amber-500 hover:bg-amber-100"
-                  >店家登入</a
+                  >店家登入</router-link
                 >
               </li>
             </ul>
@@ -368,17 +405,17 @@ watch(route, () => {
           >
             <ul class="py-1">
               <li>
-                <a
-                  href="#"
+                <router-link
+                  to="/storesignup"
                   class="block px-4 py-2 text-amber-500 hover:bg-amber-100"
-                  >店家註冊</a
+                  >店家註冊</router-link
                 >
               </li>
               <li>
-                <a
-                  href="#"
+                <router-link
+                  to="/storesignin"
                   class="block px-4 py-2 text-amber-500 hover:bg-amber-100"
-                  >店家登入</a
+                  >店家登入</router-link
                 >
               </li>
             </ul>

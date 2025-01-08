@@ -1,13 +1,20 @@
 <script setup>
-import { ref, computed, watch, onMounted, onUnmounted } from "vue";
+import { ref, computed, onUnmounted } from "vue";
 import { useAuth } from "@/stores/authStore";
 import { storeToRefs } from "pinia";
+import axios from 'axios';
+import Swal from 'sweetalert2'
+import 'sweetalert2/dist/sweetalert2.min.css'
+
 
 const user = useAuth();
 const { userData, logout } = storeToRefs(user);
+
+const selectedFile = ref(null);
 const menuVisible = ref(false);
 const isEditing = ref(false);
-const instagramUsername = ref(userData.value?.instagram || "");
+
+const igLink = ref(userData.value?.igLink || "");
 const editedUsername = ref(userData.value?.name || "使用者");
 const editedProfilePicture = ref(
   userData.value?.profilePicture || "/image/default_user.png",
@@ -16,47 +23,73 @@ const editedProfilePicture = ref(
 console.log(userData.value);
 
 // 計算屬性 - 生成 IG 連結
-const instagramLink = computed(
-  () => `https://instagram.com/${instagramUsername.value}`,
+const instagramLink = computed(() => 
+  igLink.value ? `https://instagram.com/${igLink.value}` : ""
 );
-
-const handleImageError = (event) => {
-  event.target.src = "/image/default_user.png";
-  editedProfilePicture.value = "/image/default_user.png";
-  // 更新 localStorage 中的圖片資料
-  const updatedData = {
-    ...userData.value,
-    profilePicture: "/image/default_user.png", // 使用正確 key
-  };
-  localStorage.setItem("userData", JSON.stringify(updatedData));
-  userData.value = updatedData;
-};
 
 // 切換編輯模式
 const toggleEditMode = () => {
   isEditing.value = true;
-  instagramUsername.value = userData.value?.instagram || "";
+  igLink.value = userData.value?.igLink || "";
   editedUsername.value = userData.value?.name || "使用者";
   editedProfilePicture.value =
     userData.value?.profilePicture || "/image/default_user.png";
 };
 
-// 保存使用者資料並退出編輯模式
-const saveProfile = () => {
-  isEditing.value = false;
-  const updatedData = {
-    name: editedUsername.value,
-    instagram: instagramUsername.value,
-    profilePicture: editedProfilePicture.value,
-  };
-  localStorage.setItem("userData", JSON.stringify(updatedData)); // 保存到 localStorage
-  userData.value = updatedData; // 更新 userData
+// 儲存更新
+const saveProfile = async () => {
+  try {
+    const formData = new FormData();
+
+    if (selectedFile.value) {
+      formData.append("profilePicture", selectedFile.value);
+    }
+
+    formData.append("name", editedUsername.value);
+    formData.append("igLink", igLink.value);
+
+    const userId = userData.value?._id; 
+    const token = localStorage.getItem("userToken");
+
+    const response = await axios.put(
+      `${import.meta.env.VITE_BACKEND_BASE_URL}/user/update/${userId}`,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${token}`, // 若需要 JWT
+        },
+      }
+    );
+
+    const updatedUser = response.data;
+
+    //更新到前端 (Pinia / Composition API)
+    userData.value = updatedUser;
+
+    // 若後端回傳了新的頭像連結
+    editedProfilePicture.value =
+      updatedUser.profilePicture || "/image/default_user.png";
+
+    isEditing.value = false;
+
+    console.log("更新成功")
+  } catch (err) {
+    console.error("更新失敗：", err)
+    // 2. 在錯誤時使用 SweetAlert2 顯示提示
+    Swal.fire({
+      title: "更新失敗",
+      text: err?.response?.data?.message || err.message || "請稍後再試",
+      icon: "error",
+      confirmButtonText: "確定",
+    })
+  }
 };
 
-// 取消編輯，恢復原始值（可擴展為重置到用戶原始數據）
+//取消編輯
 const cancelEdit = () => {
   isEditing.value = false;
-  instagramUsername.value = userData.value?.instagram || "";
+  igLink.value = userData.value?.igLink || "";
   editedUsername.value = userData.value?.name || "使用者";
   editedProfilePicture.value =
     userData.value?.profilePicture || "/image/default_user.png";
@@ -67,32 +100,16 @@ const toggleMenu = () => {
   menuVisible.value = !menuVisible.value;
 };
 
-// 撰寫食記的功能
-const writeReview = () => {
-  alert("撰寫食評功能即將啟用！");
-};
-
 // 更新頭像
 const onPhotoChange = (event) => {
   const file = event.target.files[0];
   if (file) {
     const newImage = URL.createObjectURL(file);
-    editedProfilePicture.value = newImage; // 更新圖片
-    userData.value = {
-      ...userData.value,
-      profilePicture: newImage, // 同步更新 Pinia 資料
-    };
+    editedProfilePicture.value = newImage;
+    // 儲存檔案於 selectedFile，之後要上傳時用
+    selectedFile.value = file;
   }
 };
-
-// 使用 watch 確保即時更新圖片
-watch(
-  () => userData.value?.profilePicture,
-  (newValue) => {
-    editedProfilePicture.value = newValue || "/image/default_user.png";
-  },
-  { immediate: true },
-);
 
 // 點擊其他地方時關閉下拉選單
 const handleClickOutside = (event) => {
@@ -105,13 +122,7 @@ const handleClickOutside = (event) => {
   }
 };
 
-// 添加全域事件監聽器
-onMounted(() => {
-  const savedData = JSON.parse(localStorage.getItem("userData")) || {};
-  document.addEventListener("click", handleClickOutside);
-  editedProfilePicture.value =
-    savedData.profilePicture || "/image/default_user.png";
-});
+document.addEventListener("click", handleClickOutside);
 
 // 移除全域事件監聽器
 onUnmounted(() => {
@@ -143,10 +154,10 @@ onUnmounted(() => {
         <a
           :href="instagramLink"
           class="underline text-amber-500 hover:text-amber-400"
-          v-if="instagramUsername"
+          v-if="igLink"
           target="_blank"
         >
-          Instagram: {{ instagramUsername }}
+          Instagram: {{ igLink }}
         </a>
         <p v-else class="flex items-center justify-center text-gray-500">
           <font-awesome-icon
@@ -179,12 +190,12 @@ onUnmounted(() => {
             v-if="menuVisible"
             class="absolute left-0 z-10 w-40 mt-2 bg-white rounded-lg shadow-lg"
           >
-            <button
-              @click="writeReview"
+            <router-link
+              to="/createnote"
               class="block w-full px-4 py-2 text-left text-amber-500 hover:bg-amber-100"
             >
               撰寫食記
-            </button>
+            </router-link>
             <button
               @click="logout"
               class="block w-full px-4 py-2 text-left text-amber-500 hover:bg-amber-100"
@@ -245,7 +256,7 @@ onUnmounted(() => {
         /></span>
         <div class="flex items-center justify-center">
           <input
-            v-model="instagramUsername"
+            v-model="igLink"
             type="text"
             placeholder="輸入 IG 帳號"
             class="w-1/2 p-2 text-center border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"

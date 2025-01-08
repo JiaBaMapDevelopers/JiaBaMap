@@ -1,6 +1,8 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import axios from "axios";
+import Swal from 'sweetalert2'
+import 'sweetalert2/dist/sweetalert2.min.css'
 
 const imageFile = ref(null); // 儲存上傳的檔案
 const storeId = "677eadb14dabab3aff8878c2";
@@ -31,15 +33,27 @@ const openAddModal = () => {
 // 驗證函數
 const validateForm = () => {
   if (!menuForm.value.name.trim()) {
-    alert("名稱不能為空！");
+    Swal.fire({
+      title: "名稱不能為空！",
+      icon: "warning",
+      confirmButtonText: "確定",
+    });
     return false;
   }
   if (!menuForm.value.category.trim()) {
-    alert("分類不能為空！");
+    Swal.fire({
+      title: "分類不能為空！",
+      icon: "warning",
+      confirmButtonText: "確定",
+    });
     return false;
   }
   if (!menuForm.value.price || menuForm.value.price <= 0) {
-    alert("價格必須大於 0！");
+    Swal.fire({
+      title: "價格必須大於 0！",
+      icon: "warning",
+      confirmButtonText: "確定",
+    });
     return false;
   }
   return true;
@@ -77,7 +91,11 @@ const fetchMenus = async (page = 1) => {
     console.log("查詢結果：", menus.value);
   } catch (error) {
     console.error("取得菜單資料失敗：", error);
-    alert("無法取得菜單資料，請檢查後端連線！");
+    Swal.fire({
+      title: "無法取得菜單資料，請檢查後端連線！",
+      icon: "error",
+      confirmButtonText: "確定",
+    });
   }
 };
 
@@ -109,12 +127,20 @@ const addMenu = async () => {
 
     if (response.status === 200 && response.data._id) {
       menus.value.push(response.data); // 更新畫面
-      closeModal();
-      alert("新增成功！");
+      closeModal(); 
+      Swal.fire({
+        title: "新增成功！",
+        icon: "success",
+        confirmButtonText: "好的",
+      });
     }
   } catch (error) {
     console.error("新增菜單失敗：", error);
-    alert("新增失敗！");
+    Swal.fire({
+      title: "新增失敗！",
+      icon: "error",
+      confirmButtonText: "確定",
+    });
   }
 };
 
@@ -155,22 +181,51 @@ const updateMenu = async () => {
       );
       menus.value[index] = response.data; // 更新畫面
       closeModal();
-      alert("更新成功！");
+      Swal.fire({
+        title: "更新成功！",
+        icon: "success",
+        confirmButtonText: "好的",
+      });
     }
   } catch (error) {
     console.error("更新菜單失敗：", error);
-    alert("更新失敗！");
+    Swal.fire({
+      title: "更新失敗！",
+      icon: "error",
+      confirmButtonText: "確定",
+    });
   }
 };
 
 const deleteMenu = async (id) => {
-  if (confirm("確定要刪除嗎？")) {
+  // 以 SweetAlert2 顯示確認視窗
+  const result = await Swal.fire({
+    title: "確定要刪除嗎？",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: "刪除",
+    cancelButtonText: "取消",
+  });
+
+  // 使用者按「刪除」才繼續
+  if (result.isConfirmed) {
     try {
       await axios.delete(`${import.meta.env.VITE_BACKEND_BASE_URL}/menu/${id}`);
       menus.value = menus.value.filter((menu) => menu._id !== id);
+
+      // 可以視需求是否再給個「刪除成功」提示
+      Swal.fire({
+        title: "刪除成功！",
+        icon: "success",
+        confirmButtonText: "好的",
+      });
     } catch (error) {
       console.error("刪除失敗：", error);
-      alert("刪除失敗！");
+      Swal.fire({
+        title: "刪除失敗！",
+        icon: "error",
+        confirmButtonText: "確定",
+      });
     }
   }
 };
