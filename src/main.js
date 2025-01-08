@@ -27,6 +27,7 @@ import {
   faRightFromBracket,
   faBell,
   faCircleXmark,
+  faPhone
 } from "@fortawesome/free-solid-svg-icons";
 import { faInstagram } from "@fortawesome/free-brands-svg-icons";
 import { createPinia } from "pinia";
@@ -67,6 +68,7 @@ library.add(
   faRightFromBracket,
   faBell,
   faCircleXmark,
+  faPhone
 );
 
 const app = createApp(App);
