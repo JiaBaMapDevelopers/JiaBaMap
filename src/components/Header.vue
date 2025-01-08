@@ -158,8 +158,8 @@ watch(route, () => {
           <router-link to="/articlelist" class="block p-2 text-amber-500 hover:bg-amber-100">熱門食記</router-link>
           <router-link to="/myarticle" class="block p-2 text-amber-500 hover:bg-amber-100">發表食記</router-link>
           <hr class="border-amber-200">
-          <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">店家註冊</a></li>
-          <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">店家登入</a></li>
+          <li><router-link to="/storesignup" class="block p-2 text-amber-500 hover:bg-amber-100">店家註冊</router-link></li>
+          <li><router-link to="/storesignin" class="block p-2 text-amber-500 hover:bg-amber-100">店家登入</router-link></li>
           <hr class="border-amber-200">
           <li v-if="user.userData">
             <button @click="user.logout" class="w-full p-2 text-center text-amber-500 hover:bg-amber-100">
@@ -198,8 +198,8 @@ watch(route, () => {
           </button>
           <div class="absolute right-0 z-50 hidden w-32 mt-0 bg-white rounded-md shadow-lg group-hover:block">
             <ul class="py-1">
-              <li><a href="#" class="block px-4 py-2 text-amber-500 hover:bg-amber-100">店家註冊</a></li>
-              <li><a href="#" class="block px-4 py-2 text-amber-500 hover:bg-amber-100">店家登入</a></li>
+              <li><router-link to="/storesignup" class="block px-4 py-2 text-amber-500 hover:bg-amber-100">店家註冊</router-link></li>
+              <li><router-link to="/storesignin" class="block px-4 py-2 text-amber-500 hover:bg-amber-100">店家登入</router-link></li>
             </ul>
           </div>
         </div>
@@ -268,8 +268,8 @@ watch(route, () => {
           </button>
           <div class="absolute right-0 z-50 hidden w-32 mt-0 bg-white rounded-md shadow-lg group-hover:block">
             <ul class="py-1">
-              <li><a href="#" class="block px-4 py-2 text-amber-500 hover:bg-amber-100">店家註冊</a></li>
-              <li><a href="#" class="block px-4 py-2 text-amber-500 hover:bg-amber-100">店家登入</a></li>
+              <li><router-link to="/storesignup" class="block px-4 py-2 text-amber-500 hover:bg-amber-100">店家註冊</router-link></li>
+              <li><router-link to="/storesignin" class="block px-4 py-2 text-amber-500 hover:bg-amber-100">店家登入</router-link></li>
             </ul>
           </div>
         </div>
