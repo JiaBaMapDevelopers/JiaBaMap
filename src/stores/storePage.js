@@ -19,6 +19,7 @@ export const useStore = defineStore("store", () => {
   const bannerPhoto = ref("");
   const lat = ref("");
   const lng = ref("");
+  const photoIds = ref([]);
   let placesId = ref("");
   const router = useRouter();
   const StoreId = (placeId) => {
