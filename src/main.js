@@ -34,6 +34,7 @@ import {
   faTrash,
   faSpinner,
   faCircleXmark,
+  faPhone
 } from "@fortawesome/free-solid-svg-icons";
 import { faInstagram } from "@fortawesome/free-brands-svg-icons";
 import { createPinia } from "pinia";
@@ -82,6 +83,7 @@ library.add(
   faTrash,
   faSpinner,
   faCircleXmark,
+  faPhone
 );
 
 const app = createApp(App);

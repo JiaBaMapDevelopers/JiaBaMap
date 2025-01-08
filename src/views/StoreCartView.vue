@@ -1,13 +1,48 @@
 <script setup>
 import { ref, onMounted, computed } from "vue";
+import { useAuth } from "@/stores/authStore";
 import Swal from "sweetalert2";
 import axios from "axios";
+import { useRouter } from "vue-router";
 
+const router = useRouter();
+const user = useAuth();
+const userData = computed(() => user.userData);
 const storeId = "67720e635123faace157e5b3";
 const categoryRefs = ref([]);
 const selectedCategory = ref(0);
 const cartItems = ref([]);
 const menus = ref([]);
+
+// 店家資訊狀態
+const storeInfo = ref({
+  name: "",
+  address: "",
+  phone: "",
+  description: "",
+  businessHours: "",
+});
+
+// // 獲取店家資訊
+// const fetchStoreInfo = async () => {
+//   try {
+//     const response = await axios.get(`${import.meta.env.VITE_BACKEND_BASE_URL}/get:${placeId}/${storeId}`);
+//     if (response.data) {
+//       // 更新店家資訊
+//       storeInfo.value = {
+//         ...storeInfo.value,
+//         ...response.data
+//       };
+//     }
+//   } catch (error) {
+//     console.error('獲取店家資訊失敗：', error);
+//     Swal.fire({
+//       title: '錯誤',
+//       text: '無法獲取店家資訊',
+//       icon: 'error'
+//     });
+//   }
+// };
 
 // 將菜單按分類整理的計算屬性
 const categorizedMenu = computed(() => {
@@ -27,15 +62,19 @@ const categorizedMenu = computed(() => {
 // 獲取菜單數據
 const fetchMenus = async () => {
   try {
-    const response = await axios.get("http://localhost:3000/menu", {
-      params: {
-        storeId,
-        limit: 50, // 設定較大的限制以確保獲取所有菜單項目
+    const response = await axios.get(
+      `${import.meta.env.VITE_BACKEND_BASE_URL}/menu`,
+      {
+        params: {
+          storeId,
+          limit: 50, // 設定較大的限制以確保獲取所有菜單項目
+        },
       },
-    });
+    );
 
     if (response.data && Array.isArray(response.data.menus)) {
       menus.value = response.data.menus;
+      console.log(menus.value);
     } else {
       console.error("菜單數據格式錯誤");
       menus.value = [];
@@ -56,9 +95,9 @@ const scrollToCategory = (index) => {
 };
 
 // Intersection Observer for active category
-onMounted(() => {
-  fetchMenus();
-
+onMounted(async () => {
+  await fetchMenus();
+  await fetchStoreInfo();
   const observer = new IntersectionObserver(
     (entries) => {
       entries.forEach((entry) => {
@@ -84,13 +123,6 @@ onMounted(() => {
 
 const calculateItemPrice = (item, options) => {
   let totalPrice = item.price;
-
-  if (options.cupSize === "大杯") {
-    totalPrice += 10;
-  }
-
-  totalPrice += options.toppings.length * 10;
-
   return totalPrice;
 };
 
@@ -104,39 +136,27 @@ const openItemModal = async (item) => {
     return;
   }
 
-  const { value: formValues } = await Swal.fire({
+  let quantity = 1;
+
+  const { value: note } = await Swal.fire({
     title: item.name,
     html: `
       <div class='flex flex-col items-center'>
         <div class='mb-4'>
           <img src='${item.imageUrl}' alt='商品圖片' class='object-cover w-24 h-24'>
         </div>
-        <div class='text-sm text-gray-600'>
-          價格: <span class='text-red-500'>\$${item.price}</span>
+        <div class='text-gray-600'>
+          單價: <span class='text-red-500'>\$${item.price}</span>
         </div>
-        ${item.description ? `<div class='mt-2 text-sm text-gray-600'>${item.description}</div>` : ""}
-        <div class='mt-4'>
-          <h3 class='text-lg font-semibold'>杯型選擇 <span class="text-red-500">*</span></h3>
-          <div class="cup-size-group" data-required="true">
-            <button class='px-3 py-2 m-1 bg-gray-100 rounded option-btn cup-size hover:' data-value="中杯">中杯</button>
-            <button class='px-3 py-2 m-1 bg-gray-100 rounded option-btn cup-size hover:' data-value="大杯">大杯 +10元</button>
-          </div>
+        <div class='mt-2 text-sm text-gray-600'>${item.description || ""}</div>
+        <input type='text' id='note-input' placeholder='備註' 
+          class='w-full p-2 mt-4 border border-gray-300 rounded-md' />
+        <div class='flex items-center mt-4'>
+          <button id='decrement-btn' class='px-2 py-1 bg-gray-300 rounded-md'>-</button>
+          <div class='mx-4'><span id='quantity'>1</span></div>
+          <button id='increment-btn' class='px-2 py-1 bg-gray-300 rounded-md'>+</button>
         </div>
-        <div class='mt-4'>
-          <h3 class='text-lg font-semibold'>加料選擇</h3>
-          <div class="toppings-group">
-            <button class='px-3 py-2 m-1 bg-gray-100 rounded option-btn topping hover:' data-value="珍珠">珍珠 +10元</button>
-            <button class='px-3 py-2 m-1 bg-gray-100 rounded option-btn topping hover:' data-value="椰果">椰果 +10元</button>
-          </div>
-        </div>
-        <div class='mt-4'>
-          <h3 class='text-lg font-semibold'>甜度選擇 <span class="text-red-500">*</span></h3>
-          <div class="sweetness-group" data-required="true">
-            <button class='px-3 py-2 m-1 bg-gray-100 rounded option-btn sweetness hover:' data-value="正常糖">正常糖</button>
-            <button class='px-3 py-2 m-1 bg-gray-100 rounded option-btn sweetness hover:' data-value="半糖">半糖</button>
-            <button class='px-3 py-2 m-1 bg-gray-100 rounded option-btn sweetness hover:' data-value="微糖">微糖</button>
-          </div>
-        </div>
+        <div class='mt-2 text-gray-600'>總價: <span id='total-price' class='text-red-500'>\$${item.price}</span></div>
       </div>
     `,
     confirmButtonText: "加入購物車",
@@ -147,58 +167,39 @@ const openItemModal = async (item) => {
       cancelButton: "bg-gray-300 text-gray-800",
     },
     didOpen: () => {
-      const groups = document.querySelectorAll('[data-required="true"]');
-      groups.forEach((group) => {
-        const buttons = group.querySelectorAll(".option-btn");
-        buttons.forEach((button) => {
-          button.addEventListener("click", () => {
-            buttons.forEach((btn) =>
-              btn.classList.remove("bg-amber-500", "text-white"),
-            );
-            button.classList.add("bg-amber-500", "text-white");
-          });
-        });
+      const quantityElement = document.querySelector("#quantity");
+      const totalPriceElement = document.querySelector("#total-price");
+      const decrementBtn = document.querySelector("#decrement-btn");
+      const incrementBtn = document.querySelector("#increment-btn");
+
+      decrementBtn.addEventListener("click", () => {
+        if (quantity > 1) {
+          quantity -= 1;
+          quantityElement.textContent = quantity;
+          totalPriceElement.textContent = item.price * quantity;
+        }
       });
 
-      const toppingButtons = document.querySelectorAll(".topping");
-      toppingButtons.forEach((button) => {
-        button.addEventListener("click", () => {
-          button.classList.toggle("bg-amber-500");
-          button.classList.toggle("text-white");
-        });
+      incrementBtn.addEventListener("click", () => {
+        quantity += 1;
+        quantityElement.textContent = quantity;
+        totalPriceElement.textContent = item.price * quantity;
       });
     },
     preConfirm: () => {
-      const cupSize = document.querySelector(".cup-size.bg-amber-500")?.dataset
-        .value;
-      const sweetness = document.querySelector(".sweetness.bg-amber-500")
-        ?.dataset.value;
-      const toppings = Array.from(
-        document.querySelectorAll(".topping.bg-amber-500"),
-      ).map((el) => el.dataset.value);
-
-      if (!cupSize || !sweetness) {
-        Swal.showValidationMessage("請選擇必填項目");
-        return false;
-      }
-
-      return {
-        cupSize,
-        sweetness,
-        toppings,
-      };
+      const noteInput = document.getElementById("note-input");
+      return noteInput ? noteInput.value : "";
     },
   });
 
-  if (formValues) {
-    const cartItem = {
+  if (note !== undefined) {
+    cartItems.value.push({
       id: Date.now(),
       item,
-      options: formValues,
-      quantity: 1,
-      itemPrice: calculateItemPrice(item, formValues),
-    };
-    cartItems.value.push(cartItem);
+      quantity,
+      itemPrice: item.price * quantity,
+      note,
+    });
 
     await Swal.fire({
       title: "成功",
@@ -209,101 +210,9 @@ const openItemModal = async (item) => {
   }
 };
 
-const openCart = async () => {
-  if (cartItems.value.length === 0) {
-    await Swal.fire({
-      title: "購物車是空的",
-      icon: "info",
-    });
-    return;
-  }
-
-  const totalAmount = cartItems.value.reduce(
-    (sum, cartItem) => sum + cartItem.itemPrice * cartItem.quantity,
-    0,
-  );
-
-  const cartHtml = cartItems.value
-    .map(
-      (cartItem, index) => `
-    <div class="flex items-center justify-between py-2 border-b">
-      <div>
-        <h3 class="font-semibold">${cartItem.item.name}</h3>
-        <p class="text-sm text-gray-600">
-          ${cartItem.options.cupSize} | 
-          ${cartItem.options.sweetness}
-          ${cartItem.options.toppings.length ? ` | ${cartItem.options.toppings.join(", ")}` : ""}
-        </p>
-        <p class="text-sm text-gray-600">
-          單價: $${cartItem.itemPrice}
-        </p>
-      </div>
-      <div class="flex items-center space-x-2">
-        <button class="px-2 quantity-btn" data-action="decrease" data-index="${index}">-</button>
-        <span class="quantity-display" data-index="${index}">${cartItem.quantity}</span>
-        <button class="px-2 quantity-btn" data-action="increase" data-index="${index}">+</button>
-        <button class="ml-2 text-red-500 delete-btn" data-index="${index}">×</button>
-      </div>
-    </div>
-  `,
-    )
-    .join("");
-
-  await Swal.fire({
-    title: "購物車",
-    html: `
-      <div class="overflow-y-auto max-h-96">
-        ${cartHtml}
-      </div>
-      <div class="mt-4 text-lg font-semibold text-right">
-        總金額: <span class="text-red-500 total-amount">\$${totalAmount.toFixed(2)}</span>
-      </div>
-    `,
-    showCancelButton: true,
-    confirmButtonText: "結帳",
-    cancelButtonText: "繼續購物",
-    didOpen: () => {
-      document.querySelectorAll(".quantity-btn").forEach((btn) => {
-        btn.addEventListener("click", (e) => {
-          const index = parseInt(btn.dataset.index);
-          const action = btn.dataset.action;
-
-          if (action === "increase") {
-            cartItems.value[index].quantity++;
-          } else if (
-            action === "decrease" &&
-            cartItems.value[index].quantity > 1
-          ) {
-            cartItems.value[index].quantity--;
-          }
-
-          document.querySelector(
-            `.quantity-display[data-index="${index}"]`,
-          ).textContent = cartItems.value[index].quantity;
-
-          const newTotal = cartItems.value.reduce(
-            (sum, cartItem) => sum + cartItem.itemPrice * cartItem.quantity,
-            0,
-          );
-          document.querySelector(".total-amount").textContent =
-            `\$${newTotal.toFixed(2)}`;
-        });
-      });
-
-      document.querySelectorAll(".delete-btn").forEach((btn) => {
-        btn.addEventListener("click", (e) => {
-          const index = parseInt(btn.dataset.index);
-          cartItems.value.splice(index, 1);
-
-          if (cartItems.value.length > 0) {
-            openCart();
-          } else {
-            Swal.close();
-          }
-        });
-      });
-    },
-  });
+const goToCart = () => {
+  // 跳轉到指定路由
+  router.push({ name: "Cart" });
 };
 </script>
 
@@ -313,24 +222,42 @@ const openCart = async () => {
     <header class="px-4 mb-8">
       <div class="flex items-center justify-between">
         <div class="flex items-center space-x-4">
-          <img src="" alt="Logo" class="h-12" />
           <div>
-            <h1 class="text-2xl font-bold text-gray-600">得正 台北東湖計劃</h1>
+            <!-- <h1 class="text-2xl font-bold text-gray-600">{{ storeInfo.name }}</h1> -->
+            <h1 class="text-2xl font-bold text-gray-600">
+              12:59早午餐Brunch.Pasta.Coffee.Dessert
+            </h1>
             <div class="text-sm text-gray-600">
-              <span class="flex items-center mr-2">
-                <span class="text-yellow-400">★</span>3.4 (7)
-              </span>
-              <span>11:00 ~ 20:00</span>
+              <!-- <span>{{ storeInfo.businessHours }}</span> -->
+              <span>11:00-16:00</span>
             </div>
+            <!-- <div class="text-sm text-gray-600">
+              <font-awesome-icon :icon="['fas', 'location-dot']" class="text-orange-400" />
+              {{ storeInfo.address }} &nbsp;
+              <font-awesome-icon :icon="['fas', 'phone']" class="text-orange-400" /> {{ storeInfo.phone }}
+            </div> -->
             <div class="text-sm text-gray-600">
-              <i class="fas fa-map-marker-alt"></i>
-              台北市內湖區東湖路133號 &nbsp;
-              <i class="fas fa-phone-alt"></i> 02-2633533
+              <font-awesome-icon
+                :icon="['fas', 'location-dot']"
+                class="text-orange-400"
+              />
+              108台灣台北市萬華區昆明街257巷14號1樓 &nbsp;
+              <font-awesome-icon
+                :icon="['fas', 'phone']"
+                class="text-orange-400"
+              />
+              02 2302 6163
+            </div>
+            <div
+              v-if="storeInfo.description"
+              class="mt-2 text-sm text-gray-600"
+            >
+              {{ storeInfo.description }}
             </div>
           </div>
         </div>
         <button
-          @click="openCart"
+          @click="goToCart"
           class="px-4 py-2 text-white rounded bg-amber-500 hover:bg-amber-400"
         >
           購物車 ({{ cartItems.length }})

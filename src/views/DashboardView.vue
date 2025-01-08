@@ -1,12 +1,12 @@
 <script setup>
 import { ref } from "vue";
+import router from "../router";
 
 const navigation = ref([
   { name: "首頁", link: "/dashboard" },
-  { name: "餐廳資訊", link: "/restaurant-info" },
+  { name: "餐廳資訊", link: "/storesignup" },
   { name: "菜單管理", link: "/menu-management" },
-  { name: "訂單管理", link: "/order-management" },
-  { name: "評論管理", link: "/review-management" },
+  { name: "訂單管理", link: "/" },
 ]);
 
 const overviewCards = ref([
@@ -46,12 +46,26 @@ const currency = (value) => {
     currency: "TWD",
   }).format(value);
 };
+
+const logout = () => localStorage.removeItem("storeToken");
+
+// localStorage.setItem("storeToken", resToken.data.token);
+//     if (resToken) {
+//       Swal.fire({
+//         title: "登入成功",
+//         icon: "success",
+//         timer: 2000,
+//         timerProgressBar: true,
+//       });
+//       //token解碼後可取得店家id
+//       storeId.value = jose.decodeJwt(resToken.data.token).id;
+//     }
 </script>
 
 <template>
   <div class="flex h-screen bg-gray-100">
     <aside class="w-64 bg-white shadow-md">
-      <div class="p-6 text-center text-lg font-semibold text-gray-800">
+      <div class="p-6 text-lg font-semibold text-center text-gray-800">
         餐廳後台
       </div>
       <nav>
@@ -66,6 +80,12 @@ const currency = (value) => {
           </li>
         </ul>
       </nav>
+      <button
+        class="px-4 mt-24 text-lg font-semibold text-center text-gray-800 rounded hover:bg-amber-400"
+        @click="logout"
+      >
+        登出
+      </button>
     </aside>
 
     <!-- Main Content -->
@@ -95,27 +115,27 @@ const currency = (value) => {
             <thead class="bg-gray-100">
               <tr>
                 <th
-                  class="px-4 py-2 text-left text-sm font-semibold text-gray-600"
+                  class="px-4 py-2 text-sm font-semibold text-left text-gray-600"
                 >
                   訂單編號
                 </th>
                 <th
-                  class="px-4 py-2 text-left text-sm font-semibold text-gray-600"
+                  class="px-4 py-2 text-sm font-semibold text-left text-gray-600"
                 >
                   顧客名稱
                 </th>
                 <th
-                  class="px-4 py-2 text-left text-sm font-semibold text-gray-600"
+                  class="px-4 py-2 text-sm font-semibold text-left text-gray-600"
                 >
                   總金額
                 </th>
                 <th
-                  class="px-4 py-2 text-left text-sm font-semibold text-gray-600"
+                  class="px-4 py-2 text-sm font-semibold text-left text-gray-600"
                 >
                   狀態
                 </th>
                 <th
-                  class="px-4 py-2 text-left text-sm font-semibold text-gray-600"
+                  class="px-4 py-2 text-sm font-semibold text-left text-gray-600"
                 >
                   取貨時間
                 </th>

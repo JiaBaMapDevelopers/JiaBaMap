@@ -2,7 +2,8 @@
 import axios from "axios";
 import { useAuth } from "@/stores/authStore";
 import { ref, onMounted } from "vue";
-
+import { useRouter } from "vue-router";
+const router = useRouter();
 const user = useAuth();
 const orders = ref([]);
 
@@ -21,6 +22,9 @@ const delOrder = async (orderId) => {
 };
 console.log(orders);
 
+const goToPay = (orderId) => {
+  router.push({ path: "/checkout/:orderId", params: { id: orderId } });
+};
 onMounted(() => {
   getOrder();
 });
@@ -57,6 +61,7 @@ onMounted(() => {
               <div class="w-6 h-6 ml-4 text-red-500 hover:text-red-600"></div>
 
               <button
+                @click="goToPay(order.orderId)"
                 class="px-4 py-2 text-white bg-blue-500 rounded-full hover:bg-blue-600"
               >
                 立刻結帳

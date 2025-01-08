@@ -54,17 +54,20 @@ const handleFileUpload = (event) => {
 // 更新 fetchMenus 支援搜尋與分頁
 const fetchMenus = async (page = 1) => {
   try {
-    const response = await axios.get("http://localhost:3000/menu", {
-      params: {
-        page,
-        limit: 10, // 每頁 10 筆資料
-        name: searchQuery.value,
-        category: selectedCategory.value,
-        minPrice: minPrice.value || undefined,
-        maxPrice: maxPrice.value || undefined,
-        storeId: "67720e635123faace157e5b3", // 確保這裡傳的是正確的 ObjectId
+    const response = await axios.get(
+      `${import.meta.env.VITE_BACKEND_BASE_URL}/menu`,
+      {
+        params: {
+          page,
+          limit: 10, // 每頁 10 筆資料
+          name: searchQuery.value,
+          category: selectedCategory.value,
+          minPrice: minPrice.value || undefined,
+          maxPrice: maxPrice.value || undefined,
+          storeId: "67720e635123faace157e5b3", // 確保這裡傳的是正確的 ObjectId
+        },
       },
-    });
+    );
 
     // 更新資料與分頁狀態
     menus.value = Array.isArray(response.data.menus) ? response.data.menus : [];
@@ -94,11 +97,15 @@ const addMenu = async () => {
       formData.append("image", menuForm.value.image); // 圖片檔案
     }
 
-    const response = await axios.post("http://localhost:3000/menu", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
+    const response = await axios.post(
+      `${import.meta.env.VITE_BACKEND_BASE_URL}/menu`,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
       },
-    });
+    );
 
     if (response.status === 200 && response.data._id) {
       menus.value.push(response.data); // 更新畫面
@@ -133,7 +140,7 @@ const updateMenu = async () => {
     }
 
     const response = await axios.put(
-      `http://localhost:3000/menu/${editingId.value}`,
+      `${import.meta.env.VITE_BACKEND_BASE_URL}/menu/${editingId.value}`,
       formData,
       {
         headers: {
@@ -159,7 +166,7 @@ const updateMenu = async () => {
 const deleteMenu = async (id) => {
   if (confirm("確定要刪除嗎？")) {
     try {
-      await axios.delete(`http://localhost:3000/menu/${id}`);
+      await axios.delete(`${import.meta.env.VITE_BACKEND_BASE_URL}/menu/${id}`);
       menus.value = menus.value.filter((menu) => menu._id !== id);
     } catch (error) {
       console.error("刪除失敗：", error);
@@ -180,7 +187,16 @@ onMounted(fetchMenus);
 <template>
   <div class="p-6 mt-10">
     <!-- 標題 -->
-    <h1 class="mb-4 text-2xl font-bold">菜單管理</h1>
+    <div class="flex justify-between">
+      <h1 class="mb-4 text-2xl font-bold">菜單管理</h1>
+      <button>
+        <router-link
+          to="/dashboard"
+          class="px-4 py-2 mb-4 text-white transition rounded bg-amber-400 hover:bg-amber-500"
+          >首頁</router-link
+        >
+      </button>
+    </div>
 
     <!-- 新增按鈕 -->
     <button
