@@ -1,9 +1,14 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue';
-import Swal from 'sweetalert2';
-import axios from 'axios';
+import { ref, onMounted, computed } from "vue";
+import { useAuth } from "@/stores/authStore";
+import Swal from "sweetalert2";
+import axios from "axios";
+import { useRouter } from "vue-router";
 
-const storeId = '67720e635123faace157e5b3';
+const router = useRouter();
+const user = useAuth();
+const userData = computed(() => user.userData);
+const storeId = "67720e635123faace157e5b3";
 const categoryRefs = ref([]);
 const selectedCategory = ref(0);
 const cartItems = ref([]);
@@ -44,12 +49,16 @@ const storeInfo = ref({
 // 將菜單按分類整理的計算屬性
 const categorizedMenu = computed(() => {
   // 獲取所有有效的分類（根據後端定義）
-  const validCategories = ['飲料', '主食', '甜點', '湯品'];
-  return validCategories.map(category => ({
-    name: category,
-    // 只顯示該分類下可用的商品
-    items: menus.value.filter(item => item.category === category && item.isAvailable !== false)
-  })).filter(category => category.items.length > 0); // 只顯示有商品的分類
+  const validCategories = ["飲料", "主食", "甜點", "湯品"];
+  return validCategories
+    .map((category) => ({
+      name: category,
+      // 只顯示該分類下可用的商品
+      items: menus.value.filter(
+        (item) => item.category === category && item.isAvailable !== false,
+      ),
+    }))
+    .filter((category) => category.items.length > 0); // 只顯示有商品的分類
 });
 
 // 獲取菜單數據
@@ -58,29 +67,30 @@ const fetchMenus = async () => {
     const response = await axios.get(`${import.meta.env.VITE_BACKEND_BASE_URL}/menu`, {
       params: {
         storeId,
-        limit: 50  // 設定較大的限制以確保獲取所有菜單項目
-      }
+        limit: 50, // 設定較大的限制以確保獲取所有菜單項目
+      },
     });
-    
+
     if (response.data && Array.isArray(response.data.menus)) {
       menus.value = response.data.menus;
+      console.log(menus.value);
     } else {
-      console.error('菜單數據格式錯誤');
+      console.error("菜單數據格式錯誤");
       menus.value = [];
     }
   } catch (error) {
-    console.error('獲取菜單失敗：', error);
+    console.error("獲取菜單失敗：", error);
     Swal.fire({
-      title: '錯誤',
-      text: '無法獲取菜單數據',
-      icon: 'error'
+      title: "錯誤",
+      text: "無法獲取菜單數據",
+      icon: "error",
     });
   }
 };
 
 const scrollToCategory = (index) => {
   selectedCategory.value = index;
-  categoryRefs.value[index]?.scrollIntoView({ behavior: 'smooth' });
+  categoryRefs.value[index]?.scrollIntoView({ behavior: "smooth" });
 };
 
 // Intersection Observer for active category
@@ -89,20 +99,22 @@ onMounted( async () => {
   await fetchStoreInfo();
   const observer = new IntersectionObserver(
     (entries) => {
-      entries.forEach(entry => {
+      entries.forEach((entry) => {
         if (entry.isIntersecting) {
-          const index = categoryRefs.value.findIndex(ref => ref === entry.target);
+          const index = categoryRefs.value.findIndex(
+            (ref) => ref === entry.target,
+          );
           if (index !== -1) {
             selectedCategory.value = index;
           }
         }
       });
     },
-    { threshold: 0.5 }
+    { threshold: 0.5 },
   );
 
   setTimeout(() => {
-    categoryRefs.value.forEach(ref => {
+    categoryRefs.value.forEach((ref) => {
       if (ref) observer.observe(ref);
     });
   }, 100);
@@ -146,12 +158,12 @@ const openItemModal = async (item) => {
         <div class='mt-2 text-gray-600'>總價: <span id='total-price' class='text-red-500'>\$${item.price}</span></div>
       </div>
     `,
-    confirmButtonText: '加入購物車',
+    confirmButtonText: "加入購物車",
     showCancelButton: true,
-    cancelButtonText: '取消',
+    cancelButtonText: "取消",
     customClass: {
-      confirmButton: 'bg-amber-500 text-white',
-      cancelButton: 'bg-gray-300 text-gray-800',
+      confirmButton: "bg-amber-500 text-white",
+      cancelButton: "bg-gray-300 text-gray-800",
     },
     didOpen: () => {
       const quantityElement = document.querySelector('#quantity');
@@ -198,6 +210,10 @@ const openItemModal = async (item) => {
 };
 
 
+const goToCart = () => {
+  // 跳轉到指定路由
+  router.push({ name: "Cart" });
+};
 </script>
 
 <template>
@@ -229,8 +245,8 @@ const openItemModal = async (item) => {
             </div>
           </div>
         </div>
-        <button 
-          @click="openCart"
+        <button
+          @click="goToCart"
           class="px-4 py-2 bg-amber-500 text-white rounded hover:bg-amber-400"
         >
           購物車 ({{ cartItems.length }})
@@ -239,14 +255,18 @@ const openItemModal = async (item) => {
     </header>
 
     <!-- Mobile Navigation -->
-    <nav class="md:hidden sticky top-0 z-10 bg-white rounded-md shadow overflow-x-auto no-scrollbar">
+    <nav
+      class="md:hidden sticky top-0 z-10 bg-white rounded-md shadow overflow-x-auto no-scrollbar"
+    >
       <div class="flex whitespace-nowrap">
-        <button 
-          v-for="(category, index) in categorizedMenu" 
+        <button
+          v-for="(category, index) in categorizedMenu"
           :key="index"
           :class="[
             'px-4 py-2 text-sm font-semibold',
-            selectedCategory === index ? 'text-amber-500 border-b-2 border-amber-500' : 'text-gray-600'
+            selectedCategory === index
+              ? 'text-amber-500 border-b-2 border-amber-500'
+              : 'text-gray-600',
           ]"
           @click="scrollToCategory(index)"
         >
@@ -255,27 +275,30 @@ const openItemModal = async (item) => {
       </div>
     </nav>
 
-
     <!-- Main Content -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-8 px-4 mt-8">
-      <div 
-        v-for="(category, index) in categorizedMenu" 
-        :key="index" 
-        :ref="el => categoryRefs[index] = el"
+      <div
+        v-for="(category, index) in categorizedMenu"
+        :key="index"
+        :ref="(el) => (categoryRefs[index] = el)"
         class="scroll-mt-16"
       >
-        <h2 class="text-amber-500 font-bold text-lg mb-4">{{ category.name }}</h2>
+        <h2 class="text-amber-500 font-bold text-lg mb-4">
+          {{ category.name }}
+        </h2>
         <ul class="space-y-4">
-          <li 
-            v-for="item in category.items" 
-            :key="item._id" 
+          <li
+            v-for="item in category.items"
+            :key="item._id"
             class="flex items-center justify-between cursor-pointer hover:bg-amber-100 p-2 rounded"
             @click="openItemModal(item)"
           >
             <div class="flex items-center space-x-4">
-              <img :src="item.imageUrl" 
-                   alt="商品圖片" 
-                   class="w-16 h-16 object-cover rounded">
+              <img
+                :src="item.imageUrl"
+                alt="商品圖片"
+                class="w-16 h-16 object-cover rounded"
+              />
               <div>
                 <span class="text-gray-800">{{ item.name }}</span>
                 <p class="text-sm text-gray-600">{{ item.description }}</p>
