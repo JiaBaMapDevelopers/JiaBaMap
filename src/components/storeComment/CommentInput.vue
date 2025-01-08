@@ -98,7 +98,7 @@ const closeLoginModal = () => {
           留下您對餐廳的評論
         </button>
         <Stars class="my-2" />
-        <div class="flex flex-col relative" v-if="isExpanded">
+        <div class="relative flex flex-col" v-if="isExpanded">
           <div v-if="userData">
             <textarea
               v-model="commentText"

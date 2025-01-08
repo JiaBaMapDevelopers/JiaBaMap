@@ -32,14 +32,14 @@ onMounted(() => {
 
 <template>
   <div class="p-6">
-    <div class="min-h-screen bg-gray-100 py-8">
+    <div class="min-h-screen py-8 bg-gray-100">
       <div v-if="orders.length > 0">
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 px-4">
+        <div class="grid grid-cols-1 gap-6 px-4 sm:grid-cols-2 lg:grid-cols-3">
           <div
             v-for="order in orders"
-            class="bg-white p-4 rounded-lg shadow-md"
+            class="p-4 bg-white rounded-lg shadow-md"
           >
-            <p class="text-gray-500 text-sm text-right">
+            <p class="text-sm text-right text-gray-500">
               {{ order.orderTime.slice(0, 10) }}
             </p>
 
@@ -52,17 +52,17 @@ onMounted(() => {
 
             <div class="my-4 border-t"></div>
 
-            <p class="text-center text-lg font-bold text-gray-800">
+            <p class="text-lg font-bold text-center text-gray-800">
               共 {{ order.totalAmount }} 元
             </p>
 
             <div class="flex items-center justify-between mt-4">
               <!-- 空白填充，使中間對齊 -->
-              <div class="h-6 w-6 ml-4 text-red-500 hover:text-red-600"></div>
+              <div class="w-6 h-6 ml-4 text-red-500 hover:text-red-600"></div>
 
               <button
                 @click="goToPay(order.orderId)"
-                class="px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600"
+                class="px-4 py-2 text-white bg-blue-500 rounded-full hover:bg-blue-600"
               >
                 立刻結帳
               </button>
@@ -73,7 +73,7 @@ onMounted(() => {
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  class="h-6 w-6"
+                  class="w-6 h-6"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"

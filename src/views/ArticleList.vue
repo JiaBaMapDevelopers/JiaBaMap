@@ -1,67 +1,59 @@
 <script setup>
-import { ref, onMounted, onUnmounted, inject } from 'vue';
-import axios from 'axios';
-import dayjs from 'dayjs'
+import { ref, onMounted, onUnmounted, inject } from "vue";
+import axios from "axios";
+import dayjs from "dayjs";
 import Header from "../components/Header.vue";
-import { useAuth } from '../stores/authStore';
-import { storeToRefs } from 'pinia';
+import { useAuth } from "../stores/authStore";
+import { storeToRefs } from "pinia";
 
 const auth = useAuth();
 const { userData } = storeToRefs(auth);
 
-const $swal = inject('$swal');  // 注入 $swal
+const $swal = inject("$swal"); // 注入 $swal
 
 const formatDate = (date) => {
- return dayjs(date).format('YYYY-MM-DD HH:mm:ss');
+  return dayjs(date).format("YYYY-MM-DD HH:mm:ss");
 };
-
 
 const articles = ref([]);
 
-
 const newComment = ref({
- content: '',
+  content: "",
 });
 
 const newReply = ref({
- content: '',
- replyingTo: null
+  content: "",
+  replyingTo: null,
 });
 
 // 設置 axios  URL
 const api = axios.create({
- baseURL: import.meta.env.VITE_BACKEND_BASE_URL
+  baseURL: import.meta.env.VITE_BACKEND_BASE_URL,
 });
-
 
 // 獲取所有文章
 const fetchArticles = async () => {
   try {
     const userId = userData.value?.sub;
-    const { data } = await api.get('/articles', {
-      params: { userId }
+    const { data } = await api.get("/articles", {
+      params: { userId },
     });
 
-    articles.value = data.map(article => ({
+    articles.value = data.map((article) => ({
       ...article,
       comments: article.comments || [],
       showComments: false,
     }));
   } catch (error) {
     await swalWithBootstrapButtons.fire({
-      title: '錯誤！',
-      text: '獲取文章失敗，請稍後再試',
-      icon: 'error',
-      confirmButtonText: '確定'
+      title: "錯誤！",
+      text: "獲取文章失敗，請稍後再試",
+      icon: "error",
+      confirmButtonText: "確定",
     });
     articles.value = []; // 清空文章列表
   }
 };
-
-
-
-
-
 
 // 獲取文章按讚端點
 const getArticleLikeEndpoint = (id) => {
@@ -70,42 +62,49 @@ const getArticleLikeEndpoint = (id) => {
 
 // 獲取評論按讚端點
 const getCommentLikeEndpoint = (id) => {
-  const article = articles.value.find(a => a.comments.some(c => c._id === id));
+  const article = articles.value.find((a) =>
+    a.comments.some((c) => c._id === id),
+  );
   if (article) {
     return `/articles/${article._id}/comments/${id}/like`;
   }
-  return '';
+  return "";
 };
 
 // 獲取回覆按讚端點
 const getReplyLikeEndpoint = (id) => {
-  const article = articles.value.find(a => 
-    a.comments.some(c => c.replies.some(r => r._id === id))
+  const article = articles.value.find((a) =>
+    a.comments.some((c) => c.replies.some((r) => r._id === id)),
   );
   if (article) {
-    const comment = article.comments.find(c => 
-      c.replies.some(r => r._id === id)
+    const comment = article.comments.find((c) =>
+      c.replies.some((r) => r._id === id),
     );
     if (comment) {
       return `/articles/${article._id}/comments/${comment._id}/replies/${id}/like`;
     }
   }
-  return '';
+  return "";
 };
 
 // 更新按讚狀態
 const updateLikeStatus = (type, id, responseData) => {
   let target;
-  
+
   switch (type) {
-    case 'article':
-      target = articles.value.find(item => item._id === id);
+    case "article":
+      target = articles.value.find((item) => item._id === id);
       break;
-    case 'comment':
-      target = articles.value.flatMap(a => a.comments).find(item => item._id === id);
+    case "comment":
+      target = articles.value
+        .flatMap((a) => a.comments)
+        .find((item) => item._id === id);
       break;
-    case 'reply':
-      target = articles.value.flatMap(a => a.comments).flatMap(c => c.replies).find(item => item._id === id);
+    case "reply":
+      target = articles.value
+        .flatMap((a) => a.comments)
+        .flatMap((c) => c.replies)
+        .find((item) => item._id === id);
       break;
   }
 
@@ -123,10 +122,10 @@ const toggleLike = async (type, id) => {
   // 檢查登入狀態
   if (!userData.value) {
     await swalWithBootstrapButtons.fire({
-      title: '提醒',
-      text: '請先登入後再按讚',
-      icon: 'warning',
-      confirmButtonText: '確定'
+      title: "提醒",
+      text: "請先登入後再按讚",
+      icon: "warning",
+      confirmButtonText: "確定",
     });
     return;
   }
@@ -134,65 +133,63 @@ const toggleLike = async (type, id) => {
   // 檢查用戶 ID
   const userId = userData.value._id;
   if (!userId) {
-    console.error('No userId found in userData:', userData.value);
+    console.error("No userId found in userData:", userData.value);
     await swalWithBootstrapButtons.fire({
-      title: '錯誤',
-      text: '無法獲取用戶資訊，請重新登入',
-      icon: 'error',
-      confirmButtonText: '確定'
+      title: "錯誤",
+      text: "無法獲取用戶資訊，請重新登入",
+      icon: "error",
+      confirmButtonText: "確定",
     });
     return;
   }
 
   // 獲取對應的端點
-  let endpoint = '';
+  let endpoint = "";
   switch (type) {
-    case 'article':
+    case "article":
       endpoint = getArticleLikeEndpoint(id);
       break;
-    case 'comment':
+    case "comment":
       endpoint = getCommentLikeEndpoint(id);
       break;
-    case 'reply':
+    case "reply":
       endpoint = getReplyLikeEndpoint(id);
       break;
   }
 
-    const response = await api.post(endpoint, 
-      { userId }, 
-      {
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      }
-    );
-    
-    if (response.status === 200) {
-      updateLikeStatus(type, id, response.data);
-    }
+  const response = await api.post(
+    endpoint,
+    { userId },
+    {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    },
+  );
+
+  if (response.status === 200) {
+    updateLikeStatus(type, id, response.data);
+  }
 };
-
-
-
 
 // 添加評論
 const addComment = async (articleId) => {
   if (!userData.value) {
     await swalWithBootstrapButtons.fire({
-      title: '提醒',
-      text: '請先登入後再發表評論',
-      icon: 'warning',
-      confirmButtonText: '確定'
+      title: "提醒",
+      text: "請先登入後再發表評論",
+      icon: "warning",
+      confirmButtonText: "確定",
     });
     return;
   }
 
   if (!newComment.value.content.trim()) {
     await swalWithBootstrapButtons.fire({
-      title: '提醒',
-      text: '請輸入評論內容',
-      icon: 'warning',
-      confirmButtonText: '確定'
+      title: "提醒",
+      text: "請輸入評論內容",
+      icon: "warning",
+      confirmButtonText: "確定",
     });
     return;
   }
@@ -202,12 +199,15 @@ const addComment = async (articleId) => {
       content: newComment.value.content.trim(),
       userId: userData.value._id,
       user: userData.value.name,
-      userPhoto: userData.value.profilePicture
+      userPhoto: userData.value.profilePicture,
     };
 
-    const { data } = await api.post(`/articles/${articleId}/comments`, commentData);
-    
-    const article = articles.value.find(a => a._id === articleId);
+    const { data } = await api.post(
+      `/articles/${articleId}/comments`,
+      commentData,
+    );
+
+    const article = articles.value.find((a) => a._id === articleId);
     if (article) {
       if (!article.comments) {
         article.comments = [];
@@ -221,15 +221,15 @@ const addComment = async (articleId) => {
         createdAt: data.createdAt,
         likesCount: 0,
         isLiked: false,
-        replies: []
+        replies: [],
       });
-      newComment.value.content = '';
+      newComment.value.content = "";
     }
   } catch (error) {
     await swalWithBootstrapButtons.fire({
-      title: '錯誤！',
-      text: '發表評論失敗，請稍後再試',
-      icon: 'error'
+      title: "錯誤！",
+      text: "發表評論失敗，請稍後再試",
+      icon: "error",
     });
   }
 };
@@ -237,38 +237,40 @@ const addComment = async (articleId) => {
 // 刪除評論函數
 const deleteComment = async (articleId, commentId) => {
   const result = await swalWithBootstrapButtons.fire({
-    title: '確定要刪除評論？',
-    text: '刪除後將無法恢復！',
-    icon: 'warning',
+    title: "確定要刪除評論？",
+    text: "刪除後將無法恢復！",
+    icon: "warning",
     showCancelButton: true,
-    confirmButtonText: '刪除！',
-    cancelButtonText: '取消',
-    reverseButtons: true
+    confirmButtonText: "刪除！",
+    cancelButtonText: "取消",
+    reverseButtons: true,
   });
-  
+
   if (result.isConfirmed) {
     try {
       await api.delete(`/articles/${articleId}/comments/${commentId}`);
-      
+
       // 在前端更新資料
-      const article = articles.value.find(a => a._id === articleId);
+      const article = articles.value.find((a) => a._id === articleId);
       if (article) {
-        const commentIndex = article.comments.findIndex(c => c._id === commentId);
+        const commentIndex = article.comments.findIndex(
+          (c) => c._id === commentId,
+        );
         if (commentIndex !== -1) {
           article.comments.splice(commentIndex, 1);
         }
       }
 
       await swalWithBootstrapButtons.fire({
-        title: '已刪除！',
-        text: '評論已成功刪除。',
-        icon: 'success'
+        title: "已刪除！",
+        text: "評論已成功刪除。",
+        icon: "success",
       });
     } catch (error) {
       await swalWithBootstrapButtons.fire({
-        title: '錯誤！',
-        text: error.response?.data?.message || '刪除評論失敗，請稍後再試',
-        icon: 'error'
+        title: "錯誤！",
+        text: error.response?.data?.message || "刪除評論失敗，請稍後再試",
+        icon: "error",
       });
     }
   }
@@ -278,20 +280,20 @@ const deleteComment = async (articleId, commentId) => {
 const addReply = async (articleId, commentId) => {
   if (!userData.value) {
     await swalWithBootstrapButtons.fire({
-      title: '提醒',
-      text: '請先登入後再發表回覆',
-      icon: 'warning',
-      confirmButtonText: '確定'
+      title: "提醒",
+      text: "請先登入後再發表回覆",
+      icon: "warning",
+      confirmButtonText: "確定",
     });
     return;
   }
 
   if (!newReply.value.content.trim()) {
     await swalWithBootstrapButtons.fire({
-      title: '提醒',
-      text: '請輸入回覆內容',
-      icon: 'warning',
-      confirmButtonText: '確定'
+      title: "提醒",
+      text: "請輸入回覆內容",
+      icon: "warning",
+      confirmButtonText: "確定",
     });
     return;
   }
@@ -301,13 +303,16 @@ const addReply = async (articleId, commentId) => {
       content: newReply.value.content.trim(),
       userId: userData.value._id,
       user: userData.value.name,
-      userPhoto: userData.value.profilePicture
+      userPhoto: userData.value.profilePicture,
     };
 
-    const { data } = await api.post(`/articles/${articleId}/comments/${commentId}/replies`, newReplyData);
-    const article = articles.value.find(a => a._id === articleId);
+    const { data } = await api.post(
+      `/articles/${articleId}/comments/${commentId}/replies`,
+      newReplyData,
+    );
+    const article = articles.value.find((a) => a._id === articleId);
     if (article) {
-      const comment = article.comments.find(c => c._id === commentId);
+      const comment = article.comments.find((c) => c._id === commentId);
       if (comment) {
         if (!comment.replies) {
           comment.replies = [];
@@ -320,44 +325,46 @@ const addReply = async (articleId, commentId) => {
           userPhoto: userData.value.profilePicture,
           createdAt: data.createdAt,
           likesCount: 0,
-          isLiked: false
+          isLiked: false,
         });
       }
     }
-    newReply.value.content = '';
+    newReply.value.content = "";
     newReply.value.replyingTo = null;
   } catch (error) {
     await swalWithBootstrapButtons.fire({
-      title: '錯誤！',
-      text: error.response?.data?.message || '發表回覆失敗，請稍後再試',
-      icon: 'error'
+      title: "錯誤！",
+      text: error.response?.data?.message || "發表回覆失敗，請稍後再試",
+      icon: "error",
     });
   }
 };
 
-
 // 刪除回覆函數
 const deleteReply = async (articleId, commentId, replyId) => {
   const result = await swalWithBootstrapButtons.fire({
-    title: '確定要刪除回覆？',
-    text: '刪除後將無法恢復！',
-    icon: 'warning',
+    title: "確定要刪除回覆？",
+    text: "刪除後將無法恢復！",
+    icon: "warning",
     showCancelButton: true,
-    confirmButtonText: '刪除',
-    cancelButtonText: '取消',
-    reverseButtons: true
+    confirmButtonText: "刪除",
+    cancelButtonText: "取消",
+    reverseButtons: true,
   });
 
   if (result.isConfirmed) {
     try {
-      await api.delete(`/articles/${articleId}/comments/${commentId}/replies/${replyId}`);
-      
-      
-      const article = articles.value.find(a => a._id === articleId);
+      await api.delete(
+        `/articles/${articleId}/comments/${commentId}/replies/${replyId}`,
+      );
+
+      const article = articles.value.find((a) => a._id === articleId);
       if (article) {
-        const comment = article.comments.find(c => c._id === commentId);
+        const comment = article.comments.find((c) => c._id === commentId);
         if (comment) {
-          const replyIndex = comment.replies.findIndex(r => r._id === replyId);
+          const replyIndex = comment.replies.findIndex(
+            (r) => r._id === replyId,
+          );
           if (replyIndex !== -1) {
             comment.replies.splice(replyIndex, 1);
           }
@@ -365,40 +372,39 @@ const deleteReply = async (articleId, commentId, replyId) => {
       }
 
       await swalWithBootstrapButtons.fire({
-        title: '已刪除！',
-        text: '回覆已刪除。',
-        icon: 'success'
+        title: "已刪除！",
+        text: "回覆已刪除。",
+        icon: "success",
       });
     } catch (error) {
       await swalWithBootstrapButtons.fire({
-        title: '錯誤！',
-        text: error.response?.data?.message || '刪除回覆失敗，請稍後再試',
-        icon: 'error'
+        title: "錯誤！",
+        text: error.response?.data?.message || "刪除回覆失敗，請稍後再試",
+        icon: "error",
       });
     }
   }
 };
 
-
 const toggleContent = (article) => {
- article.showFullContent = !article.showFullContent;
+  article.showFullContent = !article.showFullContent;
 };
 
 const toggleReplyForm = async (commentId) => {
   if (!userData.value) {
     await swalWithBootstrapButtons.fire({
-      title: '提醒',
-      text: '請先登入後再發表回覆',
-      icon: 'warning',
-      confirmButtonText: '確定'
+      title: "提醒",
+      text: "請先登入後再發表回覆",
+      icon: "warning",
+      confirmButtonText: "確定",
     });
     return;
   }
 
   if (newReply.value.replyingTo === commentId) {
-    newReply.value.replyingTo = null;  // 關閉表單
+    newReply.value.replyingTo = null; // 關閉表單
   } else {
-    newReply.value.replyingTo = commentId;  // 打開表單
+    newReply.value.replyingTo = commentId; // 打開表單
   }
 };
 
@@ -412,7 +418,10 @@ const toggleMenu = (id) => {
 
 // 點擊外部關閉選單
 const handleClickOutside = (event) => {
-  if (!event.target.closest('.menu-button') && !event.target.closest('.menu-content')) {
+  if (
+    !event.target.closest(".menu-button") &&
+    !event.target.closest(".menu-content")
+  ) {
     activeMenuId.value = null;
   }
 };
@@ -433,38 +442,39 @@ const handleResize = () => {
 
 console.log(articles.content);
 
-
 // 在 onMounted 中調用
 onMounted(async () => {
   await fetchArticles();
-  document.addEventListener('click', handleClickOutside);
-  window.addEventListener('resize', handleResize);
+  document.addEventListener("click", handleClickOutside);
+  window.addEventListener("resize", handleResize);
 });
 
 onUnmounted(() => {
-  document.removeEventListener('click', handleClickOutside);
-  window.removeEventListener('resize', handleResize);
+  document.removeEventListener("click", handleClickOutside);
+  window.removeEventListener("resize", handleResize);
 });
 
 // 配置 SweetAlert 樣式
 const swalWithBootstrapButtons = $swal.mixin({
   customClass: {
-    confirmButton: 'bg-red-500 text-white px-6 py-2 rounded mx-2 hover:bg-red-600',
-    cancelButton: 'bg-gray-500 text-white px-6 py-2 rounded mx-2 hover:bg-gray-600',
-    actions: 'flex justify-center gap-4'
+    confirmButton:
+      "bg-red-500 text-white px-6 py-2 rounded mx-2 hover:bg-red-600",
+    cancelButton:
+      "bg-gray-500 text-white px-6 py-2 rounded mx-2 hover:bg-gray-600",
+    actions: "flex justify-center gap-4",
   },
-  buttonsStyling: false
+  buttonsStyling: false,
 });
 
 const deleteArticle = async (articleId) => {
   const result = await swalWithBootstrapButtons.fire({
-    title: '確定要刪除文章？',
-    text: '刪除後將無法恢復！',
-    icon: 'warning',
+    title: "確定要刪除文章？",
+    text: "刪除後將無法恢復！",
+    icon: "warning",
     showCancelButton: true,
-    confirmButtonText: '刪除',
-    cancelButtonText: '取消',
-    reverseButtons: true
+    confirmButtonText: "刪除",
+    cancelButtonText: "取消",
+    reverseButtons: true,
   });
 
   if (result.isConfirmed) {
@@ -472,15 +482,15 @@ const deleteArticle = async (articleId) => {
       await api.delete(`/articles/${articleId}`);
       await fetchArticles(); // 重新獲取文章列表
       await swalWithBootstrapButtons.fire({
-        title: '已刪除！',
-        text: '文章已成功刪除。',
-        icon: 'success'
+        title: "已刪除！",
+        text: "文章已成功刪除。",
+        icon: "success",
       });
     } catch (error) {
       await swalWithBootstrapButtons.fire({
-        title: '錯誤！',
-        text: '刪除文章失敗，請稍後再試',
-        icon: 'error'
+        title: "錯誤！",
+        text: "刪除文章失敗，請稍後再試",
+        icon: "error",
       });
     }
   }
@@ -488,49 +498,61 @@ const deleteArticle = async (articleId) => {
 
 // 切換評論顯示
 const toggleComments = (articleId) => {
-  const article = articles.value.find(a => a._id === articleId);
+  const article = articles.value.find((a) => a._id === articleId);
   if (article) {
     article.showComments = !article.showComments;
   }
 };
-const  contentHtml = `${articles.value.content}`
-
-
+const contentHtml = `${articles.value.content}`;
 </script>
 
 <template>
   <Header @search-toggle="handleSearchToggle" />
-  <div :class="['max-w-4xl mx-auto', { 'mt-24': isSearchOpen && isMobile, 'md:mt-14 mt-16': !isSearchOpen || !isMobile }]">
-    <article 
-      v-for="article in articles" 
+  <div
+    :class="[
+      'max-w-4xl mx-auto',
+      {
+        'mt-24': isSearchOpen && isMobile,
+        'md:mt-14 mt-16': !isSearchOpen || !isMobile,
+      },
+    ]"
+  >
+    <article
+      v-for="article in articles"
       :key="article._id"
-      class="mb-8 bg-white rounded-lg shadow-md overflow-hidden"
+      class="mb-8 overflow-hidden bg-white rounded-lg shadow-md"
     >
       <!-- 桌面版排版 (>=768px) -->
       <div class="hidden md:block">
         <div class="p-6">
-          <div class="flex justify-between items-start mb-4">
-            <img 
-              :src="article.photo" 
+          <div class="flex items-start justify-between mb-4">
+            <img
+              :src="article.photo"
               :alt="article.title"
-              class="w-full h-64 object-cover rounded-lg"
+              class="object-cover w-full h-64 rounded-lg"
             />
             <!-- 三點選單 -->
-            <div v-if="userData && userData._id === article.userId" class="relative group ml-2">
-              <button 
+            <div
+              v-if="userData && userData._id === article.userId"
+              class="relative ml-2 group"
+            >
+              <button
                 @click.stop="toggleMenu(article._id)"
-                class="text-gray-500 hover:text-gray-700 px-2 font-bold menu-button"
+                class="px-2 font-bold text-gray-500 hover:text-gray-700 menu-button"
               >
                 <font-awesome-icon :icon="['fas', 'ellipsis']" />
               </button>
               <!-- 下拉選單 -->
-              <div 
+              <div
                 v-if="activeMenuId === article._id"
                 class="absolute right-0 mt-1 bg-amber-200 rounded-lg shadow-lg py-1 min-w-[100px] z-10 menu-content"
               >
-                <button 
-                  @click="deleteArticle(article._id); activeMenuId = null"
-                  class="w-full text-center px-4 py-2 text-sm font-bold text-red-500 hover:bg-gray-300"
+                <button
+                  @click="
+                    deleteArticle(article._id);
+                    activeMenuId = null;
+                  "
+                  class="w-full px-4 py-2 text-sm font-bold text-center text-red-500 hover:bg-gray-300"
                 >
                   刪除
                 </button>
@@ -540,30 +562,30 @@ const  contentHtml = `${articles.value.content}`
           <div class="space-y-4">
             <h2 class="text-2xl font-bold">{{ article.restaurantName }}</h2>
             <h2 class="text-2xl font-bold">{{ article.title }}</h2>
-            <div class="flex items-center text-gray-600 space-x-4">
+            <div class="flex items-center space-x-4 text-gray-600">
               <span>{{ formatDate(article.createdAt) }}</span>
             </div>
             <div class="relative">
-              <!-- <p class="text-gray-700 leading-relaxed whitespace-pre-wrap break-words line-clamp-3" 
+              <!-- <p class="leading-relaxed text-gray-700 break-words whitespace-pre-wrap line-clamp-3" 
                  :class="{ 'line-clamp-none': article.showFullContent }">
                 {{ article.content }}
               </p> -->
               <div v-html="article.content"></div>
-              <button 
+              <button
                 @click="toggleContent(article)"
-                class="text-blue-500 text-sm mt-2"
+                class="mt-2 text-sm text-blue-500"
               >
-                {{ article.showFullContent ? '收起' : '繼續閱讀' }}
+                {{ article.showFullContent ? "收起" : "繼續閱讀" }}
               </button>
             </div>
-            <div class="flex justify-between items-center mt-4">
+            <div class="flex items-center justify-between mt-4">
               <div class="flex items-center space-x-2">
-                <button 
+                <button
                   @click="toggleLike('article', article._id)"
                   class="flex items-center space-x-2 text-blue-500 hover:text-blue-600"
                 >
-                  <font-awesome-icon 
-                    :icon="[article.isLiked ? 'fas' : 'far', 'thumbs-up']" 
+                  <font-awesome-icon
+                    :icon="[article.isLiked ? 'fas' : 'far', 'thumbs-up']"
                     class="text-xl"
                   />
                   <span class="text-sm">{{ article.likesCount }}</span>
@@ -571,12 +593,17 @@ const  contentHtml = `${articles.value.content}`
               </div>
 
               <div class="flex items-center">
-                <button 
+                <button
                   @click="toggleComments(article._id)"
                   class="flex items-center space-x-2 text-gray-600 hover:text-gray-800"
                 >
-                  <font-awesome-icon :icon="['far', 'comment']" class="text-xl" />
-                  <span class="text-sm">{{ article.comments?.length || 0 }}</span>
+                  <font-awesome-icon
+                    :icon="['far', 'comment']"
+                    class="text-xl"
+                  />
+                  <span class="text-sm">{{
+                    article.comments?.length || 0
+                  }}</span>
                 </button>
               </div>
             </div>
@@ -587,30 +614,38 @@ const  contentHtml = `${articles.value.content}`
       <!-- 手機版排版 (<768px) -->
       <div class="md:hidden">
         <div class="relative">
-          <img 
-            :src="article.photo" 
+          <img
+            :src="article.photo"
             :alt="article.title"
-            class="w-full h-48 object-cover"
+            class="object-cover w-full h-48"
           />
-          <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-4">
-            <div class="flex justify-between items-center">
+          <div
+            class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black to-transparent"
+          >
+            <div class="flex items-center justify-between">
               <h2 class="text-xl font-bold text-white">{{ article.title }}</h2>
               <!-- 三點選單 -->
-              <div v-if="userData && userData._id === article.userId" class="relative group">
-                <button 
+              <div
+                v-if="userData && userData._id === article.userId"
+                class="relative group"
+              >
+                <button
                   @click.stop="toggleMenu(article._id)"
-                  class="text-white hover:text-gray-200 px-2 font-bold menu-button"
+                  class="px-2 font-bold text-white hover:text-gray-200 menu-button"
                 >
                   <font-awesome-icon :icon="['fas', 'ellipsis']" />
                 </button>
                 <!-- 下拉選單 -->
-                <div 
+                <div
                   v-if="activeMenuId === article._id"
                   class="absolute right-0 mt-1 bg-amber-200 rounded-lg shadow-lg py-1 min-w-[100px] z-10 menu-content"
                 >
-                  <button 
-                    @click="deleteArticle(article._id); activeMenuId = null"
-                    class="w-full text-center px-4 py-2 text-sm font-bold text-red-500 hover:bg-gray-300"
+                  <button
+                    @click="
+                      deleteArticle(article._id);
+                      activeMenuId = null;
+                    "
+                    class="w-full px-4 py-2 text-sm font-bold text-center text-red-500 hover:bg-gray-300"
                   >
                     刪除
                   </button>
@@ -620,26 +655,29 @@ const  contentHtml = `${articles.value.content}`
           </div>
         </div>
         <div class="p-4 space-y-3">
-          <div class="flex justify-between items-center text-sm text-gray-600">
+          <div class="flex items-center justify-between text-sm text-gray-600">
             <span>{{ formatDate(article.createdAt) }}</span>
           </div>
           <div class="relative">
-            <p  class="text-gray-700 text-sm line-clamp-3" :class="{ 'line-clamp-none': !article.showFullContent }">
+            <p
+              class="text-sm text-gray-700 line-clamp-3"
+              :class="{ 'line-clamp-none': !article.showFullContent }"
+            >
               {{ article.content }}
             </p>
-            <button 
+            <button
               @click="toggleContent(article)"
-              class="text-blue-500 text-sm mt-2"
+              class="mt-2 text-sm text-blue-500"
             >
-              {{ article.showFullContent ? '繼續閱讀' : '收起' }}
+              {{ article.showFullContent ? "繼續閱讀" : "收起" }}
             </button>
           </div>
-          <button 
+          <button
             @click="toggleLike('article', article._id)"
             class="flex items-center space-x-1 text-blue-500 hover:text-blue-600"
           >
-            <font-awesome-icon 
-              :icon="[article.isLiked ? 'fas' : 'far', 'thumbs-up']" 
+            <font-awesome-icon
+              :icon="[article.isLiked ? 'fas' : 'far', 'thumbs-up']"
               class="text-xl"
             />
             <span>{{ article.likesCount }}</span>
@@ -661,63 +699,78 @@ const  contentHtml = `${articles.value.content}`
             />
             <button
               @click="addComment(article._id)"
-              class="px-4 py-2 bg-amber-500 text-white rounded-full transition-colors hover:bg-amber-600"
+              class="px-4 py-2 text-white transition-colors rounded-full bg-amber-500 hover:bg-amber-600"
             >
               發送
             </button>
           </div>
 
           <!-- 評論列表 -->
-          <div v-for="comment in article.comments" :key="comment._id" class="pl-4 border-l-2">
+          <div
+            v-for="comment in article.comments"
+            :key="comment._id"
+            class="pl-4 border-l-2"
+          >
             <div class="flex items-center gap-3 mb-2">
               <div class="w-8 h-8">
-                <img 
+                <img
                   :src="comment.userPhoto"
-                  class="w-full h-full rounded-full object-cover"
+                  class="object-cover w-full h-full rounded-full"
                 />
               </div>
               <div class="flex flex-col">
-                <span class="font-medium text-sm md:text-base">{{ comment.user }}</span>
-                <span class="text-xs md:text-sm text-gray-500">{{ formatDate(comment.createdAt) }}</span>
+                <span class="text-sm font-medium md:text-base">{{
+                  comment.user
+                }}</span>
+                <span class="text-xs text-gray-500 md:text-sm">{{
+                  formatDate(comment.createdAt)
+                }}</span>
               </div>
             </div>
-            <p class="text-sm md:text-base text-gray-700 ml-11">{{ comment.content }}</p>
+            <p class="text-sm text-gray-700 md:text-base ml-11">
+              {{ comment.content }}
+            </p>
 
             <div class="flex items-center justify-between mt-2">
-              <div class="flex gap-4 items-center w-full ml-11">
-                <button 
+              <div class="flex items-center w-full gap-4 ml-11">
+                <button
                   @click="toggleLike('comment', comment._id)"
                   class="flex items-center space-x-1 text-blue-500 hover:text-blue-600"
                 >
-                  <font-awesome-icon 
-                    :icon="[comment.isLiked ? 'fas' : 'far', 'thumbs-up']" 
+                  <font-awesome-icon
+                    :icon="[comment.isLiked ? 'fas' : 'far', 'thumbs-up']"
                     class="text-xl"
                   />
                   <span>{{ comment.likesCount }}</span>
                 </button>
                 <div class="flex items-center gap-2">
-                  <button 
+                  <button
                     @click="toggleReplyForm(comment._id)"
-                    class="text-blue-500 text-sm hover:text-blue-600"
+                    class="text-sm text-blue-500 hover:text-blue-600"
                   >
-                    {{ newReply.replyingTo === comment._id ? '取消回覆' : '回覆' }}
+                    {{
+                      newReply.replyingTo === comment._id ? "取消回覆" : "回覆"
+                    }}
                   </button>
                   <!-- 評論的三點選單 -->
                   <div class="relative group">
-                    <button 
+                    <button
                       @click.stop="toggleMenu(comment._id)"
-                      class="text-gray-500 hover:text-gray-700 px-2 font-bold menu-button"
+                      class="px-2 font-bold text-gray-500 hover:text-gray-700 menu-button"
                     >
                       <font-awesome-icon :icon="['fas', 'ellipsis']" />
                     </button>
                     <!-- 下拉選單 -->
-                    <div 
+                    <div
                       v-if="activeMenuId === comment._id"
-                      class="absolute left-8 top-0  bg-amber-200 rounded-lg shadow-lg py-1 min-w-[100px] z-10 menu-content"
+                      class="absolute left-8 top-0 bg-amber-200 rounded-lg shadow-lg py-1 min-w-[100px] z-10 menu-content"
                     >
-                      <button 
-                        @click="deleteComment(article._id, comment._id); activeMenuId = null"
-                        class="w-full text-center px-4 py-2 text-sm font-bold text-red-500 hover:bg-gray-300"
+                      <button
+                        @click="
+                          deleteComment(article._id, comment._id);
+                          activeMenuId = null;
+                        "
+                        class="w-full px-4 py-2 text-sm font-bold text-center text-red-500 hover:bg-gray-300"
                       >
                         刪除
                       </button>
@@ -728,55 +781,60 @@ const  contentHtml = `${articles.value.content}`
             </div>
 
             <!-- 回覆列表 -->
-            <div 
+            <div
               v-if="comment.replies && comment.replies.length > 0"
-              class="mt-3 ml-11 space-y-3"
+              class="mt-3 space-y-3 ml-11"
             >
-              <div 
+              <div
                 v-for="reply in comment.replies"
                 :key="reply._id"
-                class="bg-gray-50 p-3 rounded"
+                class="p-3 rounded bg-gray-50"
               >
                 <div class="flex items-center gap-3 mb-2">
                   <div class="w-6 h-6">
-                    <img 
+                    <img
                       :src="reply.userPhoto"
-                      class="w-full h-full rounded-full object-cover"
+                      class="object-cover w-full h-full rounded-full"
                     />
                   </div>
                   <div class="flex flex-col">
-                    <span class="font-medium text-sm">{{ reply.user }}</span>
-                    <span class="text-xs text-gray-500">{{ formatDate(reply.createdAt) }}</span>
+                    <span class="text-sm font-medium">{{ reply.user }}</span>
+                    <span class="text-xs text-gray-500">{{
+                      formatDate(reply.createdAt)
+                    }}</span>
                   </div>
                 </div>
                 <p class="text-sm text-gray-700 ml-9">{{ reply.content }}</p>
                 <div class="flex items-center gap-4 mt-2 ml-9">
-                  <button 
+                  <button
                     @click="toggleLike('reply', reply._id)"
                     class="flex items-center space-x-1 text-blue-500 hover:text-blue-600"
                   >
-                    <font-awesome-icon 
-                      :icon="[reply.isLiked ? 'fas' : 'far', 'thumbs-up']" 
+                    <font-awesome-icon
+                      :icon="[reply.isLiked ? 'fas' : 'far', 'thumbs-up']"
                       class="text-lg"
                     />
                     <span>{{ reply.likesCount }}</span>
                   </button>
                   <!-- 回覆的三點選單 -->
                   <div class="relative group">
-                    <button 
+                    <button
                       @click.stop="toggleMenu(reply._id)"
-                      class="text-gray-500 hover:text-gray-700 px-2 font-bold menu-button"
+                      class="px-2 font-bold text-gray-500 hover:text-gray-700 menu-button"
                     >
                       <font-awesome-icon :icon="['fas', 'ellipsis']" />
                     </button>
                     <!-- 下拉選單 -->
-                    <div 
+                    <div
                       v-if="activeMenuId === reply._id"
                       class="absolute left-8 top-0 bg-amber-200 rounded-lg shadow-lg py-1 min-w-[100px] z-10 menu-content"
                     >
-                      <button 
-                        @click="deleteReply(article._id, comment._id, reply._id); activeMenuId = null"
-                        class="w-full text-center px-4 py-2 text-sm font-bold text-red-500 hover:bg-gray-300 z-50"
+                      <button
+                        @click="
+                          deleteReply(article._id, comment._id, reply._id);
+                          activeMenuId = null;
+                        "
+                        class="z-50 w-full px-4 py-2 text-sm font-bold text-center text-red-500 hover:bg-gray-300"
                       >
                         刪除
                       </button>
@@ -787,19 +845,22 @@ const  contentHtml = `${articles.value.content}`
             </div>
 
             <!-- 回覆表單 -->
-            <div 
-              v-if="newReply.replyingTo === comment._id"
-              class="mt-3 ml-11"
-            >
+            <div v-if="newReply.replyingTo === comment._id" class="mt-3 ml-11">
               <div class="flex items-start gap-3">
                 <div v-if="userData" class="w-6 h-6">
-                  <img 
+                  <img
                     :src="userData.profilePicture"
-                    class="w-full h-full rounded-full object-cover"
+                    class="object-cover w-full h-full rounded-full"
                   />
                 </div>
-                <div v-else class="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center">
-                  <font-awesome-icon :icon="['fas', 'user']" class="text-gray-400 text-sm" />
+                <div
+                  v-else
+                  class="flex items-center justify-center w-6 h-6 bg-gray-200 rounded-full"
+                >
+                  <font-awesome-icon
+                    :icon="['fas', 'user']"
+                    class="text-sm text-gray-400"
+                  />
                 </div>
                 <div class="flex-1">
                   <div class="relative">
@@ -807,25 +868,38 @@ const  contentHtml = `${articles.value.content}`
                       v-model="newReply.content"
                       rows="2"
                       maxlength="200"
-                      class="w-full border rounded p-2 text-sm disabled:bg-gray-100"
+                      class="w-full p-2 text-sm border rounded disabled:bg-gray-100"
                       :class="{ 'bg-gray-50': newReply.content.length >= 200 }"
-                      :placeholder="userData ? '請發表回覆...' : '請先登入後再發表回覆...'"
+                      :placeholder="
+                        userData ? '請發表回覆...' : '請先登入後再發表回覆...'
+                      "
                       :disabled="!userData"
-                      @input="newReply.content = $event.target.value.slice(0, 200)"
+                      @input="
+                        newReply.content = $event.target.value.slice(0, 200)
+                      "
                     ></textarea>
-                    <p v-if="newReply.content.length > 0" 
-                      class="text-xs mt-1"
-                      :class="newReply.content.length >= 200 ? 'text-red-500' : 'text-gray-500'"
+                    <p
+                      v-if="newReply.content.length > 0"
+                      class="mt-1 text-xs"
+                      :class="
+                        newReply.content.length >= 200
+                          ? 'text-red-500'
+                          : 'text-gray-500'
+                      "
                     >
-                      {{ newReply.content.length >= 200 ? '已達到字數上限' : `還可以輸入 ${200 - newReply.content.length} 字` }}
+                      {{
+                        newReply.content.length >= 200
+                          ? "已達到字數上限"
+                          : `還可以輸入 ${200 - newReply.content.length} 字`
+                      }}
                     </p>
                   </div>
                   <button
                     @click="addReply(article._id, comment._id)"
-                    class="mt-1 bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600"
+                    class="px-3 py-1 mt-1 text-sm text-white bg-blue-500 rounded hover:bg-blue-600"
                     :disabled="!userData"
                   >
-                    {{ userData ? '發表回覆' : '請先登入' }}
+                    {{ userData ? "發表回覆" : "請先登入" }}
                   </button>
                 </div>
               </div>
@@ -836,7 +910,6 @@ const  contentHtml = `${articles.value.content}`
     </article>
   </div>
 </template>
-
 
 <style scoped>
 /* 修改過渡動畫 */
