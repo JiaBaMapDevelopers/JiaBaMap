@@ -170,16 +170,6 @@ watch(route, () => {
             >
           </li>
           <hr v-if="user.userData" class="mt-2 border-amber-200" />
-          <li>
-            <a href="#" class="block p-2 text-amber-500 hover:bg-amber-100"
-              >月排行</a
-            >
-          </li>
-          <li>
-            <a href="#" class="block p-2 text-amber-500 hover:bg-amber-100"
-              >週排行</a
-            >
-          </li>
           <router-link
             to="search"
             class="block p-2 text-amber-500 hover:bg-amber-100"
@@ -194,7 +184,7 @@ watch(route, () => {
           <router-link
             to="/articlelist"
             class="block p-2 text-amber-500 hover:bg-amber-100"
-            >美食專欄</router-link
+            >熱門食記</router-link
           >
           <router-link
             to="/myarticle"
@@ -204,34 +194,13 @@ watch(route, () => {
           <hr class="border-amber-200" />
           <li>
             <a href="#" class="block p-2 text-amber-500 hover:bg-amber-100"
-              >行銷方案</a
+              >店家註冊</a
             >
           </li>
           <li>
             <a href="#" class="block p-2 text-amber-500 hover:bg-amber-100"
-              >邀請部落客</a
+              >店家登入</a
             >
-          </li>
-          <hr v-if="user.userData" class="mt-2 border-amber-200" />
-          <router-link
-            to="search"
-            class="block p-2 text-amber-500 hover:bg-amber-100"
-            >搜尋餐廳</router-link
-          >
-          <hr class="border-amber-200" />
-          <li>
-            <a href="#" class="block p-2 text-amber-500 hover:bg-amber-100"
-              >線上訂位</a
-            >
-          </li>
-          <router-link to="/articlelist" class="block p-2 text-amber-500 hover:bg-amber-100">熱門食記</router-link>
-          <router-link to="/myarticle" class="block p-2 text-amber-500 hover:bg-amber-100">發表食記</router-link>
-          <hr class="border-amber-200" />
-          <li>
-            <li><router-link to="/storesignup" class="block p-2 text-amber-500 hover:bg-amber-100">店家註冊</router-link></li>
-          </li>
-          <li>
-            <li><router-link to="/storesignin" class="block p-2 text-amber-500 hover:bg-amber-100">店家登入</router-link></li>
           </li>
           <hr class="border-amber-200" />
           <li v-if="user.userData">
@@ -292,14 +261,23 @@ watch(route, () => {
           >
             <ul class="py-1">
               <li>
-                <li><router-link to="/storesignup" class="block px-4 py-2 text-amber-500 hover:bg-amber-100">店家註冊</router-link></li>
+                <a
+                  href="#"
+                  class="block px-4 py-2 text-amber-500 hover:bg-amber-100"
+                  >店家註冊</a
+                >
               </li>
               <li>
-                <li><router-link to="/storesignin" class="block px-4 py-2 text-amber-500 hover:bg-amber-100">店家登入</router-link></li>
+                <a
+                  href="#"
+                  class="block px-4 py-2 text-amber-500 hover:bg-amber-100"
+                  >店家登入</a
+                >
               </li>
             </ul>
           </div>
         </div>
+
         <!-- 會員頭貼 -->
         <div v-if="user.userData" class="relative inline-block text-left group">
           <div class="w-10 h-10 overflow-hidden rounded-full cursor-pointer">
@@ -390,14 +368,23 @@ watch(route, () => {
           >
             <ul class="py-1">
               <li>
-                <li><router-link to="/storesignup" class="block px-4 py-2 text-amber-500 hover:bg-amber-100">店家註冊</router-link></li>
+                <a
+                  href="#"
+                  class="block px-4 py-2 text-amber-500 hover:bg-amber-100"
+                  >店家註冊</a
+                >
               </li>
               <li>
-                <li><router-link to="/storesignin" class="block px-4 py-2 text-amber-500 hover:bg-amber-100">店家登入</router-link></li>
+                <a
+                  href="#"
+                  class="block px-4 py-2 text-amber-500 hover:bg-amber-100"
+                  >店家登入</a
+                >
               </li>
             </ul>
           </div>
         </div>
+
         <!-- 會員頭貼 -->
         <div v-if="user.userData" class="relative inline-block text-left group">
           <div class="w-10 h-10 overflow-hidden rounded-full cursor-pointer">
