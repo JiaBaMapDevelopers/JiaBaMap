@@ -72,7 +72,7 @@ export const useAuth = defineStore("auth", () => {
       userId.value = jose.decodeJwt(resToken.data.token).id;
       getUserdata();
     }
-    // router.push({ name: "user" });
+    
   };
 
   const getUserdata = async () => {
