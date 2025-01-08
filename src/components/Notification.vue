@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from "vue";
+import { ref, onMounted, onUnmounted, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useAuth } from "@/stores/authStore";
 import axios from "axios";
@@ -8,97 +8,154 @@ import { io } from "socket.io-client";
 const router = useRouter();
 const auth = useAuth();
 const notifications = ref([]);
+const unreadCount = ref(0);
 const isDropdownOpen = ref(false);
 const socket = ref(null);
+const isConnected = ref(false);
 
-const getNotificationMessage = (notification) => {
-  const typeMap = {
-    comment: '發表了評論',
-    like: '按讚了',
-    reply: '回覆了'
-  };
-  return typeMap[notification.actionType] || '與你互動';
+// 獲取認證 token
+const getAuthToken = () => {
+  const token = localStorage.getItem('userToken');
+  if (!token) {
+    console.warn('No authentication token found');
+    return null;
+  }
+  return token;
 };
 
-const handleNotificationClick = async (notification) => {
-  try {
-    await axios.patch(`/api/notifications/${notification._id}/read`);
-    
-    const index = notifications.value.findIndex(n => n._id === notification._id);
-    if (index !== -1) {
-      notifications.value[index].read = true;
-    }
-
-    if (notification.relatedType.includes('article')) {
-      router.push({
-        name: 'Article',
-        params: { id: notification.relatedId },
-        query: { commentId: notification.metadata?.commentId }
-      });
-    } else if (notification.relatedType.includes('restaurant')) {
-      router.push({
-        name: 'Store',
-        params: { id: notification.relatedId }
-      });
-    }
-    
-    isDropdownOpen.value = false;
-  } catch (error) {
-    console.error('Error marking notification as read:', error);
+// 設置 axios 默認配置
+const setupAxios = () => {
+  const token = getAuthToken();
+  if (token) {
+    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
   }
 };
 
+// 初始化 Socket 連接
+const initializeSocket = () => {
+  if (!auth.userData?.id) {
+    console.warn('No user data available');
+    return;
+  }
+
+  const token = getAuthToken();
+  if (!token) return;
+
+  try {
+    if (socket.value?.connected) {
+      console.log('Socket already connected');
+      return;
+    }
+
+    console.log('Initializing socket connection...');
+    
+    socket.value = io(process.env.VITE_BACKEND_BASE_URL, {
+      auth: { token },
+      withCredentials: true,
+      autoConnect: false,
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000
+    });
+
+    socket.value.on('connect', () => {
+      console.log('Socket connected successfully');
+      isConnected.value = true;
+      socket.value.emit('join', auth.userData.id);
+    });
+
+    socket.value.on('connect_error', (error) => {
+      console.error('Socket connection error:', error);
+      isConnected.value = false;
+    });
+
+    socket.value.on('newNotification', (data) => {
+      console.log('New notification received:', data);
+      if (data.notification) {
+        notifications.value.unshift(data.notification);
+        unreadCount.value++;
+      }
+    });
+
+    socket.value.on('readNotification', ({ notificationId }) => {
+      const notification = notifications.value.find(n => n._id === notificationId);
+      if (notification && !notification.read) {
+        notification.read = true;
+        unreadCount.value = Math.max(0, unreadCount.value - 1);
+      }
+    });
+
+    socket.value.connect();
+
+  } catch (error) {
+    console.error('Socket initialization error:', error);
+  }
+};
+
+// 獲取通知列表
 const fetchNotifications = async () => {
   if (!auth.userData?.id) return;
   
   try {
+    setupAxios();
     const { data } = await axios.get(
-      `${import.meta.env.VITE_BACKEND_BASE_URL}/notifications/${auth.userData.id}`,
-      { params: { page: 1, limit: 5 } }
+      `${BACKEND_URL}/notification/${auth.userData.id}`
     );
     notifications.value = data;
+    unreadCount.value = data.filter(n => !n.read).length;
   } catch (error) {
     console.error('Error fetching notifications:', error);
   }
 };
 
-const initializeSocket = () => {
-  if (!auth.userData?.id) return;
-
-  const token = localStorage.getItem('token');
-
-  socket.value = io(import.meta.env.VITE_BACKEND_SERVER_URL, {
-    auth:{ token: token },
-    withCredentials: true,
-    autoConnect: true
-  });
-
-  socket.value.on('connect', () => {
-    socket.value.emit('join', auth.userData.id);
-  });
-
-  socket.value.on('newNotification', ({ notification }) => {
-    notifications.value.unshift(notification);
-  });
-
-  socket.value.on('readNotification', ({ notificationId }) => {
-    const index = notifications.value.findIndex(n => n._id === notificationId);
-    if (index !== -1) {
-      notifications.value[index].read = true;
-    }
-  });
+// 標記通知為已讀
+const markAsRead = async (notificationId) => {
+  try {
+    setupAxios();
+    await axios.patch(`${BACKEND_URL}/notification/read/${notificationId}`);
+  } catch (error) {
+    console.error('Error marking notification as read:', error);
+  }
 };
 
-console.log("WebSocket 連接狀態:", socket.value?.connected);
+// 處理通知點擊
+const handleNotificationClick = async (notification) => {
+  if (!notification.read) {
+    await markAsRead(notification._id);
+  }
+  
+  // 根據通知類型導航到相應頁面
+  if (notification.relatedType.includes('article')) {
+    router.push(`/articles/${notification.relatedId}`);
+  } else if (notification.relatedType.includes('restaurant')) {
+    router.push(`/restaurants/${notification.relatedId}`);
+  }
+  
+  isDropdownOpen.value = false;
+};
 
+// 監聽用戶數據變化
+watch(() => auth.userData, (newUser) => {
+  if (newUser?.id) {
+    initializeSocket();
+    fetchNotifications();
+  } else if (socket.value) {
+    socket.value.disconnect();
+    isConnected.value = false;
+  }
+}, { immediate: true });
 
 onMounted(() => {
-  fetchNotifications();
-  initializeSocket();
+  if (auth.userData?.id) {
+    initializeSocket();
+    fetchNotifications();
+  }
 });
 
 onUnmounted(() => {
-  socket.value?.disconnect();
+  if (socket.value) {
+    socket.value.disconnect();
+  }
 });
 </script>
 
@@ -106,47 +163,51 @@ onUnmounted(() => {
   <div class="relative">
     <button 
       @click="isDropdownOpen = !isDropdownOpen"
-      class="hover:bg-amber-100 p-2 rounded-md"
+      class="hover:bg-amber-100 p-2 rounded-md relative"
     >
       <div class="flex items-center text-amber-500 whitespace-nowrap">
         通知
         <font-awesome-icon :icon="['fas', 'bell']" class="ml-1" />
+        <span 
+          v-if="unreadCount > 0"
+          class="absolute -top-1 -right-1 bg-red-500 text-white rounded-full text-xs px-2 py-1 min-w-[20px] text-center"
+        >
+          {{ unreadCount }}
+        </span>
       </div>
     </button>
 
     <div 
       v-if="isDropdownOpen"
-      class="absolute right-0 mt-2 w-64 bg-white rounded-md shadow-lg z-50"
+      class="absolute right-0 mt-2 w-80 bg-white rounded-md shadow-lg z-50"
     >
-      <div class="border-b border-amber-300 p-2 flex">
-        <div class="w-1/2 text-center hover:bg-amber-100 rounded-md cursor-pointer">
-          新通知
-        </div>
-        <div class="w-1/2 text-center hover:bg-amber-100 rounded-md cursor-pointer">
-          歷史紀錄
-        </div>
-      </div>
-
       <div class="max-h-96 overflow-y-auto">
         <div 
           v-for="notification in notifications" 
           :key="notification._id"
           @click="handleNotificationClick(notification)"
-          class="p-2 hover:bg-amber-100 cursor-pointer"
-          :class="{ 'opacity-50': notification.read }"
+          class="p-3 hover:bg-amber-50 cursor-pointer border-b border-gray-100"
+          :class="{ 'bg-amber-50/50': notification.read }"
         >
-          <div class="flex items-center space-x-2">
+          <div class="flex items-start space-x-3">
             <img 
               :src="notification.metadata?.userImg || '/default-avatar.jpg'"
-              class="w-8 h-8 rounded-full object-cover"
+              class="w-10 h-10 rounded-full object-cover"
               alt="User avatar"
             />
-            <span class="font-medium text-sm">
-              {{ notification.metadata?.userName }}
-            </span>
-            <span class="text-sm">
-              {{ getNotificationMessage(notification) }}
-            </span>
+            <div class="flex-1">
+              <p class="text-sm">
+                <span class="font-medium">{{ notification.metadata?.userName }}</span>
+                {{ notification.message }}
+              </p>
+              <p class="text-xs text-gray-500 mt-1">
+                {{ new Date(notification.timestamp).toLocaleDateString() }}
+              </p>
+            </div>
+            <div 
+              v-if="!notification.read"
+              class="w-2 h-2 bg-blue-500 rounded-full mt-2"
+            ></div>
           </div>
         </div>
         

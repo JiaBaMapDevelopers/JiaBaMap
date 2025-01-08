@@ -14,14 +14,13 @@ const selectedCategory = ref(0);
 const cartItems = ref([]);
 const menus = ref([]);
 
-
 // 店家資訊狀態
 const storeInfo = ref({
-  name: '',
-  address: '',
-  phone: '',
-  description: '',
-  businessHours: ''
+  name: "",
+  address: "",
+  phone: "",
+  description: "",
+  businessHours: "",
 });
 
 // // 獲取店家資訊
@@ -45,7 +44,6 @@ const storeInfo = ref({
 //   }
 // };
 
-
 // 將菜單按分類整理的計算屬性
 const categorizedMenu = computed(() => {
   // 獲取所有有效的分類（根據後端定義）
@@ -64,12 +62,15 @@ const categorizedMenu = computed(() => {
 // 獲取菜單數據
 const fetchMenus = async () => {
   try {
-    const response = await axios.get(`${import.meta.env.VITE_BACKEND_BASE_URL}/menu`, {
-      params: {
-        storeId,
-        limit: 50, // 設定較大的限制以確保獲取所有菜單項目
+    const response = await axios.get(
+      `${import.meta.env.VITE_BACKEND_BASE_URL}/menu`,
+      {
+        params: {
+          storeId,
+          limit: 50, // 設定較大的限制以確保獲取所有菜單項目
+        },
       },
-    });
+    );
 
     if (response.data && Array.isArray(response.data.menus)) {
       menus.value = response.data.menus;
@@ -94,7 +95,7 @@ const scrollToCategory = (index) => {
 };
 
 // Intersection Observer for active category
-onMounted( async () => {
+onMounted(async () => {
   await fetchMenus();
   await fetchStoreInfo();
   const observer = new IntersectionObserver(
@@ -128,9 +129,9 @@ const calculateItemPrice = (item, options) => {
 const openItemModal = async (item) => {
   if (!item.isAvailable) {
     Swal.fire({
-      title: '商品未上架',
-      text: '此商品目前無法購買',
-      icon: 'info',
+      title: "商品未上架",
+      text: "此商品目前無法購買",
+      icon: "info",
     });
     return;
   }
@@ -142,14 +143,14 @@ const openItemModal = async (item) => {
     html: `
       <div class='flex flex-col items-center'>
         <div class='mb-4'>
-          <img src='${item.imageUrl}' alt='商品圖片' class='w-24 h-24 object-cover'>
+          <img src='${item.imageUrl}' alt='商品圖片' class='object-cover w-24 h-24'>
         </div>
         <div class='text-gray-600'>
           單價: <span class='text-red-500'>\$${item.price}</span>
         </div>
-        <div class='mt-2 text-sm text-gray-600'>${item.description || ''}</div>
+        <div class='mt-2 text-sm text-gray-600'>${item.description || ""}</div>
         <input type='text' id='note-input' placeholder='備註' 
-          class='mt-4 p-2 border border-gray-300 rounded-md w-full' />
+          class='w-full p-2 mt-4 border border-gray-300 rounded-md' />
         <div class='flex items-center mt-4'>
           <button id='decrement-btn' class='px-2 py-1 bg-gray-300 rounded-md'>-</button>
           <div class='mx-4'><span id='quantity'>1</span></div>
@@ -166,28 +167,28 @@ const openItemModal = async (item) => {
       cancelButton: "bg-gray-300 text-gray-800",
     },
     didOpen: () => {
-      const quantityElement = document.querySelector('#quantity');
-      const totalPriceElement = document.querySelector('#total-price');
-      const decrementBtn = document.querySelector('#decrement-btn');
-      const incrementBtn = document.querySelector('#increment-btn');
+      const quantityElement = document.querySelector("#quantity");
+      const totalPriceElement = document.querySelector("#total-price");
+      const decrementBtn = document.querySelector("#decrement-btn");
+      const incrementBtn = document.querySelector("#increment-btn");
 
-      decrementBtn.addEventListener('click', () => {
+      decrementBtn.addEventListener("click", () => {
         if (quantity > 1) {
           quantity -= 1;
           quantityElement.textContent = quantity;
-          totalPriceElement.textContent = (item.price * quantity);
+          totalPriceElement.textContent = item.price * quantity;
         }
       });
 
-      incrementBtn.addEventListener('click', () => {
+      incrementBtn.addEventListener("click", () => {
         quantity += 1;
         quantityElement.textContent = quantity;
-        totalPriceElement.textContent = (item.price * quantity);
+        totalPriceElement.textContent = item.price * quantity;
       });
     },
     preConfirm: () => {
-      const noteInput = document.getElementById('note-input');
-      return noteInput ? noteInput.value : '';
+      const noteInput = document.getElementById("note-input");
+      return noteInput ? noteInput.value : "";
     },
   });
 
@@ -200,15 +201,36 @@ const openItemModal = async (item) => {
       note,
     });
 
+    const cartItem = {
+      productId: item._id,
+      productName: item.name,
+      price: item.price,
+      quantity,
+    };
+
+    console.log(cartItem);
+    const orderData = {
+      customerId: userData.value._id,
+      storeId: item.storeId,
+      storeName: "12:59早午餐Brunch.Pasta.Coffee.Dessert",
+      pickupTime: Date.now(),
+      items: [cartItem],
+    };
+    console.log(orderData);
+
+    const response = await axios.post(
+      `${import.meta.env.VITE_BACKEND_BASE_URL}/order/`,
+      orderData,
+    );
+
     await Swal.fire({
-      title: '成功',
-      text: '已加入購物車',
-      icon: 'success',
+      title: "成功",
+      text: "已加入購物車",
+      icon: "success",
       timer: 1500,
     });
   }
 };
-
 
 const goToCart = () => {
   // 跳轉到指定路由
@@ -219,14 +241,15 @@ const goToCart = () => {
 <template>
   <div class="container mx-auto mt-8 sm:mt-16">
     <!-- Header Section -->
-    <header class="mb-8 px-4">
+    <header class="px-4 mb-8">
       <div class="flex items-center justify-between">
         <div class="flex items-center space-x-4">
           <div>
             <!-- <h1 class="text-2xl font-bold text-gray-600">{{ storeInfo.name }}</h1> -->
-            <h1 class="text-2xl font-bold text-gray-600">12:59早午餐Brunch.Pasta.Coffee.Dessert</h1>
+            <h1 class="text-2xl font-bold text-gray-600">
+              12:59早午餐Brunch.Pasta.Coffee.Dessert
+            </h1>
             <div class="text-sm text-gray-600">
-              
               <!-- <span>{{ storeInfo.businessHours }}</span> -->
               <span>11:00-16:00</span>
             </div>
@@ -236,18 +259,28 @@ const goToCart = () => {
               <font-awesome-icon :icon="['fas', 'phone']" class="text-orange-400" /> {{ storeInfo.phone }}
             </div> -->
             <div class="text-sm text-gray-600">
-              <font-awesome-icon :icon="['fas', 'location-dot']" class="text-orange-400" />
+              <font-awesome-icon
+                :icon="['fas', 'location-dot']"
+                class="text-orange-400"
+              />
               108台灣台北市萬華區昆明街257巷14號1樓 &nbsp;
-              <font-awesome-icon :icon="['fas', 'phone']" class="text-orange-400" /> 02 2302 6163
+              <font-awesome-icon
+                :icon="['fas', 'phone']"
+                class="text-orange-400"
+              />
+              02 2302 6163
             </div>
-            <div v-if="storeInfo.description" class="text-sm text-gray-600 mt-2">
+            <div
+              v-if="storeInfo.description"
+              class="mt-2 text-sm text-gray-600"
+            >
               {{ storeInfo.description }}
             </div>
           </div>
         </div>
         <button
           @click="goToCart"
-          class="px-4 py-2 bg-amber-500 text-white rounded hover:bg-amber-400"
+          class="px-4 py-2 text-white rounded bg-amber-500 hover:bg-amber-400"
         >
           購物車 ({{ cartItems.length }})
         </button>
@@ -256,7 +289,7 @@ const goToCart = () => {
 
     <!-- Mobile Navigation -->
     <nav
-      class="md:hidden sticky top-0 z-10 bg-white rounded-md shadow overflow-x-auto no-scrollbar"
+      class="sticky top-0 z-10 overflow-x-auto bg-white rounded-md shadow md:hidden no-scrollbar"
     >
       <div class="flex whitespace-nowrap">
         <button
@@ -276,28 +309,28 @@ const goToCart = () => {
     </nav>
 
     <!-- Main Content -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 px-4 mt-8">
+    <div class="grid grid-cols-1 gap-8 px-4 mt-8 md:grid-cols-3">
       <div
         v-for="(category, index) in categorizedMenu"
         :key="index"
         :ref="(el) => (categoryRefs[index] = el)"
         class="scroll-mt-16"
       >
-        <h2 class="text-amber-500 font-bold text-lg mb-4">
+        <h2 class="mb-4 text-lg font-bold text-amber-500">
           {{ category.name }}
         </h2>
         <ul class="space-y-4">
           <li
             v-for="item in category.items"
             :key="item._id"
-            class="flex items-center justify-between cursor-pointer hover:bg-amber-100 p-2 rounded"
+            class="flex items-center justify-between p-2 rounded cursor-pointer hover:bg-amber-100"
             @click="openItemModal(item)"
           >
             <div class="flex items-center space-x-4">
               <img
                 :src="item.imageUrl"
                 alt="商品圖片"
-                class="w-16 h-16 object-cover rounded"
+                class="object-cover w-16 h-16 rounded"
               />
               <div>
                 <span class="text-gray-800">{{ item.name }}</span>

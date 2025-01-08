@@ -40,7 +40,8 @@ onMounted(() => {
   <div v-if="dataReady">
     <div class="box-border w-full h-screen pt-2 mt-2 overflow-y-auto lg:mt-12">
       <div
-        v-for="restaurant in restaurants"
+        v-for="(restaurant, index) in restaurants"
+        :key="restaurant.id || index"
         class="flex items-center pb-2 mt-2 border-b"
       >
         <!-- 餐廳圖 -->
@@ -53,15 +54,10 @@ onMounted(() => {
         <!-- 餐廳排名、名稱 -->
         <div class="flex flex-col justify-between ml-3 sm:text-xl">
           <div class="ml-3 text-left">
-            <h2
-              class="text-base font-bold text-gray-500 text-ellipsis whitespace-nowrap overflow-hidden w-[200px]"
-            >
-              <a
-                href="#"
-                @click="StoreId(restaurant.placeId)"
-                class="text-amber-500 hover:text-orange-300"
-                >{{ restaurant.displayName }}</a
-              >
+            <h2 class="text-base font-bold text-gray-500">
+              <a href="#" @click="StoreId(restaurant.placeId)">{{
+                restaurant.displayName
+              }}</a>
             </h2>
           </div>
           <!-- 餐廳內容 -->

@@ -239,7 +239,7 @@ const saveDraft = async () => {
 <template>
   <!-- 導覽列 -->
   <header
-    class="fixed top-0 left-0 w-full z-50 bg-white shadow-md border-b border-orange-200 px-4 py-2 flex flex-wrap items-center gap-4 md:flex-nowrap md:gap-0"
+    class="fixed top-0 left-0 z-50 flex flex-wrap items-center w-full gap-4 px-4 py-2 bg-white border-b border-orange-200 shadow-md md:flex-nowrap md:gap-0"
   >
     <!-- 左側內容 -->
     <div class="flex items-center space-x-4">
@@ -265,11 +265,11 @@ const saveDraft = async () => {
     </div>
 
     <!-- 右側內容 -->
-    <div class="flex items-center space-x-4 ml-auto">
+    <div class="flex items-center ml-auto space-x-4">
       <!-- 存檔按鈕 - 只在非已發布文章編輯時顯示 -->
       <button
         v-if="!isEditingPublished"
-        class="border-2 border-amber-400 text-amber-400 px-4 py-2 rounded hover:bg-amber-400 hover:text-white transition text-sm md:text-base whitespace-nowrap"
+        class="px-4 py-2 text-sm transition border-2 rounded border-amber-400 text-amber-400 hover:bg-amber-400 hover:text-white md:text-base whitespace-nowrap"
         @click="saveDraft"
       >
         存檔
@@ -277,7 +277,7 @@ const saveDraft = async () => {
 
       <!-- 發送按鈕 -->
       <button
-        class="bg-amber-400 text-white px-4 py-2 rounded hover:bg-amber-500 transition text-sm md:text-base whitespace-nowrap"
+        class="px-4 py-2 text-sm text-white transition rounded bg-amber-400 hover:bg-amber-500 md:text-base whitespace-nowrap"
         @click="submitArticle"
       >
         {{ isEditingPublished ? "更新" : "發送" }}
@@ -288,7 +288,7 @@ const saveDraft = async () => {
           <img
             :src="currentProfilePicture"
             alt="avatar"
-            class="w-full h-full object-cover rounded-full"
+            class="object-cover w-full h-full rounded-full"
             @error="handleImageError"
           />
         </div>
@@ -297,7 +297,7 @@ const saveDraft = async () => {
   </header>
 
   <!-- 內容區域 -->
-  <div class="mt-16 md:mt-20 p-2">
+  <div class="p-2 mt-16 md:mt-20">
     <slot></slot>
   </div>
 </template>

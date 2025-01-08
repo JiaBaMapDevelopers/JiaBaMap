@@ -1,9 +1,9 @@
 <script setup>
-import Header from './components/Header.vue'
-import Footer from './components/Footer.vue'
-import Login from './components/Login.vue'
-import { computed } from 'vue';
-import { useRoute } from 'vue-router';
+import Header from "./components/Header.vue";
+import Footer from "./components/Footer.vue";
+import Login from "./components/Login.vue";
+import { computed } from "vue";
+import { useRoute } from "vue-router";
 
 const route = useRoute();
 
@@ -19,14 +19,15 @@ const hideHeader = computed(() => {
 const noPadding = computed(() => {
   return route.path === "/createnote";
 });
-
 </script>
 
 <template>
   <Login />
   <div class="relative min-h-screen">
     <Header v-if="!hideHeader" />
-    <div :class="['overflow-x-auto hide-scrollbar', { 'no-padding': noPadding }]">
+    <div
+      :class="['overflow-x-auto hide-scrollbar', { 'no-padding': noPadding }]"
+    >
       <RouterView />
       <Footer v-if="!hideFooter" />
     </div>
@@ -49,6 +50,3 @@ const noPadding = computed(() => {
   padding-top: 0 !important;
 } */
 </style>
-
-
-

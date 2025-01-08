@@ -90,7 +90,9 @@ const shareComment = (comment) => {
           >
           <p v-if="comment.AvgPrice">均消價位：${{ comment.AvgPrice }}</p>
         </div>
-        <p class="text-slate-500">評論日期：{{ comment.createdAt.slice(0, 10) }}</p>
+        <p class="text-slate-500">
+          評論日期：{{ comment.createdAt.slice(0, 10) }}
+        </p>
         <p class="my-3">{{ comment.content }}</p>
         <div>
           <div>❤ + {{ comment.likes }}</div>
