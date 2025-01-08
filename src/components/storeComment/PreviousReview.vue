@@ -33,11 +33,28 @@ const toggleLike = async (commentId) => {
     });
     return;
   }
+
+  const token = localStorage.getItem('userToken');
+    if (!token) {
+      Swal.fire({
+        title: "請重新登入！",
+        icon: "error",
+        timerProgressBar: true,
+      });
+      return;
+    }
+
   const response = await axios.put(
     `${import.meta.env.VITE_BACKEND_BASE_URL}/comments/likes/${commentId}`,
     {
       userId: userData.value._id,
     },
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    }
   );
   console.log("Response:", response.data);
   commentStore.getComment();

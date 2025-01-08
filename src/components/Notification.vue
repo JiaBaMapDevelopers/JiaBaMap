@@ -5,15 +5,19 @@ import { useAuth } from "@/stores/authStore";
 import axios from "axios";
 import { io } from "socket.io-client";
 
+// 常量
+const MAX_NOTIFICATIONS = 50;
+const BACKEND_URL = import.meta.env.VITE_BACKEND_BASE_URL;
+
 const router = useRouter();
 const auth = useAuth();
+
 const notifications = ref([]);
 const unreadCount = ref(0);
 const isDropdownOpen = ref(false);
 const socket = ref(null);
 const isConnected = ref(false);
 
-// 獲取認證 token
 const getAuthToken = () => {
   const token = localStorage.getItem('userToken');
   if (!token) {
@@ -23,7 +27,6 @@ const getAuthToken = () => {
   return token;
 };
 
-// 設置 axios 默認配置
 const setupAxios = () => {
   const token = getAuthToken();
   if (token) {
@@ -31,8 +34,28 @@ const setupAxios = () => {
   }
 };
 
-// 初始化 Socket 連接
-const initializeSocket = () => {
+const formatNotificationTime = (timestamp) => {
+  const date = new Date(timestamp);
+  const now = new Date();
+  const diffMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
+  
+  if (diffMinutes < 1) return '剛剛';
+  if (diffMinutes < 60) return `${diffMinutes} 分鐘前`;
+  if (diffMinutes < 1440) return `${Math.floor(diffMinutes / 60)} 小時前`;
+  return date.toLocaleDateString();
+};
+
+// 發送系統通知
+const sendSystemNotification = (notification) => {
+  if ('Notification' in window && Notification.permission === 'granted') {
+    new Notification('新通知', {
+      body: notification.message,
+      icon: notification.metadata?.userImg || '/default-avatar.jpg'
+    });
+  }
+};
+
+、const initializeSocket = () => {
   if (!auth.userData?.id) {
     console.warn('No user data available');
     return;
@@ -49,7 +72,7 @@ const initializeSocket = () => {
 
     console.log('Initializing socket connection...');
     
-    socket.value = io(process.env.VITE_BACKEND_BASE_URL, {
+    socket.value = io(BACKEND_URL, {
       auth: { token },
       withCredentials: true,
       autoConnect: false,
@@ -69,11 +92,27 @@ const initializeSocket = () => {
       isConnected.value = false;
     });
 
+    socket.value.on('disconnect', (reason) => {
+      console.log('Socket disconnected:', reason);
+      if (reason === 'io server disconnect') {
+        socket.value.connect();
+      }
+    });
+
     socket.value.on('newNotification', (data) => {
       console.log('New notification received:', data);
       if (data.notification) {
+        // 插入新通知到數組頭部
         notifications.value.unshift(data.notification);
+        
+        if (notifications.value.length > MAX_NOTIFICATIONS) {
+          notifications.value.pop();
+        }
+        
+        // 增加未讀數
         unreadCount.value++;
+        
+        sendSystemNotification(data.notification);
       }
     });
 
@@ -98,17 +137,20 @@ const fetchNotifications = async () => {
   
   try {
     setupAxios();
-    const { data } = await axios.get(
-      `${BACKEND_URL}/notification/${auth.userData.id}`
-    );
-    notifications.value = data;
+    const { data } = await axios.get(`${BACKEND_URL}/notification`);
+    
+    // 排序並限制通知數量
+    notifications.value = data
+      .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+      .slice(0, MAX_NOTIFICATIONS);
+    
+    // 計算未讀通知數
     unreadCount.value = data.filter(n => !n.read).length;
   } catch (error) {
     console.error('Error fetching notifications:', error);
   }
 };
 
-// 標記通知為已讀
 const markAsRead = async (notificationId) => {
   try {
     setupAxios();
@@ -118,7 +160,6 @@ const markAsRead = async (notificationId) => {
   }
 };
 
-// 處理通知點擊
 const handleNotificationClick = async (notification) => {
   if (!notification.read) {
     await markAsRead(notification._id);
@@ -126,15 +167,14 @@ const handleNotificationClick = async (notification) => {
   
   // 根據通知類型導航到相應頁面
   if (notification.relatedType.includes('article')) {
-    router.push(`/articles/${notification.relatedId}`);
+    router.push(`/articlelist/${notification.relatedId}`);
   } else if (notification.relatedType.includes('restaurant')) {
-    router.push(`/restaurants/${notification.relatedId}`);
+    router.push(`/store/${notification.relatedId}`);
   }
   
   isDropdownOpen.value = false;
 };
 
-// 監聽用戶數據變化
 watch(() => auth.userData, (newUser) => {
   if (newUser?.id) {
     initializeSocket();
@@ -146,6 +186,11 @@ watch(() => auth.userData, (newUser) => {
 }, { immediate: true });
 
 onMounted(() => {
+  // 請求系統通知權限
+  if ('Notification' in window && Notification.permission !== 'granted') {
+    Notification.requestPermission();
+  }
+
   if (auth.userData?.id) {
     initializeSocket();
     fetchNotifications();
@@ -166,7 +211,6 @@ onUnmounted(() => {
       class="hover:bg-amber-100 p-2 rounded-md relative"
     >
       <div class="flex items-center text-amber-500 whitespace-nowrap">
-        通知
         <font-awesome-icon :icon="['fas', 'bell']" class="ml-1" />
         <span 
           v-if="unreadCount > 0"
@@ -201,7 +245,7 @@ onUnmounted(() => {
                 {{ notification.message }}
               </p>
               <p class="text-xs text-gray-500 mt-1">
-                {{ new Date(notification.timestamp).toLocaleDateString() }}
+                {{ formatNotificationTime(notification.timestamp) }}
               </p>
             </div>
             <div 

@@ -9,7 +9,7 @@ import { usePicStore } from "@/stores/picStore";
 import { useAuth } from "@/stores/authStore";
 import { useStore } from "@/stores/storePage";
 import Login from "@/components/Login.vue";
-import PreviousReview from "@/components/storeComment/PreviousReview.vue";
+
 
 const user = useAuth();
 const store = useStore();
@@ -31,6 +31,11 @@ const submitComment = async () => {
     return;
   }
 
+  const token = localStorage.getItem('userToken');
+    if (!token) {
+      alert("請重新登入");
+      return;
+    }
   const formData = new FormData();
 
   formData.append("userId", userData.value._id); // 用戶 ID
@@ -49,7 +54,9 @@ const submitComment = async () => {
     `${import.meta.env.VITE_BACKEND_BASE_URL}/comments/`,
     formData,
     {
-      headers: { "Content-Type": "multipart/form-data" },
+      headers: { 
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "multipart/form-data" },
     },
   );
 

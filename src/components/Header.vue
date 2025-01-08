@@ -113,8 +113,11 @@ watch(route, () => {
         </div>
       </div>
 
+
       <!-- 手機版選單按鈕 -->
       <div class="flex items-center space-x-4 md:hidden">
+        <Notification />
+
         <button @click="toggleSearch" class="text-amber-500">
           <font-awesome-icon
             :icon="['fas', 'magnifying-glass']"
@@ -205,43 +208,7 @@ watch(route, () => {
               >店家登入</a
             >
           </li>
-          <hr v-if="user.userData" class="mt-2 border-amber-200" />
-          <router-link
-            to="search"
-            class="block p-2 text-amber-500 hover:bg-amber-100"
-            >搜尋餐廳</router-link
-          >
-          <hr class="border-amber-200" />
-          <li>
-            <a href="#" class="block p-2 text-amber-500 hover:bg-amber-100"
-              >線上訂位</a
-            >
-          </li>
-          <router-link
-            to="/articlelist"
-            class="block p-2 text-amber-500 hover:bg-amber-100"
-            >熱門食記</router-link
-          >
-          <router-link
-            to="/myarticle"
-            class="block p-2 text-amber-500 hover:bg-amber-100"
-            >發表食記</router-link
-          >
-          <hr class="border-amber-200" />
-          <li>
-            <router-link
-              to="/storesignup"
-              class="block p-2 text-amber-500 hover:bg-amber-100"
-              >店家註冊</router-link
-            >
-          </li>
-          <li>
-            <router-link
-              to="/storesignin"
-              class="block p-2 text-amber-500 hover:bg-amber-100"
-              >店家登入</router-link
-            >
-          </li>
+
           <hr class="border-amber-200" />
           <li v-if="user.userData">
             <button
@@ -317,6 +284,7 @@ watch(route, () => {
             </ul>
           </div>
         </div>
+        <Notification />
 
         <!-- 會員頭貼 -->
         <div v-if="user.userData" class="relative inline-block text-left group">

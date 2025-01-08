@@ -143,6 +143,18 @@ const toggleLike = async (type, id) => {
     return;
   }
 
+   // 獲取 token
+   const token = localStorage.getItem('userToken');
+    if (!token) {
+      await swalWithBootstrapButtons.fire({
+        title: "提醒",
+        text: "請重新登入",
+        icon: "warning",
+        confirmButtonText: "確定",
+      });
+      return;
+    }
+
   // 獲取對應的端點
   let endpoint = "";
   switch (type) {
@@ -163,6 +175,7 @@ const toggleLike = async (type, id) => {
     {
       headers: {
         "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`,
       },
     },
   );

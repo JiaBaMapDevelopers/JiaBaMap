@@ -12,12 +12,15 @@ export default defineConfig({
   server: {
     proxy: {
       "/api": {
-        target: "http://localhost:5001",
+        target: process.env.VITE_BACKEND_BASE_URL,
         changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, '')
       },
       "/socket": {
-        target: "http://localhost:5001",
+        target: process.env.VITE_BACKEND_BASE_URL,
         changeOrigin: true,
+        ws: true, 
+        rewrite: (path) => path.replace(/^\/socket/, '')
       },
     },
   },
