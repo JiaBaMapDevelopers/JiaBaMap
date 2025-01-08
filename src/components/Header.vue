@@ -3,9 +3,8 @@ import { ref, computed, onMounted, onUnmounted, watch } from "vue";
 import { storeToRefs } from "pinia";
 import SearchInput from "./SearchInput.vue";
 import { useRoute } from "vue-router";
-import Login from '@/components/Login.vue';
-import { useAuth } from '@/stores/authStore';
-
+import Login from "@/components/Login.vue";
+import { useAuth } from "@/stores/authStore";
 
 const emit = defineEmits(["search-toggle"]);
 const route = useRoute();
@@ -148,7 +147,10 @@ watch(route, () => {
       <div class="pt-2 text-center w-26">
         <ul>
           <li v-if="!user.userData">
-            <button @click="openLoginModal" class="w-full p-2 text-center text-amber-500 hover:bg-amber-100">
+            <button
+              @click="openLoginModal"
+              class="w-full p-2 text-center text-amber-500 hover:bg-amber-100"
+            >
               會員登入
             </button>
           </li>
@@ -210,16 +212,40 @@ watch(route, () => {
               >邀請部落客</a
             >
           </li>
-          <hr v-if="user.userData" class="mt-2 border-amber-200">
-          <router-link to="search" class="block p-2 text-amber-500 hover:bg-amber-100">搜尋餐廳</router-link>
-          <hr class="border-amber-200">
-          <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">線上訂位</a></li>
-          <router-link to="/articlelist" class="block p-2 text-amber-500 hover:bg-amber-100">熱門食記</router-link>
-          <router-link to="/myarticle" class="block p-2 text-amber-500 hover:bg-amber-100">發表食記</router-link>
-          <hr class="border-amber-200">
-          <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">店家註冊</a></li>
-          <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">店家登入</a></li>
-          <hr class="border-amber-200">
+          <hr v-if="user.userData" class="mt-2 border-amber-200" />
+          <router-link
+            to="search"
+            class="block p-2 text-amber-500 hover:bg-amber-100"
+            >搜尋餐廳</router-link
+          >
+          <hr class="border-amber-200" />
+          <li>
+            <a href="#" class="block p-2 text-amber-500 hover:bg-amber-100"
+              >線上訂位</a
+            >
+          </li>
+          <router-link
+            to="/articlelist"
+            class="block p-2 text-amber-500 hover:bg-amber-100"
+            >熱門食記</router-link
+          >
+          <router-link
+            to="/myarticle"
+            class="block p-2 text-amber-500 hover:bg-amber-100"
+            >發表食記</router-link
+          >
+          <hr class="border-amber-200" />
+          <li>
+            <a href="#" class="block p-2 text-amber-500 hover:bg-amber-100"
+              >店家註冊</a
+            >
+          </li>
+          <li>
+            <a href="#" class="block p-2 text-amber-500 hover:bg-amber-100"
+              >店家登入</a
+            >
+          </li>
+          <hr class="border-amber-200" />
           <li v-if="user.userData">
             <button
               @click="user.logout"
@@ -243,9 +269,11 @@ watch(route, () => {
     >
       <!-- 登入/登出按鈕 -->
       <div class="flex items-center space-x-4">
-        <button v-if="!user.userData" 
-                class="p-2 rounded-md text-amber-500 hover:bg-amber-100 min-w-20" 
-                @click="openLoginModal">
+        <button
+          v-if="!user.userData"
+          class="p-2 rounded-md text-amber-500 hover:bg-amber-100 min-w-20"
+          @click="openLoginModal"
+        >
           會員登入
         </button>
         <router-link
@@ -254,7 +282,10 @@ watch(route, () => {
         >
           發表食記
         </router-link>
-        <router-link to="/articlelist" class="p-2 rounded-md text-amber-500 hover:bg-amber-100 min-w-20">
+        <router-link
+          to="/articlelist"
+          class="p-2 rounded-md text-amber-500 hover:bg-amber-100 min-w-20"
+        >
           熱門食記
         </router-link>
       </div>
@@ -272,8 +303,20 @@ watch(route, () => {
             class="absolute right-0 z-50 hidden w-32 mt-0 bg-white rounded-md shadow-lg group-hover:block"
           >
             <ul class="py-1">
-              <li><a href="#" class="block px-4 py-2 text-amber-500 hover:bg-amber-100">店家註冊</a></li>
-              <li><a href="#" class="block px-4 py-2 text-amber-500 hover:bg-amber-100">店家登入</a></li>
+              <li>
+                <a
+                  href="#"
+                  class="block px-4 py-2 text-amber-500 hover:bg-amber-100"
+                  >店家註冊</a
+                >
+              </li>
+              <li>
+                <a
+                  href="#"
+                  class="block px-4 py-2 text-amber-500 hover:bg-amber-100"
+                  >店家登入</a
+                >
+              </li>
             </ul>
           </div>
         </div>
@@ -331,9 +374,11 @@ watch(route, () => {
     <div v-else class="items-center justify-end hidden space-x-4 md:flex">
       <!-- 登入/登出按鈕 -->
       <div class="flex items-center space-x-4">
-        <button v-if="!user.userData" 
-                class="p-2 rounded-md text-amber-500 hover:bg-amber-100 min-w-20" 
-                @click="openLoginModal">
+        <button
+          v-if="!user.userData"
+          class="p-2 rounded-md text-amber-500 hover:bg-amber-100 min-w-20"
+          @click="openLoginModal"
+        >
           會員登入
         </button>
 
@@ -343,7 +388,10 @@ watch(route, () => {
         >
           發表食記
         </router-link>
-        <router-link to="/articlelist" class="p-2 rounded-md text-amber-500 hover:bg-amber-100 min-w-20">
+        <router-link
+          to="/articlelist"
+          class="p-2 rounded-md text-amber-500 hover:bg-amber-100 min-w-20"
+        >
           熱門食記
         </router-link>
       </div>
@@ -361,8 +409,20 @@ watch(route, () => {
             class="absolute right-0 z-50 hidden w-32 mt-0 bg-white rounded-md shadow-lg group-hover:block"
           >
             <ul class="py-1">
-              <li><a href="#" class="block px-4 py-2 text-amber-500 hover:bg-amber-100">店家註冊</a></li>
-              <li><a href="#" class="block px-4 py-2 text-amber-500 hover:bg-amber-100">店家登入</a></li>
+              <li>
+                <a
+                  href="#"
+                  class="block px-4 py-2 text-amber-500 hover:bg-amber-100"
+                  >店家註冊</a
+                >
+              </li>
+              <li>
+                <a
+                  href="#"
+                  class="block px-4 py-2 text-amber-500 hover:bg-amber-100"
+                  >店家登入</a
+                >
+              </li>
             </ul>
           </div>
         </div>

@@ -1,7 +1,38 @@
 <script setup>
+import { ref } from "vue";
 const params = new URLSearchParams(window.location.search);
 const status = params.get("status");
 const transactionId = params.get("transactionId");
+const orderDetail = ref({
+  orderId: "ORDER_123456",
+  restaurantName: "台灣美食餐廳",
+  phone: "02-1234-5678",
+  address: "台北市中山區南京東路一段123號",
+  totalAmount: 940,
+  items: [
+    {
+      productId: "P001",
+      productName: "牛肉麵",
+      spec: "大碗",
+      price: 250,
+      quantity: 2,
+    },
+    {
+      productId: "P002",
+      productName: "小籠包",
+      spec: "10顆",
+      price: 200,
+      quantity: 1,
+    },
+    {
+      productId: "P003",
+      productName: "珍珠奶茶",
+      spec: "中杯",
+      price: 120,
+      quantity: 2,
+    },
+  ],
+});
 </script>
 
 <template>
@@ -13,20 +44,36 @@ const transactionId = params.get("transactionId");
     <div v-if="status == 'success'">
       <h2 class="mb-2 text-xl font-bold text-green-500">付款成功！</h2>
       <p class="mb-6 text-lg">請依照您指定的訂餐時間前往取餐。</p>
-      <p class="mb-6 font-medium text-md">交易編號：{{ transactionId }}</p>
+      <p class="mb-6 font-medium text-md">
+        訂單編號：{{ orderDetail.orderId }}
+      </p>
 
       <div class="p-4 mb-6 text-left rounded-md shadow-md bg-gray-50">
-        <p class="text-sm font-semibold text-gray-700">品項名稱</p>
-        <p class="text-sm text-gray-500">品項單價</p>
-        <p class="text-sm text-gray-500">品項數量</p>
+        <div
+          v-for="item in orderDetail.items"
+          :key="item.productId"
+          class="flex justify-between my-3"
+        >
+          <p class="text-sm font-semibold text-gray-700">
+            {{ item.productName }}
+          </p>
+          <p class="text-sm text-gray-500">
+            ${{ item.price }} / {{ item.quantity }} 份
+          </p>
+        </div>
         <hr />
-        <p class="py-1 text-lg font-bold text-gray-800">總金額</p>
+        <div class="flex justify-between py-2">
+          <p class="text-lg font-bold text-gray-800">總金額</p>
+          <p class="text-lg font-bold text-gray-800">
+            ${{ orderDetail.totalAmount }}
+          </p>
+        </div>
       </div>
     </div>
 
     <div v-else>
       <h2 class="mb-2 text-xl font-bold text-red-500">付款失敗，請重新嘗試</h2>
-      <p class="font-medium text-md">交易編號：{{ transactionId }}</p>
+      <p class="font-medium text-md">訂單編號：{{ orderDetail.orderId }}</p>
     </div>
   </div>
 </template>
