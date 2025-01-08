@@ -18,6 +18,8 @@ import CheckoutPage from "@/views/Checkout/CheckoutPage.vue";
 import CheckoutDetail from "@/views/Checkout/CheckoutDetail.vue";
 import StoreSignIn from "../views/StoreSignIn.vue";
 import Cart from "@/views/Cart.vue";
+import Terms from "../views/Footer/Terms.vue";
+import Privacy from "../views/Footer/Privacy.vue";
 
 const routes = [
   {
@@ -116,6 +118,16 @@ const routes = [
     path: "/Cart",
     name: "Cart",
     component: Cart,
+  },
+  {
+    path: "/terms",
+    name: "Terms",
+    component: Terms,
+  },
+  {
+    path: "/privacy",
+    name: "Privacy",
+    component: Privacy,
   },
 ];
 

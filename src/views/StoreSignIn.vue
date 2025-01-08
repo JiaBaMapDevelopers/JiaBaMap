@@ -112,8 +112,8 @@ const handleLogin = async () => {
       </form>
       <p class="mt-4 text-sm text-center text-gray-400">
         登入前請參閱我們的
-        <a href="#" class="text-blue-500 hover:underline">服務條款</a> 與
-        <a href="#" class="text-blue-500 hover:underline">隱私權政策</a>.
+        <router-link to="/terms" class="text-blue-500 hover:underline">服務條款</router-link> 與
+        <router-link to="/privacy" class="text-blue-500 hover:underline">隱私政策</router-link>.
       </p>
     </div>
   </div>
