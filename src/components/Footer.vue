@@ -9,8 +9,8 @@
         <ul class="space-y-1 md:space-y-2 text-sm">
           <li><a href="#" class="custom-underline">常見問題</a></li>
           <li><a href="#" class="custom-underline">聯絡我們</a></li>
-          <li><a href="#" class="custom-underline">服務條款</a></li>
-          <li><a href="#" class="custom-underline">隱私政策</a></li>
+          <li><router-link to="/terms" class="custom-underline">服務條款</router-link></li>
+          <li><router-link to="/privacy" class="custom-underline">隱私政策</router-link></li>
         </ul>
       </div>
       <!-- 第二欄 -->
@@ -36,7 +36,7 @@
       <div>
         <h4 class="mb-2 font-bold text-base">店家專區</h4>
         <ul class="space-y-1 md:space-y-2 text-sm">
-          <li><a href="#" class="custom-underline">如何加入愛食記？</a></li>
+          <li><a href="#" class="custom-underline">如何加入JiaBaMap？</a></li>
           <li><a href="#" class="custom-underline">聯繫部落客</a></li>
         </ul>
         <p class="mt-2 text-xs md:text-sm text-amber-100">v: 1.8.3, 67</p>
