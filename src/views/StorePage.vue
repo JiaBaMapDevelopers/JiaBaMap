@@ -188,7 +188,11 @@ document.addEventListener("click", handleDocumentClick);
               @click="updateFavorite"
               class="absolute right-[-25px] top-3 flex items-center"
             >
-              <font-awesome-icon :icon="[iconClassic, 'bookmark']" size="xl" style="color: orange;" />
+              <font-awesome-icon
+                :icon="[iconClassic, 'bookmark']"
+                size="xl"
+                style="color: orange"
+              />
             </button>
           </div>
           <div
@@ -359,6 +363,12 @@ document.addEventListener("click", handleDocumentClick);
               />google評價
             </button>
           </a>
+
+          <router-link to="/storecart">
+            <button class="p-2 mt-6 mx-4 rounded-lg shadow text-amber-500">
+              訂餐
+            </button>
+          </router-link>
         </div>
       </div>
 

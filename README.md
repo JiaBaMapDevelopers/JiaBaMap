@@ -55,6 +55,7 @@ npm install
 
 ```sh
 VITE_GOOGLE_MAPS_API_KEY=<your google api key>
+VITE_BACKEND_NGROK_URL=<your backend url>
 ```
 
 4. 啟動開發伺服器
