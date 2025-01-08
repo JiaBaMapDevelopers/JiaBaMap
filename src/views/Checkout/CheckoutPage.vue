@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch } from "vue";
+import { ref, onMounted } from "vue";
 import axios from "axios";
 import Swal from "sweetalert2";
 import DatePicker from "@/components/DatePicker.vue";
@@ -10,98 +10,54 @@ const VITE_BACKEND_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
 
 const route = useRoute();
 const router = useRouter();
-// const orderDetail = ref(null);
-// let shoppingCart = ref(null);
+const orderId = route.params.orderId;
+console.log(orderId);
+
+const orderDetail = ref(null);
+const shoppingCart = {
+  packages: {
+    id: "4",
+    amount: "",
+    products: [],
+  },
+  orderId: "",
+};
 let pickupPhone = ref(null);
 let pickupName = ref(null);
 const selectedPayment = ref("LINEPay");
 const selectedInvoice = ref("紙本發票");
 const formattedDateTime = ref("");
 
-const orderDetail = ref({
-  orderId: "ORDER123456",
-  restaurantName: "台灣美食餐廳",
-  phone: "02-1234-5678",
-  address: "台北市中山區南京東路一段123號",
-  totalAmount: 940,
-  items: [
-    {
-      productId: "P001",
-      productName: "牛肉麵",
-      spec: "大碗",
-      price: 250,
-      quantity: 2,
-    },
-    {
-      productId: "P002",
-      productName: "小籠包",
-      spec: "10顆",
-      price: 200,
-      quantity: 1,
-    },
-    {
-      productId: "P003",
-      productName: "珍珠奶茶",
-      spec: "中杯",
-      price: 120,
-      quantity: 2,
-    },
-  ],
-});
-const shoppingCart = {
-  packages: {
-    id: "1",
-    amount: 940,
-    products: [
-      {
-        id: "P001",
-        name: "牛肉麵",
-        quantity: 2,
-        price: 250,
-      },
-      {
-        id: "P002",
-        name: "小籠包",
-        quantity: 1,
-        price: 200,
-      },
-      {
-        id: "P003",
-        name: "珍珠奶茶",
-        quantity: 2,
-        price: 120,
-      },
-    ],
-  },
-  orderId: "EXAMPLE_ORDER_20250108_1000030",
-};
-
 const updateFormattedDateTime = (newFormattedDateTime) => {
   formattedDateTime.value = newFormattedDateTime;
 };
 
 const getOrderDetails = async (orderId) => {
-  //撈訂單明細
   try {
-    const res = await axios.get(`${VITE_BACKEND_BASE_URL}/order/${orderId}`);
+    const res = await axios.get(
+      `${VITE_BACKEND_BASE_URL}/order/detail/${orderId}`,
+    );
     orderDetail.value = res.data;
-    shoppingCart.value = {
-      id: orderDetail.value.orderId,
-      amount: orderDetail.value.totalAmount,
-      products: orderDetail.value.items,
-    };
+    shoppingCart.packages.products = orderDetail.value.items.map((item) => ({
+      id: item.productId,
+      name: item.productName,
+      quantity: item.quantity,
+      price: item.price,
+    }));
+    shoppingCart.orderId = orderDetail.value.orderId;
+    shoppingCart.packages.amount = orderDetail.value.totalAmount;
     console.log("取得訂單資料成功: ", orderDetail.value);
+    console.log("取得linepay payload: ", shoppingCart);
   } catch (error) {
     console.log("取得訂單資料錯誤: ", error);
   }
 };
 
-// onMounted(() => {
-//   const orderId = route.params.orderId; //從路徑拿到訂單編號
-//   if (orderId) {
-//     getOrderDetails(orderId);
-//   }
-// });
+onMounted(() => {
+  if (orderId) {
+    getOrderDetails(orderId);
+  }
+});
 
 // 監聽 orderDetail 的變化
 // watch(orderDetail, (newValue) => {
@@ -117,7 +73,6 @@ const getOrderDetails = async (orderId) => {
 
 const handelPayment = async (shoppingCart) => {
   try {
-    console.log("shoppingCart: ", shoppingCart);
     const url = `${VITE_BACKEND_NGROK_URL}/payments/linepay/reserve`;
     const { data } = await axios.post(url, shoppingCart);
     const paymentUrl = data?.response?.info?.paymentUrl?.web;
@@ -138,7 +93,7 @@ const handelPayment = async (shoppingCart) => {
       });
     }
   } catch (err) {
-    console.log(err);
+    console.log("error: ", err);
     Swal.fire({
       title: "Error!",
       text: "建立付款請求失敗，請稍後再試",
@@ -157,9 +112,7 @@ const gotoOrderDetail = (orderId) => {
   router.push(`/checkout-detail?transactionId=${orderId}&status=success`);
 };
 const submitOrder = (selectedPayment) => {
-  console.log("selectedPayment: ", selectedPayment);
   if (selectedPayment === "LINEPay") {
-    console.log("shoppingCart2: ", shoppingCart);
     handelPayment(shoppingCart);
   } else {
     gotoOrderDetail(route.params.orderId);
@@ -309,8 +262,8 @@ const submitOrder = (selectedPayment) => {
             class="flex flex-col justify-center gap-4 p-4 border border-gray-200 border-dashed bg-gray-50 rounded-xl"
           >
             <div class="flex flex-col text-left">
-              <h3 class="mb-1 font-bold text-amber-500">
-                {{ orderDetail.restaurantName }}
+              <h3 class="mb-1 text-lg font-bold text-amber-500">
+                {{ orderDetail.storeName }}
               </h3>
               <div class="flex gap-2 my-2">
                 <font-awesome-icon
@@ -318,7 +271,7 @@ const submitOrder = (selectedPayment) => {
                   style="color: #f59e0b"
                   class="fa-lg"
                 />
-                <p>{{ orderDetail.phone }}</p>
+                <p>{{ orderDetail.storePhone }}</p>
               </div>
               <div class="flex gap-2 my-2 cursor-pointer">
                 <font-awesome-icon
@@ -326,7 +279,7 @@ const submitOrder = (selectedPayment) => {
                   class="fa-lg"
                   style="color: #f59e0b"
                 />
-                <p>{{ orderDetail.address }}</p>
+                <p>{{ orderDetail.storeAddress }}</p>
               </div>
             </div>
             <div class="text-left">

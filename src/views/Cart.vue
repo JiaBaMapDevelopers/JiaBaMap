@@ -12,6 +12,7 @@ const getOrder = async () => {
     `${import.meta.env.VITE_BACKEND_BASE_URL}/order/${user.userData._id}`,
   );
   orders.value = response.data;
+  console.log("get order: ", orders.value);
 };
 
 const delOrder = async (orderId) => {
@@ -23,7 +24,7 @@ const delOrder = async (orderId) => {
 console.log(orders);
 
 const goToPay = (orderId) => {
-  router.push({ path: "/checkout/:orderId", params: { id: orderId } });
+  router.push({ path: `/checkout/${orderId}` });
 };
 onMounted(() => {
   getOrder();
@@ -44,15 +45,23 @@ onMounted(() => {
             </p>
 
             <div class="flex justify-center my-4">
-              <img class="w-16 h-16 rounded-full" src="" alt="商品圖片" />
+              <img
+                class="w-20 h-20 rounded-full"
+                src="https://i.imgur.com/5UshzJJ.jpeg"
+                alt="商品圖片"
+              />
             </div>
 
-            <p class="text-center text-gray-700">{{ 0 }} 項商品</p>
-            <p class="text-center text-gray-500">{{ order.restaurantName }}</p>
+            <p class="text-lg text-center text-gray-800">
+              {{ order.itemsLength }} 項商品
+            </p>
+            <p class="text-lg text-center">
+              {{ order.restaurantName }}
+            </p>
 
             <div class="my-4 border-t"></div>
 
-            <p class="text-lg font-bold text-center text-gray-800">
+            <p class="text-xl font-bold text-center text-gray-800">
               共 {{ order.totalAmount }} 元
             </p>
 

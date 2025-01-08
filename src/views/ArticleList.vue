@@ -545,14 +545,11 @@ const contentHtml = `${articles.value.content}`;
               <!-- 下拉選單 -->
               <div
                 v-if="activeMenuId === article._id"
-                class="absolute right-0 mt-1 bg-amber-200 rounded-lg shadow-lg py-1 min-w-[100px] z-10 menu-content"
+                class="absolute right-0 mt-1 bg-amber-100 hover:bg-amber-200 rounded-lg shadow-lg py-1 min-w-[100px] z-10 menu-content"
               >
-                <button
-                  @click="
-                    deleteArticle(article._id);
-                    activeMenuId = null;
-                  "
-                  class="w-full px-4 py-2 text-sm font-bold text-center text-red-500 hover:bg-gray-300"
+                <button 
+                  @click="deleteArticle(article._id); activeMenuId = null"
+                  class="bg-transparent w-full text-center px-4 py-2 text-sm font-bold text-red-500"
                 >
                   刪除
                 </button>
@@ -573,7 +570,7 @@ const contentHtml = `${articles.value.content}`;
               <div v-html="article.content"></div>
               <button
                 @click="toggleContent(article)"
-                class="mt-2 text-sm text-blue-500"
+                class="text-amber-500 text-sm mt-2"
               >
                 {{ article.showFullContent ? "收起" : "繼續閱讀" }}
               </button>
@@ -582,7 +579,7 @@ const contentHtml = `${articles.value.content}`;
               <div class="flex items-center space-x-2">
                 <button
                   @click="toggleLike('article', article._id)"
-                  class="flex items-center space-x-2 text-blue-500 hover:text-blue-600"
+                  class="flex items-center space-x-2 text-amber-500 hover:text-amber-600"
                 >
                   <font-awesome-icon
                     :icon="[article.isLiked ? 'fas' : 'far', 'thumbs-up']"
@@ -597,13 +594,9 @@ const contentHtml = `${articles.value.content}`;
                   @click="toggleComments(article._id)"
                   class="flex items-center space-x-2 text-gray-600 hover:text-gray-800"
                 >
-                  <font-awesome-icon
-                    :icon="['far', 'comment']"
-                    class="text-xl"
-                  />
-                  <span class="text-sm">{{
-                    article.comments?.length || 0
-                  }}</span>
+                  <font-awesome-icon :icon="['far', 'comment']" class="text-xl text-amber-500
+                  " />
+                  <span class="text-sm text-amber-500 ">{{ article.comments?.length || 0 }}</span>
                 </button>
               </div>
             </div>
@@ -638,14 +631,11 @@ const contentHtml = `${articles.value.content}`;
                 <!-- 下拉選單 -->
                 <div
                   v-if="activeMenuId === article._id"
-                  class="absolute right-0 mt-1 bg-amber-200 rounded-lg shadow-lg py-1 min-w-[100px] z-10 menu-content"
+                  class="absolute right-0 mt-1 bg-amber-200 hover:bg-amber-300 rounded-lg shadow-lg py-1 min-w-[100px] z-10 menu-content"
                 >
-                  <button
-                    @click="
-                      deleteArticle(article._id);
-                      activeMenuId = null;
-                    "
-                    class="w-full px-4 py-2 text-sm font-bold text-center text-red-500 hover:bg-gray-300"
+                  <button 
+                    @click="deleteArticle(article._id); activeMenuId = null"
+                    class="bg-transparent w-full text-center px-4 py-2 text-sm font-bold text-red-500"
                   >
                     刪除
                   </button>
@@ -668,14 +658,14 @@ const contentHtml = `${articles.value.content}`;
             <div v-html="article.content"></div>
             <button
               @click="toggleContent(article)"
-              class="mt-2 text-sm text-blue-500"
+              class="text-amber-500 text-sm mt-2"
             >
               {{ article.showFullContent ? "繼續閱讀" : "收起" }}
             </button>
           </div>
           <button
             @click="toggleLike('article', article._id)"
-            class="flex items-center space-x-1 text-blue-500 hover:text-blue-600"
+            class="flex items-center space-x-1 text-amber-500 hover:text-amber-600"
           >
             <font-awesome-icon
               :icon="[article.isLiked ? 'fas' : 'far', 'thumbs-up']"
@@ -736,7 +726,7 @@ const contentHtml = `${articles.value.content}`;
               <div class="flex items-center w-full gap-4 ml-11">
                 <button
                   @click="toggleLike('comment', comment._id)"
-                  class="flex items-center space-x-1 text-blue-500 hover:text-blue-600"
+                  class="flex items-center space-x-1 text-amber-500 hover:text-amber-600"
                 >
                   <font-awesome-icon
                     :icon="[comment.isLiked ? 'fas' : 'far', 'thumbs-up']"
@@ -747,7 +737,7 @@ const contentHtml = `${articles.value.content}`;
                 <div class="flex items-center gap-2">
                   <button
                     @click="toggleReplyForm(comment._id)"
-                    class="text-sm text-blue-500 hover:text-blue-600"
+                    class="text-amber-500 text-sm hover:text-amber-500"
                   >
                     {{
                       newReply.replyingTo === comment._id ? "取消回覆" : "回覆"
@@ -764,14 +754,11 @@ const contentHtml = `${articles.value.content}`;
                     <!-- 下拉選單 -->
                     <div
                       v-if="activeMenuId === comment._id"
-                      class="absolute left-8 top-0 bg-amber-200 rounded-lg shadow-lg py-1 min-w-[100px] z-10 menu-content"
+                      class="absolute left-8 top-0  bg-amber-100 hover:bg-amber-200 rounded-lg shadow-lg py-1 min-w-[100px] z-10 menu-content"
                     >
-                      <button
-                        @click="
-                          deleteComment(article._id, comment._id);
-                          activeMenuId = null;
-                        "
-                        class="w-full px-4 py-2 text-sm font-bold text-center text-red-500 hover:bg-gray-300"
+                      <button 
+                        @click="deleteComment(article._id, comment._id); activeMenuId = null"
+                        class="bg-transparent w-full text-center px-4 py-2 text-sm font-bold text-red-500"
                       >
                         刪除
                       </button>
@@ -809,7 +796,7 @@ const contentHtml = `${articles.value.content}`;
                 <div class="flex items-center gap-4 mt-2 ml-9">
                   <button
                     @click="toggleLike('reply', reply._id)"
-                    class="flex items-center space-x-1 text-blue-500 hover:text-blue-600"
+                    class="flex items-center space-x-1 text-amber-500 hover:text-amber-600"
                   >
                     <font-awesome-icon
                       :icon="[reply.isLiked ? 'fas' : 'far', 'thumbs-up']"
@@ -828,14 +815,11 @@ const contentHtml = `${articles.value.content}`;
                     <!-- 下拉選單 -->
                     <div
                       v-if="activeMenuId === reply._id"
-                      class="absolute left-8 top-0 bg-amber-200 rounded-lg shadow-lg py-1 min-w-[100px] z-10 menu-content"
+                      class="absolute left-8 top-0 bg-amber-100 hover:bg-amber-200 rounded-lg shadow-lg py-1 min-w-[100px] z-10 menu-content"
                     >
-                      <button
-                        @click="
-                          deleteReply(article._id, comment._id, reply._id);
-                          activeMenuId = null;
-                        "
-                        class="z-50 w-full px-4 py-2 text-sm font-bold text-center text-red-500 hover:bg-gray-300"
+                      <button 
+                        @click="deleteReply(article._id, comment._id, reply._id); activeMenuId = null"
+                        class="bg-transparent w-full text-center px-4 py-2 text-sm font-bold text-red-500  z-50"
                       >
                         刪除
                       </button>
@@ -897,7 +881,7 @@ const contentHtml = `${articles.value.content}`;
                   </div>
                   <button
                     @click="addReply(article._id, comment._id)"
-                    class="px-3 py-1 mt-1 text-sm text-white bg-blue-500 rounded hover:bg-blue-600"
+                    class="mt-1 bg-amber-500 text-white px-3 py-1 rounded text-sm hover:bg-amber-600"
                     :disabled="!userData"
                   >
                     {{ userData ? "發表回覆" : "請先登入" }}
