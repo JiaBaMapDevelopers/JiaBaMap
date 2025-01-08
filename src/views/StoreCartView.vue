@@ -200,6 +200,28 @@ const openItemModal = async (item) => {
       note,
     });
 
+    const cartItem = {
+      productId: item._id,
+      productName: item.name,
+      price: item.price,
+      quantity,
+    };
+
+    console.log(cartItem);
+    const orderData = {
+      customerId: userData.value._id,
+      storeId: item.storeId,
+      storeName: "12:59早午餐Brunch.Pasta.Coffee.Dessert",
+      pickupTime: Date.now(),
+      items: [cartItem],
+    };
+    console.log(orderData);
+
+    const response = await axios.post(
+      `${import.meta.env.VITE_BACKEND_BASE_URL}/order/`,
+      orderData,
+    );
+
     await Swal.fire({
       title: '成功',
       text: '已加入購物車',
