@@ -55,7 +55,7 @@ const sendSystemNotification = (notification) => {
   }
 };
 
-、const initializeSocket = () => {
+const initializeSocket = () => {
   if (!auth.userData?.id) {
     console.warn('No user data available');
     return;
