@@ -26,7 +26,15 @@ import {
   faCamera,
   faRightFromBracket,
   faBell,
+  faFileInvoiceDollar,
+  faPhoneFlip,
+  faCircleExclamation,
+  faXmark,
+  faPen,
+  faTrash,
+  faSpinner,
   faCircleXmark,
+  faPhone
 } from "@fortawesome/free-solid-svg-icons";
 import { faInstagram } from "@fortawesome/free-brands-svg-icons";
 import { createPinia } from "pinia";
@@ -38,6 +46,7 @@ import {
 import { faThumbsUp as fasThumbsUp } from "@fortawesome/free-solid-svg-icons";
 import VueSweetalert2 from "vue-sweetalert2";
 import "sweetalert2/dist/sweetalert2.min.css";
+import "preline/preline";
 
 library.add(
   faEllipsis,
@@ -66,7 +75,15 @@ library.add(
   faCamera,
   faRightFromBracket,
   faBell,
+  faFileInvoiceDollar,
+  faPhoneFlip,
+  faCircleExclamation,
+  faXmark,
+  faPen,
+  faTrash,
+  faSpinner,
   faCircleXmark,
+  faPhone
 );
 
 const app = createApp(App);

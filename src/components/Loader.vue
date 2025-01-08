@@ -8,8 +8,7 @@
         <div class="cat__head"></div>
       </div>
     </div>
-</div>
-
+  </div>
 </template>
 
 <style scoped>
@@ -29,19 +28,24 @@
 
 .cat:active > * {
   -webkit-animation-play-state: running;
-          animation-play-state: running;
+  animation-play-state: running;
 }
 
-.cat__body, .cat__tail, .cat__head {
+.cat__body,
+.cat__tail,
+.cat__head {
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  -webkit-animation: rotating 2.79s cubic-bezier(0.65, 0.54, 0.12, 0.93) infinite;
-          animation: rotating 2.79s cubic-bezier(0.65, 0.54, 0.12, 0.93) infinite;
+  -webkit-animation: rotating 2.79s cubic-bezier(0.65, 0.54, 0.12, 0.93)
+    infinite;
+  animation: rotating 2.79s cubic-bezier(0.65, 0.54, 0.12, 0.93) infinite;
 }
-.cat__body::before, .cat__tail::before, .cat__head::before {
+.cat__body::before,
+.cat__tail::before,
+.cat__head::before {
   content: "";
   position: absolute;
   width: 50%;
@@ -61,7 +65,7 @@
 
 .cat__tail {
   -webkit-animation-delay: 0.2s;
-          animation-delay: 0.2s;
+  animation-delay: 0.2s;
 }
 .cat__tail::before {
   left: 0;
@@ -73,11 +77,11 @@
 
 .cat__body {
   -webkit-animation-delay: 0.1s;
-          animation-delay: 0.1s;
+  animation-delay: 0.1s;
 }
 .cat__body:nth-of-type(2) {
   -webkit-animation-delay: 0.2s;
-          animation-delay: 0.2s;
+  animation-delay: 0.2s;
 }
 .cat__body::before {
   right: 0;
@@ -162,5 +166,4 @@ body {
 .info a {
   color: inherit;
 }
-
 </style>

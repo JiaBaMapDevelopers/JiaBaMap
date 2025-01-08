@@ -1,5 +1,5 @@
 <script setup>
-import CreateNote from '@/components/CreateNote/CreateNote.vue';
+import CreateNote from "@/components/CreateNote/CreateNote.vue";
 </script>
 
 <template>
@@ -7,5 +7,3 @@ import CreateNote from '@/components/CreateNote/CreateNote.vue';
     <CreateNote />
   </div>
 </template>
-
-  
