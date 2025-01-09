@@ -87,7 +87,10 @@ const checkFavorite = () => {
 const checkStore = async() => {
   const response = await axios.get(`${import.meta.env.VITE_BACKEND_BASE_URL}/store/get/${placesId.value}`)
   if(response.status === 200){
-    hasStore.value = "true"
+    hasStore.value = true
+    return
+  }else{
+    hasStore.value = false
     return
   }
 }
