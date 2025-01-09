@@ -1,9 +1,11 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import axios from "axios";
+import Swal from "sweetalert2";
 const params = new URLSearchParams(window.location.search);
 const status = params.get("status");
 const orderId = params.get("orderId");
+const transactionId = params.get("transactionId");
 const orderDetail = ref(null);
 
 const VITE_BACKEND_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
@@ -14,9 +16,13 @@ const getOrderDetails = async (orderId) => {
       `${VITE_BACKEND_BASE_URL}/order/detail/${orderId}`,
     );
     orderDetail.value = res.data;
-    
   } catch (error) {
-    console.log("取得訂單資料錯誤: ", error);
+    Swal.fire({
+      title: "無法取得訂單詳細資料",
+      text: error,
+      icon: "error",
+      confirmButtonText: "好",
+    });
   }
 };
 
@@ -62,13 +68,17 @@ onMounted(() => {
         </div>
       </div>
       <div v-else>
-        <p>訂單資料加載中...</p>
+        <h2 class="mb-2 text-xl font-bold text-green-500">預訂成功！</h2>
+        <p class="mb-6 text-lg">
+          請依照您指定的訂餐時間前往取餐，並備妥現金付款。
+        </p>
+        <p class="mb-6 font-medium text-md">訂單編號：{{ transactionId }}</p>
       </div>
     </div>
 
     <div v-else>
       <h2 class="mb-2 text-xl font-bold text-red-500">付款失敗，請重新嘗試</h2>
-      <p class="font-medium text-md">訂單編號：{{ orderId }}</p>
+      <p class="font-medium text-md">訂單編號：{{ transactionId }}</p>
     </div>
   </div>
 </template>
