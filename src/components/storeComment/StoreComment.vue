@@ -1,5 +1,5 @@
 <template>
-  <div class="mt-10">
+  <div id="similar" class="mt-10">
     <CommentInput />
     <PreviousReview />
   </div>
