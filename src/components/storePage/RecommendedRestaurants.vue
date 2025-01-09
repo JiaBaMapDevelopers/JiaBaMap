@@ -36,6 +36,7 @@ const { recommendedRestaurants } = storeToRefs(restaurantStore);
           class="flex justify-center"
         >
           <Slide
+            id="topic" 
             v-for="restaurant in recommendedRestaurants"
             :key="restaurant.place_id"
             class="flex-shrink-0 px-1"

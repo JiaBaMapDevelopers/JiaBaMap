@@ -3,9 +3,10 @@ import { ref, onMounted, computed } from "vue";
 import { useAuth } from "@/stores/authStore";
 import Swal from "sweetalert2";
 import axios from "axios";
-import { useRouter } from "vue-router";
+import { useRouter, useRoute } from "vue-router";
 
 const router = useRouter();
+const route = useRoute();
 const user = useAuth();
 const userData = computed(() => user.userData);
 const storeId = "677eadb14dabab3aff8878c2";
@@ -13,6 +14,9 @@ const categoryRefs = ref([]);
 const selectedCategory = ref(0);
 const cartItems = ref([]);
 const menus = ref([]);
+
+const placeId = route.params.storeId
+
 
 // 店家資訊狀態
 const storeInfo = ref({
@@ -66,7 +70,7 @@ const fetchMenus = async () => {
       `${import.meta.env.VITE_BACKEND_BASE_URL}/menu`,
       {
         params: {
-          storeId,
+          placeId: placeId,
           limit: 50, // 設定較大的限制以確保獲取所有菜單項目
         },
       },
@@ -74,7 +78,6 @@ const fetchMenus = async () => {
 
     if (response.data && Array.isArray(response.data.menus)) {
       menus.value = response.data.menus;
-      console.log(menus.value);
     } else {
       console.error("菜單數據格式錯誤");
       menus.value = [];
@@ -208,7 +211,6 @@ const openItemModal = async (item) => {
       quantity,
     };
 
-    console.log(cartItem);
     const orderData = {
       customerId: userData.value._id,
       storeId: item.storeId,
@@ -216,7 +218,6 @@ const openItemModal = async (item) => {
       pickupTime: Date.now(),
       items: [cartItem],
     };
-    console.log(orderData);
 
     const response = await axios.post(
       `${import.meta.env.VITE_BACKEND_BASE_URL}/order/`,

@@ -39,7 +39,7 @@ const routes = [
     path: "/user",
     name: "user",
     component: UserProfile,
-    meta: { requiresAuth: false },
+    meta: { requiresAuth: true },
   },
   {
     path: "/search",
@@ -83,9 +83,10 @@ const routes = [
     component: Dashboard,
   },
   {
-    path: "/storecart",
+    path: "/storecart/:storeId",
     name: "storecart",
     component: StoreCart,
+    meta: { requiresAuth: true },
   },
   {
     path: "/storesignup",
@@ -121,6 +122,7 @@ const routes = [
     path: "/Cart",
     name: "Cart",
     component: Cart,
+    meta: { requiresAuth: true },
   },
   {
     path: "/terms",
@@ -152,7 +154,7 @@ router.beforeEach((to, from, next) => {
         title: "請先登入！",
         icon: "error",
       });
-      next({ name: "home" });
+      // next({ name: "home" });
     } else {
       next();
     }

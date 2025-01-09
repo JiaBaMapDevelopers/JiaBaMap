@@ -1,4 +1,5 @@
 <script setup>
+import {useRouter} from "vue-router"
 import axios from "axios";
 import { onMounted, ref, computed } from "vue";
 import { storeToRefs } from "pinia";
@@ -12,10 +13,12 @@ import RecommendedRestaurants from "@/components/storePage/RecommendedRestaurant
 import SearchInput from "@/components/SearchInput.vue";
 import { useAuth } from "@/stores/authStore";
 
+// const router = useRouter()
 const restaurantStore = useStore();
 const user = useAuth();
 const userData = computed(() => user.userData);
 const iconClassic = ref("far");
+const hasStore = ref(false)
 // 從 store 中解構需要的屬性
 const {
   storeName,
@@ -32,6 +35,7 @@ const {
   storePhoto,
   bannerPhoto,
   staticMapUrl,
+  placesId
 } = storeToRefs(restaurantStore);
 
 // 下拉選單狀態
@@ -80,6 +84,17 @@ const checkFavorite = () => {
   }
 };
 
+const checkStore = async() => {
+  const response = await axios.get(`${import.meta.env.VITE_BACKEND_BASE_URL}/store/get/${placesId.value}`)
+  if(response.status === 200){
+    hasStore.value = true
+    return
+  }else{
+    hasStore.value = false
+    return
+  }
+}
+
 // 頁面載入時的初始化
 onMounted(async () => {
   try {
@@ -92,6 +107,7 @@ onMounted(async () => {
   } catch (error) {
     console.error("數據載入錯誤：", error);
   }
+  checkStore();
 });
 
 // 點擊頁面其他地方時隱藏下拉選單
@@ -120,7 +136,7 @@ document.addEventListener("click", handleDocumentClick);
     </div>
     <!-- 橫幅圖片區 -->
     <div class="relative w-full h-48">
-      <img
+      <img 
         v-if="bannerPhoto"
         :src="bannerPhoto"
         alt="Banner"
@@ -138,34 +154,34 @@ document.addEventListener("click", handleDocumentClick);
     </div>
 
     <!-- 導航標籤 -->
-    <nav
+    <nav id="title" 
       class="flex items-center px-4 space-x-4 overflow-x-auto bg-white shadow md:overflow-visible"
     >
-      <button
+      <a href="#title"><button
         class="px-4 py-4 font-bold border-b-2 border-transparent text-amber-500 hover:border-amber-500 whitespace-nowrap"
       >
         總覽
-      </button>
-      <button
-        class="px-4 py-4 font-bold border-b-2 border-transparent text-amber-500 hover:border-amber-500 whitespace-nowrap"
-      >
-        照片
-      </button>
-      <button
-        class="px-4 py-4 font-bold border-b-2 border-transparent text-amber-500 hover:border-amber-500 whitespace-nowrap"
-      >
-        菜單
-      </button>
-      <button
+      </button></a>
+      <a href="#comment"><button
         class="px-4 py-4 font-bold border-b-2 border-transparent text-amber-500 hover:border-amber-500 whitespace-nowrap"
       >
         評論
-      </button>
-      <button
+      </button></a>
+      <a href="#similar"><button
         class="px-4 py-4 font-bold border-b-2 border-transparent text-amber-500 hover:border-amber-500 whitespace-nowrap"
       >
-        更多餐廳
-      </button>
+        相似餐廳
+      </button></a>
+      <a href="#recommend"><button
+        class="px-4 py-4 font-bold border-b-2 border-transparent text-amber-500 hover:border-amber-500 whitespace-nowrap"
+      >
+        推薦餐廳
+      </button></a>
+      <a href="#topic"><button
+        class="px-4 py-4 font-bold border-b-2 border-transparent text-amber-500 hover:border-amber-500 whitespace-nowrap"
+      >
+        精選主題
+      </button></a>
     </nav>
 
     <!-- 主要內容區 -->
@@ -337,7 +353,7 @@ document.addEventListener("click", handleDocumentClick);
             均消價位 | {{ `${startPrice}-${endPrice}` }}元
           </p>
           <p v-else>均消價位 | 未提供</p>
-          <p>
+          <p id="comment" >
             訂位電話 |
             {{ nationalPhoneNumber != null ? nationalPhoneNumber : "未提供" }}
           </p>
@@ -364,7 +380,7 @@ document.addEventListener("click", handleDocumentClick);
             </button>
           </a>
 
-          <router-link to="/storecart">
+          <router-link :to="{ name: 'storecart', params: { storeId: placesId } }" v-if="hasStore">
             <button class="p-2 mt-6 mx-4 rounded-lg shadow text-amber-500">
               訂餐
             </button>
@@ -380,16 +396,6 @@ document.addEventListener("click", handleDocumentClick);
 
         <!-- 推薦餐廳部分 -->
         <RecommendedRestaurants />
-      </div>
-
-      <!-- 搜尋相關主題 -->
-      <SearchTag />
-
-      <!-- 地圖區域 -->
-      <div class="mt-10 text-gray-700">
-        <h3 class="mb-2 text-2xl font-bold">
-          和牛涮 日式鍋物放題 台南中華西店 的食記
-        </h3>
       </div>
       <!-- 熱門餐廳分類 -->
       <div class="mt-10 text-gray-700">

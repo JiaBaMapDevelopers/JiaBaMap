@@ -11,7 +11,10 @@ const VITE_BACKEND_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
 const route = useRoute();
 const router = useRouter();
 const orderId = route.params.orderId;
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin
 const orderDetail = ref(null);
 const shoppingCart = {
   packages: {
