@@ -5,7 +5,8 @@ import Swal from "sweetalert2";
 import "sweetalert2/dist/sweetalert2.min.css";
 
 const imageFile = ref(null); // 儲存上傳的檔案
-const storeId = "677df116064889ada7b60176";
+const storeId = ref("");
+const demoStoreName = "12:59早午餐Brunch.Pasta.Coffee.Dessert";
 const menus = ref([]);
 const showModal = ref(false);
 const isEditing = ref(false);
@@ -71,6 +72,7 @@ const fetchStoreId = async () => {
     `${import.meta.env.VITE_BACKEND_BASE_URL}/store/getIdByName/${demoStoreName}`,
   );
   storeId.value = response.data._id;
+  console.log(storeId.value);
 };
 
 // 更新 fetchMenus 支援搜尋與分頁
@@ -95,8 +97,6 @@ const fetchMenus = async (page = 1) => {
     menus.value = Array.isArray(response.data.menus) ? response.data.menus : [];
     totalPages.value = response.data.totalPages;
     currentPage.value = response.data.currentPage;
-
-    console.log("查詢結果：", menus.value);
   } catch (error) {
     console.error("取得菜單資料失敗：", error);
     Swal.fire({
@@ -116,7 +116,7 @@ const addMenu = async () => {
     formData.append("description", menuForm.value.description); // 新增描述
     formData.append("price", menuForm.value.price);
     formData.append("category", menuForm.value.category);
-    formData.append("storeId", storeId);
+    formData.append("storeId", storeId.value);
 
     // 檢查圖片並加入
     if (menuForm.value.image) {
@@ -375,12 +375,13 @@ onMounted(async () => {
             </div>
           </td>
           <td class="px-4 py-2 border border-gray-300">{{ menu.name }}</td>
-          <td v-if="menu.description !== 'undefined'" class="px-4 py-2 border border-gray-300">
+          <td
+            v-if="menu.description !== 'undefined'"
+            class="px-4 py-2 border border-gray-300"
+          >
             {{ menu.description }}
           </td>
-          <td v-else class="px-4 py-2 border border-gray-300">
-            
-          </td>
+          <td v-else class="px-4 py-2 border border-gray-300"></td>
           <td class="px-4 py-2 border border-gray-300">${{ menu.price }}</td>
           <td class="px-4 py-2 border border-gray-300">{{ menu.category }}</td>
           <td class="px-4 py-2 border border-gray-300">

@@ -16,7 +16,6 @@ const cartItems = ref([]);
 const menus = ref([]);
 
 const placeId = route.params.storeId
-console.log(placeId);
 
 
 // 店家資訊狀態
@@ -79,7 +78,6 @@ const fetchMenus = async () => {
 
     if (response.data && Array.isArray(response.data.menus)) {
       menus.value = response.data.menus;
-      console.log(menus.value);
     } else {
       console.error("菜單數據格式錯誤");
       menus.value = [];
@@ -213,7 +211,6 @@ const openItemModal = async (item) => {
       quantity,
     };
 
-    console.log(cartItem);
     const orderData = {
       customerId: userData.value._id,
       storeId: item.storeId,
@@ -221,7 +218,6 @@ const openItemModal = async (item) => {
       pickupTime: Date.now(),
       items: [cartItem],
     };
-    console.log(orderData);
 
     const response = await axios.post(
       `${import.meta.env.VITE_BACKEND_BASE_URL}/order/`,
