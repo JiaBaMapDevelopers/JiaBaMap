@@ -43,6 +43,7 @@ const fetchArticles = async () => {
       ...article,
       comments: article.comments || [],
       showComments: false,
+      showFullContent: false, // 初始化為不顯示全文
     }));
   } catch (error) {
     await swalWithBootstrapButtons.fire({
@@ -563,11 +564,11 @@ const contentHtml = `${articles.value.content}`;
               <span>{{ formatDate(article.createdAt) }}</span>
             </div>
             <div class="relative">
-              <!-- <p class="leading-relaxed text-gray-700 break-words whitespace-pre-wrap line-clamp-3" 
-                 :class="{ 'line-clamp-none': article.showFullContent }">
-                {{ article.content }}
-              </p> -->
-              <div v-html="article.content" class="break-words"></div>
+              <div
+                class="article-content break-words"
+                :class="{ 'line-clamp': !article.showFullContent }"
+                v-html="article.content"
+              ></div>
               <button
                 @click="toggleContent(article)"
                 class="text-amber-500 text-sm mt-2"
@@ -649,18 +650,16 @@ const contentHtml = `${articles.value.content}`;
             <span>{{ formatDate(article.createdAt) }}</span>
           </div>
           <div class="relative">
-            <!-- <p
-              class="text-sm text-gray-700 line-clamp-3"
-              :class="{ 'line-clamp-none': !article.showFullContent }"
-            >
-              {{ article.content }}
-            </p> -->
-            <div v-html="article.content" class="break-words"></div>
+            <div
+              class="article-content break-words"
+              :class="{ 'line-clamp': !article.showFullContent }"
+              v-html="article.content"
+            ></div>
             <button
               @click="toggleContent(article)"
               class="text-amber-500 text-sm mt-2"
             >
-              {{ article.showFullContent ? "繼續閱讀" : "收起" }}
+              {{ article.showFullContent ? "收起" : "繼續閱讀" }}
             </button>
           </div>
           <button
@@ -958,9 +957,14 @@ button.bg-amber-500:hover {
   overflow-wrap: break-word;
 }
 
-/* 增加段落樣式 */
 .article-content {
-  white-space: pre-wrap; /* 保留換行符 */
-  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.5rem; /* 每行的高度 */
+}
+
+.line-clamp {
+  -webkit-line-clamp: var(--line-clamp-count, 3); /* 默認 3 行 */
 }
 </style>
