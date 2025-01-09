@@ -498,95 +498,124 @@ const getCurrentContent = () => {
       :currentRestaurantName="restaurantName"
       :getCurrentContent="getCurrentContent"
     />
-    <div class="max-w-4xl p-4 mx-auto mt-6 bg-white rounded-lg shadow-lg m-11 md:p-4">
+    <div
+      class="max-w-4xl p-4 mx-auto mt-6 bg-white rounded-lg shadow-lg m-11 md:p-4"
+    >
       <div class="flex items-center mb-4">
-        <label for="eatDate" class="block mr-2 text-sm font-medium text-gray-700">
-          用餐日期：
+        <label for="date" class="block mr-2 text-sm font-medium text-gray-700"
+          >用餐日期：</label
+        >
+        <div class="relative flex-grow">
           <input
             type="date"
-            id="eatDate"
-            name="eatDate"
+            id="date"
             v-model="date"
             :class="{ 'border-red-500': errors.date }"
             class="px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
             @input="errors.date = false"
           />
-        </label>
-        <span v-if="errors.date" class="absolute left-0 text-sm text-red-500 top-full">
-          請選擇用餐日期
-        </span>
+          <span
+            v-if="errors.date"
+            class="absolute left-0 text-sm text-red-500 top-full"
+          >
+            請選擇用餐日期
+          </span>
+        </div>
       </div>
       <div class="mb-4">
-        <label for="restaurantNameInput" class="block mb-1 text-sm font-medium text-gray-700">
-          餐廳名稱
-          <div class="relative">
-            <input
-              id="restaurantNameInput"
-              name="restaurantName"
-              type="text"
-              v-model="restaurantName"
-              placeholder="輸入餐廳名稱"
-              :class="{ 'border-red-500': errors.restaurantName }"
-              class="w-full px-3 py-2 text-xl border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
-            />
-            <span v-if="errors.restaurantName" class="absolute left-0 text-sm text-red-500 top-full">
-              {{ errors.restaurantName }}
-            </span>
-          </div>
-        </label>
-      </div>
-      <div class="mb-4">
-        <label for="titleInput" class="block mb-1 text-sm font-medium text-gray-700">
-          文章標題
-          <div class="relative">
-            <input
-              id="titleInput"
-              name="title"
-              type="text"
-              v-model="title"
-              placeholder="輸入文章標題"
-              :class="{ 'border-red-500': errors.title }"
-              class="w-full px-3 py-2 text-xl border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
-            />
-            <span v-if="errors.title" class="absolute left-0 text-sm text-red-500 top-full">
-              {{ errors.title }}
-            </span>
-          </div>
-        </label>
-      </div>
-      <div class="mb-4">
-        <label for="contentInput" class="block mb-1 text-sm font-medium text-gray-700">
-          文章內容
-          <div class="relative">
-            <div
-              id="contentInput"
-              name="content"
-              contenteditable="true"
-              ref="editor"
-              :class="{ 'border-red-500': errors.content }"
-              class="w-full px-3 py-2 overflow-y-auto text-base border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-500 h-100"
-              @input="updateContent"
-            ></div>
-            <span v-if="errors.content" class="absolute left-0 text-sm text-red-500 top-full">
-              文章內容至少需要300字（目前 {{ contentWordCount }} 字）
-            </span>
-          </div>
-        </label>
-      </div>
-      <div class="mb-4">
-        <label for="imageUpload" class="block mb-1 text-sm font-medium text-gray-700">
-          插入圖片
+        <label
+          for="restaurant"
+          class="block mb-1 text-sm font-medium text-gray-700"
+          >餐廳名稱</label
+        >
+        <div class="relative">
           <input
-            type="file"
-            id="imageUpload"
-            name="imageUpload"
-            @change="onImageSelect"
-            class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:bg-amber-400 file:text-white hover:file:bg-amber-500 file:transition file:cursor-pointer"
+            id="restaurant"
+            type="text"
+            v-model="restaurantName"
+            placeholder="輸入餐廳名稱"
+            :class="{ 'border-red-500': errors.restaurantName }"
+            class="w-full px-3 py-2 text-xl border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
           />
-        </label>
-        <!-- 显示已插入的文件名称 -->
+          <span
+            v-if="errors.restaurantName"
+            class="absolute left-0 text-sm text-red-500 top-full"
+          >
+            {{ errors.restaurantName }}
+          </span>
+        </div>
+      </div>
+      <div class="mb-4">
+        <label for="title" class="block mb-1 text-sm font-medium text-gray-700"
+          >文章標題</label
+        >
+        <div class="relative">
+          <input
+            id="title"
+            type="text"
+            v-model="title"
+            placeholder="輸入文章標題"
+            :class="{ 'border-red-500': errors.title }"
+            class="w-full px-3 py-2 text-xl border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
+          />
+          <span
+            v-if="errors.title"
+            class="absolute left-0 text-sm text-red-500 top-full"
+          >
+            {{ errors.title }}
+          </span>
+        </div>
+      </div>
+      <div class="mb-4">
+        <label class="block mb-1 text-sm font-medium text-gray-700"
+          >文章內容</label
+        >
+        <div class="relative">
+          <div
+            contenteditable="true"
+            ref="editor"
+            :class="{ 'border-red-500': errors.content }"
+            class="w-full px-3 py-2 overflow-y-auto text-base border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-500 h-100"
+            @input="updateContent"
+          ></div>
+          <span
+            v-if="errors.content"
+            class="absolute left-0 text-sm text-red-500 top-full"
+          >
+            文章內容至少需要300字（目前 {{ contentWordCount }} 字）
+          </span>
+          <!-- 字數計數器 -->
+          <div
+            class="mt-2 text-sm"
+            :class="{
+              'text-red-500': contentWordCount < 300,
+              'text-green-500': contentWordCount >= 300,
+            }"
+          >
+            目前字數：{{ contentWordCount }} / 300
+            <span v-if="contentWordCount < 300"
+              >（還需要 {{ 300 - contentWordCount }} 字）</span
+            >
+            <span v-else>（已達到最低字數要求）</span>
+          </div>
+        </div>
+      </div>
+      <div class="mb-4">
+        <label class="block mb-1 text-sm font-medium text-gray-700"
+          >插入圖片</label
+        >
+        <input
+          type="file"
+          @change="onImageSelect"
+          class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:bg-amber-400 file:text-white hover:file:bg-amber-500 file:transition file:cursor-pointer"
+        />
+        <!-- 顯示已插入的檔案名稱 -->
         <ul class="mt-2">
-          <li v-for="file in fileList" :key="file.name" class="text-sm text-gray-600">
+          <li
+            v-for="file in fileList"
+            :key="file.name"
+            class="text-sm text-gray-600"
+          >
             已插入檔案：{{ file.name }}
           </li>
         </ul>

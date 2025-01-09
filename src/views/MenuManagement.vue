@@ -1,11 +1,11 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import axios from "axios";
-import Swal from 'sweetalert2'
-import 'sweetalert2/dist/sweetalert2.min.css'
+import Swal from "sweetalert2";
+import "sweetalert2/dist/sweetalert2.min.css";
 
 const imageFile = ref(null); // 儲存上傳的檔案
-const storeId = "67720e635123faace157e5b3";
+const storeId = "677df116064889ada7b60176";
 const menus = ref([]);
 const showModal = ref(false);
 const isEditing = ref(false);
@@ -65,6 +65,14 @@ const handleFileUpload = (event) => {
   menuForm.value.image = file; // 暫存圖片檔案
 };
 
+//搜尋店家Id
+const fetchStoreId = async () => {
+  const response = await axios.get(
+    `${import.meta.env.VITE_BACKEND_BASE_URL}/store/getIdByName/${demoStoreName}`,
+  );
+  storeId.value = response.data._id;
+};
+
 // 更新 fetchMenus 支援搜尋與分頁
 const fetchMenus = async (page = 1) => {
   try {
@@ -78,7 +86,7 @@ const fetchMenus = async (page = 1) => {
           category: selectedCategory.value,
           minPrice: minPrice.value || undefined,
           maxPrice: maxPrice.value || undefined,
-          storeId: "67720e635123faace157e5b3", // 確保這裡傳的是正確的 ObjectId
+          placeId: "ChIJSZ0SYPCrQjQR-T3_o5h0s9I", // 確保這裡傳的是正確的 ObjectId
         },
       },
     );
@@ -127,7 +135,7 @@ const addMenu = async () => {
 
     if (response.status === 200 && response.data._id) {
       menus.value.push(response.data); // 更新畫面
-      closeModal(); 
+      closeModal();
       Swal.fire({
         title: "新增成功！",
         icon: "success",
@@ -236,7 +244,10 @@ const closeModal = () => {
   menuForm.value = { name: "", description: "", price: "", category: "" };
 };
 
-onMounted(fetchMenus);
+onMounted(async () => {
+  await fetchStoreId();
+  await fetchMenus();
+});
 </script>
 
 <template>
@@ -364,8 +375,11 @@ onMounted(fetchMenus);
             </div>
           </td>
           <td class="px-4 py-2 border border-gray-300">{{ menu.name }}</td>
-          <td class="px-4 py-2 border border-gray-300">
+          <td v-if="menu.description !== 'undefined'" class="px-4 py-2 border border-gray-300">
             {{ menu.description }}
+          </td>
+          <td v-else class="px-4 py-2 border border-gray-300">
+            
           </td>
           <td class="px-4 py-2 border border-gray-300">${{ menu.price }}</td>
           <td class="px-4 py-2 border border-gray-300">{{ menu.category }}</td>
