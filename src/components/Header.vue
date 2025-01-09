@@ -173,7 +173,7 @@ watch(route, () => {
             </div>
             <router-link
               to="/user"
-              class="pl-4 font-bold leading-10 text-amber-500"
+              class="px-4 font-bold leading-10 text-amber-500"
               >{{ user.userData?.name || "使用者" }}</router-link
             >
           </li>
@@ -184,7 +184,6 @@ watch(route, () => {
             >搜尋餐廳</router-link
           >
           <hr class="border-amber-200" />
-
           <router-link
             to="/articlelist"
             class="block p-2 text-amber-500 hover:bg-amber-100"
@@ -199,17 +198,18 @@ watch(route, () => {
           <li>
             <router-link
               to="/storesignup"
-              class="block p-2 text-amber-500 hover:bg-amber-100"
+              class="block px-4 py-2 text-amber-500 hover:bg-amber-100"
               >店家註冊</router-link
             >
           </li>
           <li>
             <router-link
               to="/storesignin"
-              class="block p-2 text-amber-500 hover:bg-amber-100"
+              class="block px-4 py-2 text-amber-500 hover:bg-amber-100"
               >店家登入</router-link
             >
           </li>
+
           <hr class="border-amber-200" />
           <li v-if="user.userData">
             <button
