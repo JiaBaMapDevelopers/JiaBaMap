@@ -20,7 +20,6 @@ const editedProfilePicture = ref(
   userData.value?.profilePicture || "/image/default_user.png",
 );
 
-console.log(userData.value);
 
 // 計算屬性 - 生成 IG 連結
 const instagramLink = computed(() => 
@@ -73,7 +72,6 @@ const saveProfile = async () => {
 
     isEditing.value = false;
 
-    console.log("更新成功")
   } catch (err) {
     console.error("更新失敗：", err)
     // 2. 在錯誤時使用 SweetAlert2 顯示提示

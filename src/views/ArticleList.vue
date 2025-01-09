@@ -440,7 +440,6 @@ const handleResize = () => {
   isMobile.value = window.innerWidth < 768;
 };
 
-console.log(articles.content);
 
 // 在 onMounted 中調用
 onMounted(async () => {

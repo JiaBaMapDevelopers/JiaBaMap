@@ -96,7 +96,6 @@ const fetchMenus = async (page = 1) => {
     totalPages.value = response.data.totalPages;
     currentPage.value = response.data.currentPage;
 
-    console.log("查詢結果：", menus.value);
   } catch (error) {
     console.error("取得菜單資料失敗：", error);
     Swal.fire({

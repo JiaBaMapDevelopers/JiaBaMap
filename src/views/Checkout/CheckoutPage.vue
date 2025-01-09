@@ -11,8 +11,6 @@ const VITE_BACKEND_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
 const route = useRoute();
 const router = useRouter();
 const orderId = route.params.orderId;
-console.log(orderId);
-
 const orderDetail = ref(null);
 const shoppingCart = {
   packages: {
@@ -46,8 +44,6 @@ const getOrderDetails = async (orderId) => {
     }));
     shoppingCart.orderId = orderDetail.value.orderId;
     shoppingCart.packages.amount = orderDetail.value.totalAmount;
-    console.log("取得訂單資料成功: ", orderDetail.value);
-    console.log("取得linepay payload: ", shoppingCart);
   } catch (error) {
     console.log("取得訂單資料錯誤: ", error);
   }
@@ -77,8 +73,6 @@ const handelPayment = async (shoppingCart) => {
     const { data } = await axios.post(url, shoppingCart);
     const paymentUrl = data?.response?.info?.paymentUrl?.web;
     const returnCode = data?.response?.returnCode;
-
-    console.log(returnCode);
 
     if (returnCode === "0000") {
       window.location.href = paymentUrl;

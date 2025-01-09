@@ -12,7 +12,6 @@ const getOrder = async () => {
     `${import.meta.env.VITE_BACKEND_BASE_URL}/order/${user.userData._id}`,
   );
   orders.value = response.data;
-  console.log("get order: ", orders.value);
 };
 
 const delOrder = async (orderId) => {
@@ -21,7 +20,6 @@ const delOrder = async (orderId) => {
   );
   await getOrder();
 };
-console.log(orders);
 
 const goToPay = (orderId) => {
   router.push({ path: `/checkout/${orderId}` });
