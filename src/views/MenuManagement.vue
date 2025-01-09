@@ -377,8 +377,11 @@ onMounted(async () => {
             </div>
           </td>
           <td class="px-4 py-2 border border-gray-300">{{ menu.name }}</td>
-          <td class="px-4 py-2 border border-gray-300">
+          <td v-if="menu.description !== 'undefined'" class="px-4 py-2 border border-gray-300">
             {{ menu.description }}
+          </td>
+          <td v-else class="px-4 py-2 border border-gray-300">
+            
           </td>
           <td class="px-4 py-2 border border-gray-300">${{ menu.price }}</td>
           <td class="px-4 py-2 border border-gray-300">{{ menu.category }}</td>
