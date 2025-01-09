@@ -39,7 +39,6 @@ const toggleLike = async (commentId) => {
       userId: userData.value._id,
     },
   );
-  console.log("Response:", response.data);
   commentStore.getComment();
 };
 

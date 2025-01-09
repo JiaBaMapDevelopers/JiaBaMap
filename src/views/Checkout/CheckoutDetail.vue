@@ -13,13 +13,8 @@ const getOrderDetails = async (orderId) => {
     const res = await axios.get(
       `${VITE_BACKEND_BASE_URL}/order/detail/${orderId}`,
     );
-    console.log(res);
     orderDetail.value = res.data;
-    if (orderDetail.value !== null) {
-      console.log("取得訂單資料成功: ", orderDetail.value);
-    } else {
-      console.log("無法取得訂單資料");
-    }
+    
   } catch (error) {
     console.log("取得訂單資料錯誤: ", error);
   }
@@ -27,10 +22,7 @@ const getOrderDetails = async (orderId) => {
 
 onMounted(() => {
   if (orderId) {
-    console.log(orderId);
     getOrderDetails(orderId);
-  } else {
-    console.log("未取得訂單 ID");
   }
 });
 </script>
