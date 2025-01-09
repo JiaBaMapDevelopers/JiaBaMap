@@ -8,7 +8,7 @@ import { useRouter } from "vue-router";
 const router = useRouter();
 const user = useAuth();
 const userData = computed(() => user.userData);
-const storeId = "67720e635123faace157e5b3";
+const storeId = "677eadb14dabab3aff8878c2";
 const categoryRefs = ref([]);
 const selectedCategory = ref(0);
 const cartItems = ref([]);
