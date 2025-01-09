@@ -5,9 +5,7 @@ import Swal from "sweetalert2";
 import "sweetalert2/dist/sweetalert2.min.css";
 
 const imageFile = ref(null); // 儲存上傳的檔案
-const demoStoreName = "12:59早午餐Brunch.Pasta.Coffee.Dessert";
-// const storeId = "677eadb14dabab3aff8878c2";
-let storeId = ref("");
+const storeId = "677df116064889ada7b60176";
 const menus = ref([]);
 const showModal = ref(false);
 const isEditing = ref(false);
@@ -88,7 +86,7 @@ const fetchMenus = async (page = 1) => {
           category: selectedCategory.value,
           minPrice: minPrice.value || undefined,
           maxPrice: maxPrice.value || undefined,
-          storeId: storeId.value, // 確保這裡傳的是正確的 ObjectId
+          placeId: "ChIJSZ0SYPCrQjQR-T3_o5h0s9I", // 確保這裡傳的是正確的 ObjectId
         },
       },
     );
@@ -118,7 +116,7 @@ const addMenu = async () => {
     formData.append("description", menuForm.value.description); // 新增描述
     formData.append("price", menuForm.value.price);
     formData.append("category", menuForm.value.category);
-    formData.append("storeId", storeId.value);
+    formData.append("storeId", storeId);
 
     // 檢查圖片並加入
     if (menuForm.value.image) {
