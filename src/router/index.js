@@ -21,6 +21,9 @@ import Cart from "@/views/Cart.vue";
 import Terms from "../views/Footer/Terms.vue";
 import Privacy from "../views/Footer/Privacy.vue";
 
+import { HSStaticMethods } from "preline/preline";
+window.HSStaticMethods = HSStaticMethods;
+
 const routes = [
   {
     path: "/",
@@ -155,6 +158,14 @@ router.beforeEach((to, from, next) => {
     }
   } else {
     next();
+  }
+});
+
+router.afterEach((to, from, failure) => {
+  if (!failure) {
+    setTimeout(() => {
+      window.HSStaticMethods.autoInit();
+    }, 100);
   }
 });
 

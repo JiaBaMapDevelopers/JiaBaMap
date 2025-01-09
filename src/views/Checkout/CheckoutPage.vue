@@ -11,12 +11,11 @@ const VITE_BACKEND_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
 const route = useRoute();
 const router = useRouter();
 const orderId = route.params.orderId;
-console.log(orderId);
 
 const orderDetail = ref(null);
 const shoppingCart = {
   packages: {
-    id: "4",
+    id: "1",
     amount: "",
     products: [],
   },
@@ -46,10 +45,13 @@ const getOrderDetails = async (orderId) => {
     }));
     shoppingCart.orderId = orderDetail.value.orderId;
     shoppingCart.packages.amount = orderDetail.value.totalAmount;
-    console.log("取得訂單資料成功: ", orderDetail.value);
-    console.log("取得linepay payload: ", shoppingCart);
   } catch (error) {
-    console.log("取得訂單資料錯誤: ", error);
+    Swal.fire({
+      title: "取得訂單資料錯誤",
+      text: error,
+      icon: "error",
+      confirmButtonText: "好",
+    });
   }
 };
 
@@ -78,29 +80,26 @@ const handelPayment = async (shoppingCart) => {
     const paymentUrl = data?.response?.info?.paymentUrl?.web;
     const returnCode = data?.response?.returnCode;
 
-    console.log(returnCode);
-
     if (returnCode === "0000") {
       window.location.href = paymentUrl;
     } else {
       Swal.fire({
-        title: "Error!",
+        title: "付款失敗",
         text: data.response.returnMessage,
         icon: "error",
         confirmButtonText: "好",
       }).then(() => {
-        window.location.href = "/checkout/677a5bd8853f37ea78725bf4";
+        router.push(`/checkout/${orderId}`);
       });
     }
-  } catch (err) {
-    console.log("error: ", err);
+  } catch (error) {
     Swal.fire({
-      title: "Error!",
-      text: "建立付款請求失敗，請稍後再試",
+      title: "建立付款請求失敗",
+      text: error,
       icon: "error",
       confirmButtonText: "好",
     }).then(() => {
-      window.location.href = "/checkout/677a5bd8853f37ea78725bf4";
+      router.push(`/checkout/${orderId}`);
     });
   }
 };
@@ -319,18 +318,8 @@ const submitOrder = (selectedPayment) => {
                 <div v-for="item in orderDetail.items" :key="item.productId">
                   <h3>{{ item.productName }}</h3>
                   <p class="text-gray-400">
-                    {{ item.spec }} / ${{ item.price }} / {{ item.quantity }} 份
+                    ${{ item.price }} / {{ item.quantity }} 份
                   </p>
-                </div>
-                <div class="flex gap-6">
-                  <font-awesome-icon
-                    :icon="['fas', 'pen']"
-                    style="color: #f59e0b"
-                  />
-                  <font-awesome-icon
-                    :icon="['fas', 'trash']"
-                    style="color: #898989"
-                  />
                 </div>
               </div>
               <button
@@ -385,12 +374,12 @@ const submitOrder = (selectedPayment) => {
             <div class="w-full text-left">
               <h2 class="mb-1 font-bold">取貨人資訊</h2>
               <div class="max-w-sm">
-                <label for="input-label" class="block mb-2 text-sm font-medium"
+                <label for="pickup-name" class="block mb-2 text-sm font-medium"
                   >姓名</label
                 >
                 <input
                   type="email"
-                  id="input-label"
+                  id="pickup-name"
                   class="block w-full px-4 py-3 mb-2 text-sm border-gray-200 rounded-lg focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none"
                   placeholder="請輸入取貨人姓名"
                   v-model="pickupName"
@@ -398,12 +387,12 @@ const submitOrder = (selectedPayment) => {
                 />
               </div>
               <div class="max-w-sm">
-                <label for="input-label" class="block mb-2 text-sm font-medium"
+                <label for="pickup-phone" class="block mb-2 text-sm font-medium"
                   >聯絡電話</label
                 >
                 <input
                   type="email"
-                  id="input-label"
+                  id="pickup-phone"
                   class="block w-full px-4 py-3 mb-2 text-sm border-gray-200 rounded-lg focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none"
                   placeholder="請輸入取貨人聯絡電話"
                   v-model="pickupPhone"
