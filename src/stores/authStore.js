@@ -86,7 +86,6 @@ export const useAuth = defineStore("auth", () => {
     userData.value = null;
     localStorage.removeItem("userData"); // 清除 localStorage
     router.push({ name: "home" });
-    console.log("用戶已登出");
   };
 
   return {
