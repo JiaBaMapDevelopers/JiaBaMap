@@ -53,7 +53,7 @@ const { storeName, similarRestaurants } = storeToRefs(restaurantStore);
                     class="object-cover w-[250px] h-[160px] rounded-t-lg"
                   />
                 </div>
-                <div class="p-4">
+                <div id="recommend" class="p-4">
                   <h4
                     class="text-lg font-bold text-center truncate md:text-left"
                   >
