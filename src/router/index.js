@@ -80,7 +80,7 @@ const routes = [
     component: Dashboard,
   },
   {
-    path: "/storecart",
+    path: "/storecart/:storeId",
     name: "storecart",
     component: StoreCart,
   },

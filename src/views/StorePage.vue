@@ -1,4 +1,5 @@
 <script setup>
+import {useRouter} from "vue-router"
 import axios from "axios";
 import { onMounted, ref, computed } from "vue";
 import { storeToRefs } from "pinia";
@@ -12,10 +13,12 @@ import RecommendedRestaurants from "@/components/storePage/RecommendedRestaurant
 import SearchInput from "@/components/SearchInput.vue";
 import { useAuth } from "@/stores/authStore";
 
+// const router = useRouter()
 const restaurantStore = useStore();
 const user = useAuth();
 const userData = computed(() => user.userData);
 const iconClassic = ref("far");
+const hasStore = ref(false)
 // 從 store 中解構需要的屬性
 const {
   storeName,
@@ -32,6 +35,7 @@ const {
   storePhoto,
   bannerPhoto,
   staticMapUrl,
+  placesId
 } = storeToRefs(restaurantStore);
 
 // 下拉選單狀態
@@ -80,6 +84,14 @@ const checkFavorite = () => {
   }
 };
 
+const checkStore = async() => {
+  const response = await axios.get(`${import.meta.env.VITE_BACKEND_BASE_URL}/store/get/${placesId.value}`)
+  if(response.status === 200){
+    hasStore.value = "true"
+    return
+  }
+}
+
 // 頁面載入時的初始化
 onMounted(async () => {
   try {
@@ -92,6 +104,7 @@ onMounted(async () => {
   } catch (error) {
     console.error("數據載入錯誤：", error);
   }
+  checkStore();
 });
 
 // 點擊頁面其他地方時隱藏下拉選單
@@ -364,7 +377,7 @@ document.addEventListener("click", handleDocumentClick);
             </button>
           </a>
 
-          <router-link to="/storecart">
+          <router-link :to="{ name: 'storecart', params: { storeId: placesId } }" v-if="hasStore">
             <button class="p-2 mt-6 mx-4 rounded-lg shadow text-amber-500">
               訂餐
             </button>

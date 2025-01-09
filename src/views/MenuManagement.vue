@@ -5,7 +5,7 @@ import Swal from 'sweetalert2'
 import 'sweetalert2/dist/sweetalert2.min.css'
 
 const imageFile = ref(null); // 儲存上傳的檔案
-const storeId = "677eadb14dabab3aff8878c2";
+const storeId = "677df116064889ada7b60176";
 const menus = ref([]);
 const showModal = ref(false);
 const isEditing = ref(false);
@@ -78,7 +78,7 @@ const fetchMenus = async (page = 1) => {
           category: selectedCategory.value,
           minPrice: minPrice.value || undefined,
           maxPrice: maxPrice.value || undefined,
-          storeId: storeId, // 確保這裡傳的是正確的 ObjectId
+          placeId: "ChIJSZ0SYPCrQjQR-T3_o5h0s9I", // 確保這裡傳的是正確的 ObjectId
         },
       },
     );
