@@ -16,7 +16,6 @@ const cartItems = ref([]);
 const menus = ref([]);
 
 const placeId = route.params.storeId
-(placeId);
 
 
 // 店家資訊狀態
