@@ -1,11 +1,13 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import axios from "axios";
-import Swal from 'sweetalert2'
-import 'sweetalert2/dist/sweetalert2.min.css'
+import Swal from "sweetalert2";
+import "sweetalert2/dist/sweetalert2.min.css";
 
 const imageFile = ref(null); // 儲存上傳的檔案
-const storeId = "677eadb14dabab3aff8878c2";
+const demoStoreName = "12:59早午餐Brunch.Pasta.Coffee.Dessert";
+// const storeId = "677eadb14dabab3aff8878c2";
+let storeId = ref("");
 const menus = ref([]);
 const showModal = ref(false);
 const isEditing = ref(false);
@@ -65,6 +67,14 @@ const handleFileUpload = (event) => {
   menuForm.value.image = file; // 暫存圖片檔案
 };
 
+//搜尋店家Id
+const fetchStoreId = async () => {
+  const response = await axios.get(
+    `${import.meta.env.VITE_BACKEND_BASE_URL}/store/getIdByName/${demoStoreName}`,
+  );
+  storeId.value = response.data._id;
+};
+
 // 更新 fetchMenus 支援搜尋與分頁
 const fetchMenus = async (page = 1) => {
   try {
@@ -78,7 +88,7 @@ const fetchMenus = async (page = 1) => {
           category: selectedCategory.value,
           minPrice: minPrice.value || undefined,
           maxPrice: maxPrice.value || undefined,
-          storeId: storeId, // 確保這裡傳的是正確的 ObjectId
+          storeId: storeId.value, // 確保這裡傳的是正確的 ObjectId
         },
       },
     );
@@ -108,7 +118,7 @@ const addMenu = async () => {
     formData.append("description", menuForm.value.description); // 新增描述
     formData.append("price", menuForm.value.price);
     formData.append("category", menuForm.value.category);
-    formData.append("storeId", storeId);
+    formData.append("storeId", storeId.value);
 
     // 檢查圖片並加入
     if (menuForm.value.image) {
@@ -127,7 +137,7 @@ const addMenu = async () => {
 
     if (response.status === 200 && response.data._id) {
       menus.value.push(response.data); // 更新畫面
-      closeModal(); 
+      closeModal();
       Swal.fire({
         title: "新增成功！",
         icon: "success",
@@ -236,7 +246,10 @@ const closeModal = () => {
   menuForm.value = { name: "", description: "", price: "", category: "" };
 };
 
-onMounted(fetchMenus);
+onMounted(async () => {
+  await fetchStoreId();
+  await fetchMenus();
+});
 </script>
 
 <template>
