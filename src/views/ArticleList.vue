@@ -567,7 +567,7 @@ const contentHtml = `${articles.value.content}`;
                  :class="{ 'line-clamp-none': article.showFullContent }">
                 {{ article.content }}
               </p> -->
-              <div v-html="article.content"></div>
+              <div v-html="article.content" class="break-words"></div>
               <button
                 @click="toggleContent(article)"
                 class="text-amber-500 text-sm mt-2"
@@ -649,12 +649,13 @@ const contentHtml = `${articles.value.content}`;
             <span>{{ formatDate(article.createdAt) }}</span>
           </div>
           <div class="relative">
-            <p
+            <!-- <p
               class="text-sm text-gray-700 line-clamp-3"
               :class="{ 'line-clamp-none': !article.showFullContent }"
             >
               {{ article.content }}
-            </p>
+            </p> -->
+            <div v-html="article.content" class="break-words"></div>
             <button
               @click="toggleContent(article)"
               class="text-amber-500 text-sm mt-2"
@@ -949,5 +950,17 @@ button.bg-amber-500 {
 
 button.bg-amber-500:hover {
   background-color: rgb(217 119 6) !important; /* amber-600 */
+}
+
+.break-words {
+  word-wrap: break-word;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+/* 增加段落樣式 */
+.article-content {
+  white-space: pre-wrap; /* 保留換行符 */
+  line-height: 1.5;
 }
 </style>
