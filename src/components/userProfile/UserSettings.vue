@@ -80,17 +80,13 @@ const saveProfile = async () => {
       updatedUser.profilePicture || "/image/default_user.png";
 
     isEditing.value = false;
-<<<<<<< HEAD
     Swal.fire({
       title: "更新成功",
       text: "您的個人檔案已成功更新！",
       icon: "success",
       confirmButtonText: "確定",
-      confirmButtonColor: "#FFA500", 
+      confirmButtonColor: "#FFA500"
     });
-=======
-
->>>>>>> dev
   } catch (err) {
     console.error("更新失敗：", err)
     Swal.fire({
@@ -98,7 +94,7 @@ const saveProfile = async () => {
       text: err?.response?.data?.message || err.message || "請稍後再試",
       icon: "error",
       confirmButtonText: "確定",
-      confirmButtonColor: "#FFA500",
+      confirmButtonColor: "#FFA500"
     })
   }
 };
