@@ -139,11 +139,19 @@ watch(route, () => {
     </Transition>
 
     <!-- 手機版選單 -->
-    <div
-      v-if="isMenuOpen"
-      ref="menuContainer"
-      class="absolute right-0 bg-white shadow-lg top-full md:hidden mobile-menu"
+    <transition
+      enter-active-class="transition-all duration-300 ease-out"
+      enter-from-class="transform scale-y-0 opacity-0 origin-top"
+      enter-to-class="transform scale-y-100 opacity-100 origin-top"
+      leave-active-class="transition-all duration-300 ease-in"
+      leave-from-class="transform scale-y-100 opacity-100 origin-top"
+      leave-to-class="transform scale-y-0 opacity-0 origin-top"
     >
+      <div
+        v-if="isMenuOpen"
+        ref="menuContainer"
+        class="absolute right-2 p-2 bg-white shadow-lg top-full md:hidden mobile-menu rounded-sm"
+      >
       <div class="pt-2 text-center w-26">
         <ul>
           <li v-if="!user.userData">
@@ -165,7 +173,7 @@ watch(route, () => {
             </div>
             <router-link
               to="/user"
-              class="pl-4 font-bold leading-10 text-amber-500"
+              class="px-4 font-bold leading-10 text-amber-500"
               >{{ user.userData?.name || "使用者" }}</router-link
             >
           </li>
@@ -176,44 +184,6 @@ watch(route, () => {
             >搜尋餐廳</router-link
           >
           <hr class="border-amber-200" />
-          <li>
-            <a href="#" class="block p-2 text-amber-500 hover:bg-amber-100"
-              >線上訂位</a
-            >
-          </li>
-          <router-link
-            to="/articlelist"
-            class="block p-2 text-amber-500 hover:bg-amber-100"
-            >熱門食記</router-link
-          >
-          <router-link
-            to="/myarticle"
-            class="block p-2 text-amber-500 hover:bg-amber-100"
-            >發表食記</router-link
-          >
-          <hr class="border-amber-200" />
-          <li>
-            <a href="#" class="block p-2 text-amber-500 hover:bg-amber-100"
-              >店家註冊</a
-            >
-          </li>
-          <li>
-            <a href="#" class="block p-2 text-amber-500 hover:bg-amber-100"
-              >店家登入</a
-            >
-          </li>
-          <hr v-if="user.userData" class="mt-2 border-amber-200" />
-          <router-link
-            to="search"
-            class="block p-2 text-amber-500 hover:bg-amber-100"
-            >搜尋餐廳</router-link
-          >
-          <hr class="border-amber-200" />
-          <li>
-            <a href="#" class="block p-2 text-amber-500 hover:bg-amber-100"
-              >線上訂位</a
-            >
-          </li>
           <router-link
             to="/articlelist"
             class="block p-2 text-amber-500 hover:bg-amber-100"
@@ -228,17 +198,18 @@ watch(route, () => {
           <li>
             <router-link
               to="/storesignup"
-              class="block p-2 text-amber-500 hover:bg-amber-100"
+              class="block px-4 py-2 text-amber-500 hover:bg-amber-100"
               >店家註冊</router-link
             >
           </li>
           <li>
             <router-link
               to="/storesignin"
-              class="block p-2 text-amber-500 hover:bg-amber-100"
+              class="block px-4 py-2 text-amber-500 hover:bg-amber-100"
               >店家登入</router-link
             >
           </li>
+
           <hr class="border-amber-200" />
           <li v-if="user.userData">
             <button
@@ -255,6 +226,7 @@ watch(route, () => {
         </ul>
       </div>
     </div>
+    </transition>
 
     <!-- 桌面版主選單 -->
     <div

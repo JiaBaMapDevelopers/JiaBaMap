@@ -38,6 +38,15 @@ const toggleEditMode = () => {
 // 儲存更新
 const saveProfile = async () => {
   try {
+    Swal.fire({
+      title: "儲存中...",
+      text: "正在更新您的個人檔案，請稍後...",
+      allowOutsideClick: false,
+      showConfirmButton: false,
+      willOpen: () => {
+        Swal.showLoading(); // 顯示加載動畫
+      },
+    });
     const formData = new FormData();
 
     if (selectedFile.value) {
@@ -71,15 +80,21 @@ const saveProfile = async () => {
       updatedUser.profilePicture || "/image/default_user.png";
 
     isEditing.value = false;
-
+    Swal.fire({
+      title: "更新成功",
+      text: "您的個人檔案已成功更新！",
+      icon: "success",
+      confirmButtonText: "確定",
+      confirmButtonColor: "#FFA500"
+    });
   } catch (err) {
     console.error("更新失敗：", err)
-    // 2. 在錯誤時使用 SweetAlert2 顯示提示
     Swal.fire({
       title: "更新失敗",
       text: err?.response?.data?.message || err.message || "請稍後再試",
       icon: "error",
       confirmButtonText: "確定",
+      confirmButtonColor: "#FFA500"
     })
   }
 };
