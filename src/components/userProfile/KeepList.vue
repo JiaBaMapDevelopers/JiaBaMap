@@ -38,21 +38,24 @@ onMounted(() => {
 
 <template>
   <div v-if="dataReady">
-    <div class="box-border w-full h-screen pt-2 mt-2 overflow-y-auto lg:mt-12">
+    <div
+      class="box-border w-full my-4 overflow-y-auto"
+      v-if="restaurants.length > 0"
+    >
       <div
         v-for="(restaurant, index) in restaurants"
         :key="restaurant.id || index"
         class="flex items-center pb-2 mt-2 border-b"
       >
         <!-- 餐廳圖 -->
-        <div class="w-40 h-32">
+        <div class="w-32 h-32 overflow-hidden">
           <img
             :src="photos(restaurant.photoIds[0])"
-            class="object-cover w-full h-full mx-3 rounded-md"
+            class="object-cover w-full h-full rounded-md"
           />
         </div>
         <!-- 餐廳排名、名稱 -->
-        <div class="flex flex-col justify-between ml-3 sm:text-xl">
+        <div class="flex flex-col justify-between gap-1 sm:text-xl">
           <div class="ml-3 text-left">
             <h2 class="text-base font-bold text-gray-500">
               <a href="#" @click="StoreId(restaurant.placeId)">{{
@@ -121,6 +124,9 @@ onMounted(() => {
           </div>
         </div>
       </div>
+    </div>
+    <div v-else>
+      <p class="my-2 text-base font-bold text-gray-500">目前沒有收藏的餐廳！</p>
     </div>
   </div>
 </template>
