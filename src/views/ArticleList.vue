@@ -737,12 +737,13 @@ const contentHtml = `${articles.value.content}`;
                     @click="toggleReplyForm(comment._id)"
                     class="text-amber-500 text-sm hover:text-amber-500"
                   >
-                    {{
-                      newReply.replyingTo === comment._id ? "取消回覆" : "回覆"
-                    }}
+                    {{ newReply.replyingTo === comment._id ? "取消回覆" : "回覆" }}
                   </button>
-                  <!-- 評論的三點選單 -->
-                  <div class="relative group">
+                  <!-- 只有當評論是當前登入用戶發表的才顯示三點選單 -->
+                  <div 
+                    v-if="userData && userData._id === comment.userId"
+                    class="relative group"
+                  >
                     <button
                       @click.stop="toggleMenu(comment._id)"
                       class="px-2 font-bold text-gray-500 hover:text-gray-700 menu-button"
@@ -802,8 +803,11 @@ const contentHtml = `${articles.value.content}`;
                     />
                     <span>{{ reply.likesCount }}</span>
                   </button>
-                  <!-- 回覆的三點選單 -->
-                  <div class="relative group">
+                  <!-- 只有當回覆是當前登入用戶發表的才顯示三點選單 -->
+                  <div 
+                    v-if="userData && userData._id === reply.userId"
+                    class="relative group"
+                  >
                     <button
                       @click.stop="toggleMenu(reply._id)"
                       class="px-2 font-bold text-gray-500 hover:text-gray-700 menu-button"
