@@ -83,8 +83,8 @@
     <!-- 所有食記 -->
     <div v-show="activeTab === 'article'">
       <h2 class="mt-4 font-bold text-left text-amber-500">我寫的食記</h2>
-      <!-- 文章列表 -->
-      <!-- <div v-if="articles.length > 0" class="space-y-4">
+      文章列表
+      <div v-if="articles.length > 0" class="space-y-4">
         <div
           v-for="article in articles"
           :key="article.id"
@@ -120,7 +120,7 @@
       </div>
       <div v-else>
         <p class="my-2 text-base font-bold text-gray-500">暫無食記！</p>
-      </div> -->
+      </div>
     </div>
 
     <!-- 我的珍藏 -->
